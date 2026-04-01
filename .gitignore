@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Ignorar arquivos gerados para outras plataformas
+/windows/
+/macos/
+/linux/
+/web/
