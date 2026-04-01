@@ -14,16 +14,17 @@ class ApiService {
 
   // ─── Verifica se hoje já teve login online ────────────────────────────────
   static Future<bool> jaLogouHoje() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs      = await SharedPreferences.getInstance();
     final ultimaData = prefs.getString(_keyUltimoLoginData) ?? '';
-    final hoje = _dataHoje();
-    return ultimaData == hoje;
+    return ultimaData == _dataHoje();
   }
 
   // ─── Data de hoje no formato yyyy-MM-dd ───────────────────────────────────
   static String _dataHoje() {
     final now = DateTime.now();
-    return '${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}';
+    return '${now.year}-'
+        '${now.month.toString().padLeft(2, '0')}-'
+        '${now.day.toString().padLeft(2, '0')}';
   }
 
   // ─── LOGIN PRINCIPAL ──────────────────────────────────────────────────────
@@ -32,13 +33,9 @@ class ApiService {
     required String senha,
   }) async {
     final jaLogou = await jaLogouHoje();
-
-    // ── OFFLINE: já logou online hoje ──────────────────────────────────────
     if (jaLogou) {
       return _loginOffline(usuario, senha);
     }
-
-    // ── ONLINE: primeiro login do dia ──────────────────────────────────────
     return _loginOnline(usuario, senha);
   }
 
@@ -47,7 +44,7 @@ class ApiService {
     String usuario,
     String senha,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs        = await SharedPreferences.getInstance();
     final usuarioSalvo = prefs.getString(_keyUsuario) ?? '';
     final senhaSalva   = prefs.getString(_keySenha)   ?? '';
     final nomeSalvo    = prefs.getString(_keyNome)     ?? '';
@@ -76,19 +73,20 @@ class ApiService {
     try {
       final uri = Uri.parse(_baseUrl).replace(
         queryParameters: {
-          'action'  : 'LOGIN',
-          'usuario' : usuario,
-          'senha'   : senha,
+          'action' : 'LOGIN',
+          'usuario': usuario,
+          'senha'  : senha,
         },
       );
 
-      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(uri)
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
         if (data['sucesso'] == true) {
-          // Salva sessão local
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_keyUsuario,         usuario);
           await prefs.setString(_keySenha,           senha);
@@ -114,7 +112,6 @@ class ApiService {
         'sucesso' : false,
         'mensagem': 'Erro no servidor (${response.statusCode}).',
       };
-
     } catch (e) {
       return {
         'sucesso' : false,
@@ -124,9 +121,45 @@ class ApiService {
   }
 
   // ─── LOGOUT ───────────────────────────────────────────────────────────────
-  // Não apaga os dados — apenas deixa o usuário voltar para a LoginScreen.
-  // Os dados offline continuam válidos até a meia-noite.
   static Future<void> logout() async {
-    // Intencional: não limpa nada, só navega de volta.
+    // Intencional: não limpa cache — mantém login offline válido
+  }
+
+  // ─── LISTAR MÁQUINAS ──────────────────────────────────────────────────────
+  static Future<List<Map<String, dynamic>>> listarMaquinas() async {
+    try {
+      final uri = Uri.parse(_baseUrl).replace(
+        queryParameters: {'action': 'LISTAR_MAQUINAS'},
+      );
+
+      print('[API] Chamando LISTAR_MAQUINAS: $uri');
+
+      final response = await http
+          .get(uri)
+          .timeout(const Duration(seconds: 30));
+
+      print('[API] Status: ${response.statusCode}');
+      print('[API] Body (primeiros 300 chars): ${response.body.substring(0, response.body.length.clamp(0, 300))}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['sucesso'] == true && data['maquinas'] != null) {
+          final lista = List<Map<String, dynamic>>.from(
+            (data['maquinas'] as List).map(
+              (item) => Map<String, dynamic>.from(item as Map),
+            ),
+          );
+          print('[API] Máquinas recebidas: ${lista.length}');
+          return lista;
+        } else {
+          print('[API] Resposta sem sucesso: ${data['mensagem']}');
+        }
+      }
+      return [];
+    } catch (e) {
+      print('[API] Erro em listarMaquinas: $e');
+      return [];
+    }
   }
 }

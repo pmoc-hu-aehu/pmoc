@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
+import 'maquinas_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String nome;
@@ -17,11 +18,11 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final menus = [
       _MenuItemData(
-        titulo: 'CHECKLISTS',
+        titulo  : 'CHECKLISTS',
         subtitulo: 'Registros de manutenção',
-        icon: Icons.checklist_rounded,
-        cor: const Color(0xFF2563eb),
-        onTap: () => Navigator.push(
+        icon    : Icons.checklist_rounded,
+        cor     : const Color(0xFF2563eb),
+        onTap   : () => Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => HomeScreen(nome: nome, perfil: perfil),
@@ -29,26 +30,32 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
       _MenuItemData(
-        titulo: 'MÁQUINAS',
+        titulo   : 'MÁQUINAS',
         subtitulo: 'Cadastro de equipamentos',
-        icon: Icons.precision_manufacturing_outlined,
-        cor: const Color(0xFF0ea5e9),
-        onTap: () {
-          // TODO: navegar para tela de máquinas
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tela de Máquinas em breve')),
-          );
-        },
+        icon     : Icons.precision_manufacturing_outlined,
+        cor      : const Color(0xFF0ea5e9),
+        onTap    : () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const MaquinasScreen(),
+          ),
+        ),
       ),
       _MenuItemData(
-        titulo: 'RELATÓRIOS',
+        titulo   : 'RELATÓRIOS',
         subtitulo: 'Histórico e exportação',
-        icon: Icons.bar_chart_rounded,
-        cor: const Color(0xFF10b981),
-        onTap: () {
-          // TODO: navegar para tela de relatórios
+        icon     : Icons.bar_chart_rounded,
+        cor      : const Color(0xFF10b981),
+        onTap    : () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tela de Relatórios em breve')),
+            SnackBar(
+              content        : const Text('Tela de Relatórios em breve'),
+              backgroundColor: const Color(0xFF1e293b),
+              behavior       : SnackBarBehavior.floating,
+              shape          : RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           );
         },
       ),
@@ -58,24 +65,24 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF0f172a),
       appBar: AppBar(
         backgroundColor: const Color(0xFF020617),
-        elevation: 0,
-        title: const Text(
+        elevation      : 0,
+        title          : const Text(
           'PMOC DO HU LONDRINA',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight   : FontWeight.w700,
             letterSpacing: 1.2,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white70),
+            icon   : const Icon(Icons.logout, color: Colors.white70),
             tooltip: 'Sair',
             onPressed: () async {
               final confirmar = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
                   backgroundColor: const Color(0xFF1e293b),
-                  shape: RoundedRectangleBorder(
+                  shape          : RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   title: const Text(
@@ -89,7 +96,7 @@ class DashboardScreen extends StatelessWidget {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text(
+                      child    : const Text(
                         'Cancelar',
                         style: TextStyle(color: Colors.white54),
                       ),
@@ -97,12 +104,12 @@ class DashboardScreen extends StatelessWidget {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1d4ed8),
-                        shape: RoundedRectangleBorder(
+                        shape          : RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Sair'),
+                      child    : const Text('Sair'),
                     ),
                   ],
                 ),
@@ -125,9 +132,10 @@ class DashboardScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ── CABEÇALHO ──────────────────────────────────────────
+
+            // ── CABEÇALHO ────────────────────────────────────────────────
             Container(
-              width: double.infinity,
+              width  : double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -136,7 +144,7 @@ class DashboardScreen extends StatelessWidget {
                     Color(0xFF0f172a),
                   ],
                   begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  end  : Alignment.bottomRight,
                 ),
               ),
               child: Column(
@@ -145,11 +153,11 @@ class DashboardScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 46,
+                        width : 46,
                         height: 46,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1d4ed8).withValues(alpha: 0.25),
-                          shape: BoxShape.circle,
+                          color : const Color(0xFF1d4ed8).withValues(alpha: 0.25),
+                          shape : BoxShape.circle,
                           border: Border.all(
                             color: const Color(0xFF3b82f6),
                             width: 1.5,
@@ -158,7 +166,7 @@ class DashboardScreen extends StatelessWidget {
                         child: const Icon(
                           Icons.person_outline,
                           color: Color(0xFF3b82f6),
-                          size: 24,
+                          size : 24,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -168,8 +176,8 @@ class DashboardScreen extends StatelessWidget {
                           Text(
                             'Olá, $nome',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
+                              color     : Colors.white,
+                              fontSize  : 17,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -177,7 +185,7 @@ class DashboardScreen extends StatelessWidget {
                           Text(
                             'Perfil: $perfil',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color   : Colors.white.withValues(alpha: 0.5),
                               fontSize: 13,
                             ),
                           ),
@@ -188,13 +196,13 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Container(
                     height: 1,
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color : Colors.white.withValues(alpha: 0.06),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'O que deseja fazer?',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color   : Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -202,7 +210,7 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
 
-            // ── MENU PRINCIPAL ─────────────────────────────────────
+            // ── MENU PRINCIPAL ───────────────────────────────────────────
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -210,20 +218,20 @@ class DashboardScreen extends StatelessWidget {
                   children: menus.map((item) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: _MenuItem(data: item),
+                      child  : _MenuItem(data: item),
                     );
                   }).toList(),
                 ),
               ),
             ),
 
-            // ── RODAPÉ ─────────────────────────────────────────────
+            // ── RODAPÉ ───────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: Text(
+              child  : Text(
                 'DMPE — HU Londrina © 2025',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.18),
+                  color   : Colors.white.withValues(alpha: 0.18),
                   fontSize: 11,
                 ),
               ),
@@ -235,11 +243,13 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
+// ── ITEM DE MENU ─────────────────────────────────────────────────────────────
+
 class _MenuItemData {
-  final String titulo;
-  final String subtitulo;
-  final IconData icon;
-  final Color cor;
+  final String      titulo;
+  final String      subtitulo;
+  final IconData    icon;
+  final Color       cor;
   final VoidCallback onTap;
 
   _MenuItemData({
@@ -253,44 +263,43 @@ class _MenuItemData {
 
 class _MenuItem extends StatelessWidget {
   final _MenuItemData data;
-
   const _MenuItem({required this.data});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: data.onTap,
-      borderRadius: BorderRadius.circular(18),
+      onTap        : data.onTap,
+      borderRadius : BorderRadius.circular(18),
       child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
         decoration: BoxDecoration(
-          color: const Color(0xFF1e293b),
+          color       : const Color(0xFF1e293b),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
+          border      : Border.all(
             color: data.cor.withValues(alpha: 0.35),
             width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: data.cor.withValues(alpha: 0.12),
+              color     : data.cor.withValues(alpha: 0.12),
               blurRadius: 16,
-              offset: const Offset(0, 6),
+              offset    : const Offset(0, 6),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              width: 52,
+              width : 52,
               height: 52,
               decoration: BoxDecoration(
-                color: data.cor.withValues(alpha: 0.15),
+                color       : data.cor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 data.icon,
                 color: data.cor,
-                size: 28,
+                size : 28,
               ),
             ),
             const SizedBox(width: 16),
@@ -301,8 +310,8 @@ class _MenuItem extends StatelessWidget {
                   Text(
                     data.titulo,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
+                      color     : Colors.white,
+                      fontSize  : 16,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.8,
                     ),
@@ -311,7 +320,7 @@ class _MenuItem extends StatelessWidget {
                   Text(
                     data.subtitulo,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color   : Colors.white.withValues(alpha: 0.5),
                       fontSize: 13,
                     ),
                   ),
@@ -321,7 +330,7 @@ class _MenuItem extends StatelessWidget {
             Icon(
               Icons.chevron_right_rounded,
               color: data.cor.withValues(alpha: 0.7),
-              size: 28,
+              size : 28,
             ),
           ],
         ),
