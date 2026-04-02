@@ -10,9 +10,9 @@ class SyncService {
   // ─── Verifica conexão ─────────────────────────────────────────────────────
   static Future<bool> temConexao() async {
     try {
-      final result = await Connectivity().checkConnectivity();
-      final online = result != ConnectivityResult.none;
-      print('[SYNC] Conexão: $online ($result)');
+      final results = await Connectivity().checkConnectivity();
+      final online  = results.any((r) => r != ConnectivityResult.none);
+      print('[SYNC] Conexão: $online ($results)');
       return online;
     } catch (e) {
       print('[SYNC] Erro ao verificar conexão: $e');

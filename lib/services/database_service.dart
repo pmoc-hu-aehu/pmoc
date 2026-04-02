@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/maquina.dart';
+import '../models/checklist_pendente.dart';
 
 class DatabaseService {
   static Database? _db;
@@ -17,17 +18,15 @@ class DatabaseService {
 
     return openDatabase(
       path,
-      version: 2, // ← versão aumentada para forçar upgrade
+      version: 3,
       onCreate: (db, version) async {
-        print('[DB] onCreate: criando tabelas...');
         await _criarTabelas(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        print('[DB] onUpgrade: $oldVersion → $newVersion');
-        // Remove tudo e recria do zero
-        await db.execute('DROP TABLE IF EXISTS maquinas');
-        await db.execute('DROP TABLE IF EXISTS config');
-        await _criarTabelas(db);
+        if (oldVersion < 3) {
+          // Adiciona tabela de fila offline sem apagar dados existentes
+          await _criarTabelaPendentes(db);
+        }
       },
       onOpen: (db) async {
         print('[DB] Banco aberto. Verificando tabelas...');
@@ -58,7 +57,43 @@ class DatabaseService {
       )
     ''');
 
-    print('[DB] Tabelas verificadas/criadas com sucesso');
+    await _criarTabelaPendentes(db);
+  }
+
+  static Future<void> _criarTabelaPendentes(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS checklist_pendente (
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        tipo           TEXT NOT NULL,
+        payload_json   TEXT NOT NULL,
+        foto_suja_path TEXT,
+        foto_limpa_path TEXT,
+        criado_em      TEXT NOT NULL
+      )
+    ''');
+  }
+
+  // ─── FILA OFFLINE ─────────────────────────────────────────────────────────
+  static Future<int> salvarPendente(ChecklistPendente p) async {
+    final database = await db;
+    return database.insert('checklist_pendente', p.toMap());
+  }
+
+  static Future<List<ChecklistPendente>> listarPendentes() async {
+    final database = await db;
+    final rows = await database.query('checklist_pendente', orderBy: 'criado_em ASC');
+    return rows.map(ChecklistPendente.fromMap).toList();
+  }
+
+  static Future<int> contarPendentes() async {
+    final database = await db;
+    final result = await database.rawQuery('SELECT COUNT(*) as total FROM checklist_pendente');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  static Future<void> removerPendente(int id) async {
+    final database = await db;
+    await database.delete('checklist_pendente', where: 'id = ?', whereArgs: [id]);
   }
 
   // ─── SALVAR MÁQUINAS ──────────────────────────────────────────────────────

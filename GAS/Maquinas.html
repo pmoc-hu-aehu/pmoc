@@ -1,0 +1,79 @@
+<div id="modulo-MAQUINAS" class="modulo-oculto" style="display: flex; flex-direction: column; height: 100%; overflow-y: hidden;">
+  <h3 class="section-title">Gestão de Máquinas e Equipamentos</h3>
+  
+  <div style="display: flex; gap: 20px; flex-grow: 1; overflow: hidden; padding-bottom: 10px;">
+    
+    <div class="form-container" style="flex: 1; min-width: 260px; max-width: 320px; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 20px;">
+      <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary);">Dados do Equipamento</h4>
+      
+      <input type="hidden" id="maq_id" value=""> 
+      
+      <label>FUEL (ÚNICO)</label>
+      <input type="number" id="maq_fuel" class="input-form" placeholder="Ex: 12345">
+      
+      <label>Localização / Setor</label>
+      <input type="text" id="maq_localizacao" class="input-form" placeholder="Ex: UTI Adulto - Leito 02">
+      
+      <label>Modelo (Tipo de Ar)</label>
+      <select id="maq_modelo" class="input-form">
+        <option value="Split">Split</option>
+        <option value="K7">K7</option>
+        <option value="Piso Teto">Piso Teto</option>
+        <option value="Chiller">Chiller</option>
+        <option value="Fancoil">Fancoil (FanCoin)</option>
+        <option value="VRF">VRF</option>
+        <option value="Outros">Outros</option>
+      </select>
+      
+      <label>Marca</label>
+      <input type="text" id="maq_marca" class="input-form" placeholder="Ex: Carrier / Springer">
+
+      <label>Número de Série</label>
+      <input type="text" id="maq_serie" class="input-form" placeholder="Ex: 987654321A">
+
+      <label>Criticidade</label>
+      <select id="maq_criticidade" class="input-form">
+        <option value="Baixa">Baixa</option>
+        <option value="Média">Média</option>
+        <option value="Alta">Alta</option>
+      </select>
+
+      <label>Capacidade</label>
+      <input type="text" id="maq_capacidade" class="input-form" placeholder="Ex: 18.000 BTUs">
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px; margin-bottom: 10px; flex-shrink: 0;">
+        <button onclick="salvarMaquina()" class="btn-primary" style="flex: 1;" id="btn-salvar-maq">Salvar</button>
+        <button onclick="limparFormMaquina()" class="btn-primary" style="flex: 1; background: var(--text-muted); box-shadow: none;">Limpar</button>
+      </div>
+      
+      <p id="msg-maquina" style="margin-top: 5px; font-weight: bold; font-size: 12px; text-align: center; min-height: 20px; flex-shrink: 0;"></p>
+    </div>
+
+    <div class="form-container" style="flex: 2.5; min-width: 0; display: flex; flex-direction: column; overflow: hidden;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <h4 style="margin: 0; color: var(--primary);">Máquinas Cadastradas</h4>
+        <input type="text" id="busca-maquina" onkeyup="filtrarMaquinas()" placeholder="Buscar por FUEL, Setor ou Série..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; max-width: 300px; font-size: 13px; outline: none;">
+      </div>
+      
+      <div style="overflow-x: auto; overflow-y: auto; flex-grow: 1; border: 1px solid #e2e8f0; border-radius: 4px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; min-width: 650px;">
+          <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
+            <tr style="border-bottom: 2px solid var(--primary); color: var(--text-muted);">
+              <th style="padding: 12px 8px;">FUEL</th>
+              <th style="padding: 12px 8px;">Equipamento</th>
+              <th style="padding: 12px 8px;">Setor (Local)</th>
+              <th style="padding: 12px 8px;">Nº Série</th>
+              <th style="padding: 12px 8px;">Crit.</th>
+              <th style="padding: 12px 8px; text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-maquinas">
+            <tr><td colspan="6" style="text-align: center; padding: 20px;">Carregando máquinas...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>

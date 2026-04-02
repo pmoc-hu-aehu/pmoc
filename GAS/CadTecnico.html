@@ -1,0 +1,58 @@
+<div id="modulo-TECNICOS" class="modulo-oculto" style="display: flex; flex-direction: column; height: 100%; overflow-y: hidden;">
+  <h3 class="section-title">Gestão de Técnicos</h3>
+  
+  <div style="display: flex; gap: 20px; flex-grow: 1; overflow: hidden; padding-bottom: 10px;">
+    
+    <div class="form-container" style="flex: 1; min-width: 300px; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 20px;">
+      <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary);">Dados do Técnico</h4>
+      
+      <input type="hidden" id="tec_id" value=""> 
+      
+      <label>Nome Completo</label>
+      <input type="text" id="tec_nome" class="input-form" placeholder="Ex: João Silva">
+      
+      <label>Login de Acesso</label>
+      <input type="text" id="tec_login" class="input-form" placeholder="Ex: joao.tec">
+      
+      <label>Senha</label>
+      <input type="text" id="tec_senha" class="input-form" placeholder="Defina a senha">
+      
+      <label>Telefone / WhatsApp</label>
+      <input type="text" id="tec_fone" class="input-form" placeholder="(00) 00000-0000">
+
+      <label>Perfil de Acesso</label>
+      <select id="tec_perfil" class="input-form">
+        <option value="BASICO">Básico (Apenas Agendamentos)</option>
+        <option value="PLENO">Pleno (Agendamentos e Relatórios)</option>
+        <option value="ADMIN">Administrador (Acesso Total)</option>
+      </select>
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px; margin-bottom: 10px; flex-shrink: 0;">
+        <button onclick="salvarTecnico()" class="btn-primary" style="flex: 1;" id="btn-salvar-tec">Salvar Técnico</button>
+        <button onclick="limparFormTecnico()" class="btn-primary" style="flex: 1; background: var(--text-muted); box-shadow: none;">Limpar</button>
+      </div>
+      
+      <p id="msg-tecnico" style="margin-top: 10px; font-weight: bold; font-size: 13px; text-align: center; min-height: 20px; flex-shrink: 0;"></p>
+    </div>
+
+    <div class="form-container" style="flex: 2; min-width: 450px; overflow-y: auto; display: flex; flex-direction: column;">
+      <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary);">Técnicos Cadastrados</h4>
+      
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--primary); color: var(--text-muted);">
+            <th style="padding: 10px 5px;">Nome</th>
+            <th style="padding: 10px 5px;">Login</th>
+            <th style="padding: 10px 5px;">Telefone</th>
+            <th style="padding: 10px 5px;">Perfil</th>
+            <th style="padding: 10px 5px; text-align: center;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-tecnicos">
+          <tr><td colspan="5" style="text-align: center; padding: 20px;">Carregando técnicos...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,550 @@
+<script>
+
+// ==========================================
+// RELÓGIO
+// ==========================================
+
+function atualizarRelogio() {
+  var agora = new Date();
+  var elData = document.getElementById('data-atual');
+  var elHora = document.getElementById('hora-atual');
+  if (elData && elHora) {
+    elData.innerText = agora.toLocaleDateString('pt-BR');
+    elHora.innerText = agora.toLocaleTimeString('pt-BR');
+  }
+}
+setInterval(atualizarRelogio, 1000);
+atualizarRelogio();
+
+// ==========================================
+// LOGIN
+// ==========================================
+
+function fazerLogin() {
+  var user  = document.getElementById('login_user').value;
+  var pass  = document.getElementById('login_pass').value;
+  var msgEl = document.getElementById('msg-login');
+
+  if (user === "") { msgEl.innerText = "Digite o usuário.";  msgEl.style.color = "var(--danger)"; return; }
+  if (pass === "") { msgEl.innerText = "Digite a senha.";    msgEl.style.color = "var(--danger)"; return; }
+
+  msgEl.innerText   = "Autenticando...";
+  msgEl.style.color = "var(--primary)";
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res) {
+        msgEl.innerText   = "Sem resposta do servidor.";
+        msgEl.style.color = "var(--danger)";
+        return;
+      }
+      if (res.sucesso) {
+        document.getElementById('login-wrapper').style.display  = 'none';
+        document.getElementById('tela-dashboard').style.display = 'flex';
+        document.getElementById('boas-vindas').innerText =
+          "Logado como: " + res.nome + " | Perfil: " + res.perfil;
+        configurarPermissoes(res.perfil);
+        abrirModulo('HOME');
+        carregarContadores();
+      } else {
+        msgEl.innerText   = res.mensagem || "Usuário ou senha incorretos.";
+        msgEl.style.color = "var(--danger)";
+      }
+    })
+    .withFailureHandler(function(err) {
+      // CAPTURA ERROS REAIS DO BACKEND — mostra no lugar de travar
+      msgEl.innerText   = "Erro do servidor: " + err.message;
+      msgEl.style.color = "var(--danger)";
+      console.error("Erro backend login:", err);
+    })
+    .validarLogin(user, pass);
+}
+
+// ==========================================
+// PERMISSÕES
+// ==========================================
+
+function configurarPermissoes(perfil) {
+  var botoes = ['btn-agendamento','btn-maquinas','btn-engenheiros',
+                'btn-tecnicos','btn-relatorio','btn-pmoc'];
+
+  botoes.forEach(function(b) {
+    var el = document.getElementById(b);
+    if (el) el.style.display = 'none';
+  });
+
+  if (perfil === "ADMIN") {
+    botoes.forEach(function(b) {
+      var el = document.getElementById(b);
+      if (el) el.style.display = 'block';
+    });
+  } else if (perfil === "PLENO") {
+    var r = document.getElementById('btn-relatorio');
+    if (r) r.style.display = 'block';
+  } else if (perfil === "ENGENHEIRO") {
+    var r = document.getElementById('btn-relatorio');
+    var p = document.getElementById('btn-pmoc');
+    if (r) r.style.display = 'block';
+    if (p) p.style.display = 'block';
+  }
+}
+
+// ==========================================
+// NAVEGAÇÃO
+// ==========================================
+
+function abrirModulo(moduloNome) {
+  var modulos = ['HOME','AGENDAMENTO','TECNICOS','ENGENHEIROS','MAQUINAS','RELATORIO','PMOC'];
+  modulos.forEach(function(m) {
+    var el = document.getElementById('modulo-' + m);
+    if (el) el.style.display = 'none';
+  });
+
+  var ativo = document.getElementById('modulo-' + moduloNome);
+  if (ativo) ativo.style.display = 'flex';
+
+  document.querySelectorAll('.menu-btn').forEach(function(btn) {
+    btn.classList.remove('active');
+  });
+  var btnAtivo = document.getElementById('btn-' + moduloNome.toLowerCase());
+  if (btnAtivo) btnAtivo.classList.add('active');
+
+  if (moduloNome === 'TECNICOS')    listarTecnicos();
+  if (moduloNome === 'ENGENHEIROS') listarEngenheiros();
+  if (moduloNome === 'MAQUINAS')    listarMaquinas();
+}
+
+function sair() {
+  document.getElementById('tela-dashboard').style.display = 'none';
+  document.getElementById('login-wrapper').style.display  = 'flex';
+  document.getElementById('login_user').value = "";
+  document.getElementById('login_pass').value = "";
+  document.getElementById('msg-login').innerText = "";
+}
+
+// ==========================================
+// CONTADORES
+// ==========================================
+
+function carregarContadores() {
+  google.script.run
+    .withSuccessHandler(function(d) {
+      if (!d) return;
+      var cMaq = document.getElementById('count-maquinas');
+      var cEng = document.getElementById('count-engenheiros');
+      var cTec = document.getElementById('count-tecnicos');
+      if (cMaq) cMaq.innerText = d.maquinas    || 0;
+      if (cEng) cEng.innerText = d.engenheiros || 0;
+      if (cTec) cTec.innerText = d.tecnicos    || 0;
+    })
+    .withFailureHandler(function(err) { console.error("Erro contadores:", err); })
+    .obterContadores();
+
+  google.script.run
+    .withSuccessHandler(function(d) {
+      if (!d) return;
+      function set(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.innerText = val || 0;
+      }
+      set('filtros-hoje',  d.filtros      ? d.filtros.hoje      : 0); set('filtros-mes',  d.filtros      ? d.filtros.mes      : 0); set('filtros-ano',  d.filtros      ? d.filtros.ano      : 0);
+      set('prev-hoje',     d.preventivas  ? d.preventivas.hoje  : 0); set('prev-mes',     d.preventivas  ? d.preventivas.mes  : 0); set('prev-ano',     d.preventivas  ? d.preventivas.ano  : 0);
+      set('corr-hoje',     d.corretivas   ? d.corretivas.hoje   : 0); set('corr-mes',     d.corretivas   ? d.corretivas.mes   : 0); set('corr-ano',     d.corretivas   ? d.corretivas.ano   : 0);
+      set('mov-hoje',      d.movimentacao ? d.movimentacao.hoje : 0); set('mov-mes',      d.movimentacao ? d.movimentacao.mes : 0); set('mov-ano',      d.movimentacao ? d.movimentacao.ano : 0);
+      set('pressao-hoje',  d.pressao      ? d.pressao.hoje      : 0); set('pressao-mes',  d.pressao      ? d.pressao.mes      : 0); set('pressao-ano',  d.pressao      ? d.pressao.ano      : 0);
+      set('qar-hoje',      d.qualidadeAr  ? d.qualidadeAr.hoje  : 0); set('qar-mes',      d.qualidadeAr  ? d.qualidadeAr.mes  : 0); set('qar-ano',      d.qualidadeAr  ? d.qualidadeAr.ano  : 0);
+      set('dutos-hoje',    d.dutos        ? d.dutos.hoje        : 0); set('dutos-mes',    d.dutos        ? d.dutos.mes        : 0); set('dutos-ano',    d.dutos        ? d.dutos.ano        : 0);
+      set('exaustao-hoje', d.exaustao     ? d.exaustao.hoje     : 0); set('exaustao-mes', d.exaustao     ? d.exaustao.mes     : 0); set('exaustao-ano', d.exaustao     ? d.exaustao.ano     : 0);
+    })
+    .withFailureHandler(function(err) { console.error("Erro dashboard:", err); })
+    .obterContadoresDashboard();
+}
+
+// ==========================================
+// MÁQUINAS
+// ==========================================
+
+var maquinasGlobais = [];
+
+function limparFormMaquina() {
+  document.getElementById('maq_id').value          = "";
+  document.getElementById('maq_fuel').value        = "";
+  document.getElementById('maq_localizacao').value = "";
+  document.getElementById('maq_modelo').value      = "Split";
+  document.getElementById('maq_marca').value       = "";
+  document.getElementById('maq_serie').value       = "";
+  document.getElementById('maq_criticidade').value = "Baixa";
+  document.getElementById('maq_capacidade').value  = "";
+  document.getElementById('btn-salvar-maq').innerText = "Salvar";
+  document.getElementById('msg-maquina').innerText    = "";
+}
+
+function salvarMaquina() {
+  var dados = {
+    id         : document.getElementById('maq_id').value,
+    fuel       : document.getElementById('maq_fuel').value,
+    localizacao: document.getElementById('maq_localizacao').value,
+    modelo     : document.getElementById('maq_modelo').value,
+    marca      : document.getElementById('maq_marca').value,
+    serie      : document.getElementById('maq_serie').value,
+    criticidade: document.getElementById('maq_criticidade').value,
+    capacidade : document.getElementById('maq_capacidade').value
+  };
+  var msgEl = document.getElementById('msg-maquina');
+  if (!dados.fuel || !dados.localizacao) {
+    msgEl.innerText   = "FUEL e Localização obrigatórios!";
+    msgEl.style.color = "var(--danger)";
+    return;
+  }
+  msgEl.innerText   = "Processando...";
+  msgEl.style.color = "var(--primary)";
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      msgEl.innerText = res.msg;
+      if (res.sucesso) {
+        msgEl.style.color = "#10b981";
+        limparFormMaquina();
+        listarMaquinas();
+        carregarContadores();
+      } else {
+        msgEl.style.color = "var(--danger)";
+      }
+    })
+    .withFailureHandler(function(err) {
+      msgEl.innerText   = "Erro: " + err.message;
+      msgEl.style.color = "var(--danger)";
+    })
+    .salvarMaquinaBD(dados);
+}
+
+function listarMaquinas() {
+  document.getElementById('tabela-maquinas').innerHTML =
+    "<tr><td colspan='6' style='text-align:center;padding:20px;'>Carregando máquinas...</td></tr>";
+
+  google.script.run
+    .withSuccessHandler(function(lista) {
+      maquinasGlobais = lista || [];
+      renderizarTabelaMaquinas(maquinasGlobais);
+    })
+    .withFailureHandler(function(err) { console.error("Erro listar máquinas:", err); })
+    .getListaMaquinas();
+}
+
+function renderizarTabelaMaquinas(lista) {
+  var tbody = document.getElementById('tabela-maquinas');
+  tbody.innerHTML = "";
+  if (lista.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px;'>Nenhuma máquina encontrada.</td></tr>";
+    return;
+  }
+  lista.forEach(function(m) {
+    var corCrit = m.criticidade === "Alta"  ? "var(--danger)" :
+                 (m.criticidade === "Média" ? "#f59e0b" : "#10b981");
+    var tr = document.createElement('tr');
+    tr.style.borderBottom = "1px solid #e2e8f0";
+    tr.innerHTML =
+      '<td style="padding:10px 8px;font-weight:bold;color:var(--primary);font-size:13px;">' + m.fuel + '</td>' +
+      '<td style="padding:10px 8px;font-size:12px;"><strong>' + m.modelo + '</strong><br><small style="color:var(--text-muted);">' + m.marca + ' | ' + m.capacidade + '</small></td>' +
+      '<td style="padding:10px 8px;font-size:12px;">' + m.localizacao + '</td>' +
+      '<td style="padding:10px 8px;font-size:12px;">' + m.serie + '</td>' +
+      '<td style="padding:10px 8px;"><span style="background:' + corCrit + ';color:white;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:bold;">' + m.criticidade + '</span></td>' +
+      '<td style="padding:10px 8px;text-align:center;min-width:90px;">' +
+        '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + m.localizacao + '\',\'' + m.modelo + '\',\'' + m.marca + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + m.capacidade + '\')" style="background:#f59e0b;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">EDITAR</button>' +
+        '<button onclick="abrirAutorizarRelimpeza(\'' + m.fuel + '\')" style="background:#8b5cf6;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">AUTORIZAR</button>' +
+        '<button onclick="apagarMaquina(\'' + m.id + '\')" style="background:var(--danger);color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold;">X</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function filtrarMaquinas() {
+  var termo = document.getElementById('busca-maquina').value.toLowerCase().trim();
+
+  if (termo === "") {
+    renderizarTabelaMaquinas(maquinasGlobais);
+    return;
+  }
+
+  var filtrados = maquinasGlobais.filter(function(m) {
+    var fuelStr  = String(m.fuel        || "").toLowerCase();
+    var setorStr = String(m.localizacao || "").toLowerCase();
+    var serieStr = String(m.serie       || "").toLowerCase();
+    var marcaStr = String(m.marca       || "").toLowerCase();
+    var modStr   = String(m.modelo      || "").toLowerCase();
+
+    return fuelStr.indexOf(termo)  >= 0 ||
+           setorStr.indexOf(termo) >= 0 ||
+           serieStr.indexOf(termo) >= 0 ||
+           marcaStr.indexOf(termo) >= 0 ||
+           modStr.indexOf(termo)   >= 0;
+  });
+
+  renderizarTabelaMaquinas(filtrados);
+}
+
+function abrirAutorizarRelimpeza(fuel) {
+  var tipo = prompt('Autorizar relimpeza para FUEL ' + fuel + '.\nDigite o tipo: FILTRO ou DUTO');
+  if (!tipo) return;
+  tipo = tipo.trim().toUpperCase();
+  if (tipo !== 'FILTRO' && tipo !== 'DUTO') {
+    alert('Tipo inválido. Use FILTRO ou DUTO.');
+    return;
+  }
+  if (!confirm('Autorizar relimpeza de ' + tipo + ' para FUEL ' + fuel + ' no mês atual?')) return;
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      alert(res.sucesso ? '✓ ' + res.msg : '✗ ' + res.msg);
+    })
+    .withFailureHandler(function(err) { alert('Erro: ' + err.message); })
+    .autorizarRelimpeza(fuel, tipo);
+}
+
+function editarMaquina(id, fuel, localizacao, modelo, marca, serie, criticidade, capacidade) {
+  document.getElementById('maq_id').value          = id;
+  document.getElementById('maq_fuel').value        = fuel;
+  document.getElementById('maq_localizacao').value = localizacao;
+  document.getElementById('maq_modelo').value      = modelo;
+  document.getElementById('maq_marca').value       = marca;
+  document.getElementById('maq_serie').value       = serie;
+  document.getElementById('maq_criticidade').value = criticidade;
+  document.getElementById('maq_capacidade').value  = capacidade;
+  document.getElementById('btn-salvar-maq').innerText = "Atualizar";
+  var msgEl = document.getElementById('msg-maquina');
+  msgEl.innerText   = "Modo de Edição ativado.";
+  msgEl.style.color = "#f59e0b";
+}
+
+function apagarMaquina(id) {
+  if (confirm("ATENÇÃO: Deseja realmente excluir esta máquina do sistema?")) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.sucesso) { listarMaquinas(); carregarContadores(); }
+        else { alert(res.msg); }
+      })
+      .withFailureHandler(function(err) { alert("Erro: " + err.message); })
+      .excluirMaquinaBD(id);
+  }
+}
+
+// ==========================================
+// TÉCNICOS
+// ==========================================
+
+function limparFormTecnico() {
+  document.getElementById('tec_id').value     = "";
+  document.getElementById('tec_nome').value   = "";
+  document.getElementById('tec_login').value  = "";
+  document.getElementById('tec_senha').value  = "";
+  document.getElementById('tec_fone').value   = "";
+  document.getElementById('tec_perfil').value = "BASICO";
+  document.getElementById('btn-salvar-tec').innerText = "Salvar Técnico";
+  document.getElementById('msg-tecnico').innerText    = "";
+}
+
+function salvarTecnico() {
+  var dados = {
+    id    : document.getElementById('tec_id').value,
+    nome  : document.getElementById('tec_nome').value,
+    login : document.getElementById('tec_login').value,
+    senha : document.getElementById('tec_senha').value,
+    fone  : document.getElementById('tec_fone').value,
+    perfil: document.getElementById('tec_perfil').value
+  };
+  var msgEl = document.getElementById('msg-tecnico');
+  if (!dados.nome || !dados.login || !dados.senha) {
+    msgEl.innerText   = "Preencha Nome, Login e Senha!";
+    msgEl.style.color = "var(--danger)";
+    return;
+  }
+  msgEl.innerText   = "Processando...";
+  msgEl.style.color = "var(--primary)";
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      msgEl.innerText = res.msg;
+      if (res.sucesso) {
+        msgEl.style.color = "#10b981";
+        limparFormTecnico();
+        listarTecnicos();
+        carregarContadores();
+      } else {
+        msgEl.style.color = "var(--danger)";
+      }
+    })
+    .withFailureHandler(function(err) {
+      msgEl.innerText   = "Erro: " + err.message;
+      msgEl.style.color = "var(--danger)";
+    })
+    .salvarTecnicoBD(dados);
+}
+
+function listarTecnicos() {
+  document.getElementById('tabela-tecnicos').innerHTML =
+    "<tr><td colspan='5' style='text-align:center;padding:20px;'>Carregando técnicos...</td></tr>";
+
+  google.script.run
+    .withSuccessHandler(function(lista) {
+      var tbody = document.getElementById('tabela-tecnicos');
+      tbody.innerHTML = "";
+      if (!lista || lista.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>Nenhum técnico cadastrado.</td></tr>";
+        return;
+      }
+      lista.forEach(function(t) {
+        var tr = document.createElement('tr');
+        tr.style.borderBottom = "1px solid #e2e8f0";
+        tr.innerHTML =
+          '<td style="padding:10px 5px;font-weight:bold;">'    + t.nome  + '</td>' +
+          '<td style="padding:10px 5px;">'                     + t.login + '</td>' +
+          '<td style="padding:10px 5px;">'                     + t.fone  + '</td>' +
+          '<td style="padding:10px 5px;font-weight:600;color:var(--primary);">' + t.perfil + '</td>' +
+          '<td style="padding:10px 5px;text-align:center;">' +
+            '<button onclick="editarTecnico(\'' + t.id + '\',\'' + t.nome + '\',\'' + t.login + '\',\'' + t.senha + '\',\'' + t.fone + '\',\'' + t.perfil + '\')" style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;">EDITAR</button>' +
+            '<button onclick="apagarTecnico(\'' + t.id + '\')" style="background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;">X</button>' +
+          '</td>';
+        tbody.appendChild(tr);
+      });
+    })
+    .withFailureHandler(function(err) { console.error("Erro técnicos:", err); })
+    .getListaTecnicos();
+}
+
+function editarTecnico(id, nome, login, senha, fone, perfil) {
+  document.getElementById('tec_id').value     = id;
+  document.getElementById('tec_nome').value   = nome;
+  document.getElementById('tec_login').value  = login;
+  document.getElementById('tec_senha').value  = senha;
+  document.getElementById('tec_fone').value   = fone;
+  document.getElementById('tec_perfil').value = perfil;
+  document.getElementById('btn-salvar-tec').innerText = "Atualizar Técnico";
+  var msgEl = document.getElementById('msg-tecnico');
+  msgEl.innerText   = "Modo de Edição ativado.";
+  msgEl.style.color = "#f59e0b";
+}
+
+function apagarTecnico(id) {
+  if (confirm("ATENÇÃO: Deseja realmente excluir este técnico do sistema?")) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.sucesso) { listarTecnicos(); carregarContadores(); }
+        else { alert(res.msg); }
+      })
+      .withFailureHandler(function(err) { alert("Erro: " + err.message); })
+      .excluirTecnicoBD(id);
+  }
+}
+
+// ==========================================
+// ENGENHEIROS
+// ==========================================
+
+function limparFormEngenheiro() {
+  document.getElementById('eng_id').value    = "";
+  document.getElementById('eng_nome').value  = "";
+  document.getElementById('eng_crea').value  = "";
+  document.getElementById('eng_login').value = "";
+  document.getElementById('eng_senha').value = "";
+  document.getElementById('eng_fone').value  = "";
+  document.getElementById('eng_email').value = "";
+  document.getElementById('btn-salvar-eng').innerText = "Salvar Engenheiro";
+  document.getElementById('msg-engenheiro').innerText = "";
+}
+
+function salvarEngenheiro() {
+  var dados = {
+    id   : document.getElementById('eng_id').value,
+    nome : document.getElementById('eng_nome').value,
+    crea : document.getElementById('eng_crea').value,
+    login: document.getElementById('eng_login').value,
+    senha: document.getElementById('eng_senha').value,
+    fone : document.getElementById('eng_fone').value,
+    email: document.getElementById('eng_email').value
+  };
+  var msgEl = document.getElementById('msg-engenheiro');
+  if (!dados.nome || !dados.login || !dados.senha) {
+    msgEl.innerText   = "Preencha Nome, Login e Senha!";
+    msgEl.style.color = "var(--danger)";
+    return;
+  }
+  msgEl.innerText   = "Processando...";
+  msgEl.style.color = "var(--primary)";
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      msgEl.innerText = res.msg;
+      if (res.sucesso) {
+        msgEl.style.color = "#10b981";
+        limparFormEngenheiro();
+        listarEngenheiros();
+        carregarContadores();
+      } else {
+        msgEl.style.color = "var(--danger)";
+      }
+    })
+    .withFailureHandler(function(err) {
+      msgEl.innerText   = "Erro: " + err.message;
+      msgEl.style.color = "var(--danger)";
+    })
+    .salvarEngenheiroBD(dados);
+}
+
+function listarEngenheiros() {
+  document.getElementById('tabela-engenheiros').innerHTML =
+    "<tr><td colspan='5' style='text-align:center;padding:20px;'>Carregando engenheiros...</td></tr>";
+
+  google.script.run
+    .withSuccessHandler(function(lista) {
+      var tbody = document.getElementById('tabela-engenheiros');
+      tbody.innerHTML = "";
+      if (!lista || lista.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>Nenhum engenheiro cadastrado.</td></tr>";
+        return;
+      }
+      lista.forEach(function(eng) {
+        var tr = document.createElement('tr');
+        tr.style.borderBottom = "1px solid #e2e8f0";
+        tr.innerHTML =
+          '<td style="padding:10px 5px;font-weight:bold;">' + eng.nome  + '</td>' +
+          '<td style="padding:10px 5px;">'                  + eng.crea  + '</td>' +
+          '<td style="padding:10px 5px;">'                  + eng.login + '</td>' +
+          '<td style="padding:10px 5px;">'                  + eng.fone  + '</td>' +
+          '<td style="padding:10px 5px;text-align:center;">' +
+            '<button onclick="editarEngenheiro(\'' + eng.id + '\',\'' + eng.nome + '\',\'' + eng.crea + '\',\'' + eng.login + '\',\'' + eng.senha + '\',\'' + eng.fone + '\',\'' + eng.email + '\')" style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;">EDITAR</button>' +
+            '<button onclick="apagarEngenheiro(\'' + eng.id + '\')" style="background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;">X</button>' +
+          '</td>';
+        tbody.appendChild(tr);
+      });
+    })
+    .withFailureHandler(function(err) { console.error("Erro engenheiros:", err); })
+    .getListaEngenheiros();
+}
+
+function editarEngenheiro(id, nome, crea, login, senha, fone, email) {
+  document.getElementById('eng_id').value    = id;
+  document.getElementById('eng_nome').value  = nome;
+  document.getElementById('eng_crea').value  = crea;
+  document.getElementById('eng_login').value = login;
+  document.getElementById('eng_senha').value = senha;
+  document.getElementById('eng_fone').value  = fone;
+  document.getElementById('eng_email').value = email;
+  document.getElementById('btn-salvar-eng').innerText = "Atualizar Engenheiro";
+  var msgEl = document.getElementById('msg-engenheiro');
+  msgEl.innerText   = "Modo de Edição ativado.";
+  msgEl.style.color = "#f59e0b";
+}
+
+function apagarEngenheiro(id) {
+  if (confirm("ATENÇÃO: Deseja realmente excluir este engenheiro do sistema?")) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.sucesso) { listarEngenheiros(); carregarContadores(); }
+        else { alert(res.msg); }
+      })
+      .withFailureHandler(function(err) { alert("Erro: " + err.message); })
+      .excluirEngenheiroBD(id);
+  }
+}
+
+</script>

@@ -1,0 +1,508 @@
+<div id="modulo-RELATORIO" class="modulo-oculto">
+  <div id="rel-wrapper">
+
+    <!-- CABEÇALHO IMPRESSÃO -->
+    <div id="rel-cab-print" style="display:none; text-align:center; border-bottom:2px solid #000; margin-bottom:14px; padding-bottom:10px;">
+      <h3 style="margin:0; font-size:13px; text-transform:uppercase;">Relatório de Manutenção PMOC — Hospital Universitário de Londrina</h3>
+      <p style="margin:4px 0; font-size:10px;" id="rel-cab-info"></p>
+    </div>
+
+    <!-- TOPO -->
+    <div class="rel-topo no-print">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <i class="material-icons" style="color:#0284c7; font-size:26px;">assessment</i>
+        <div>
+          <h2 style="margin:0; font-size:18px; font-weight:800; color:#0f172a;">Relatório de Manutenções</h2>
+          <p style="margin:3px 0 0; font-size:12px; color:#64748b;">Filtre por período, equipamento ou técnico e gere o relatório.</p>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button onclick="gerarRelatorio()" class="rel-btn btn-blue">
+          <i class="material-icons">search</i> GERAR RELATÓRIO
+        </button>
+        <button onclick="window.print()" class="rel-btn btn-gray">
+          <i class="material-icons">print</i> IMPRIMIR
+        </button>
+        <button onclick="limparRelatorio()" class="rel-btn btn-outline">
+          <i class="material-icons">clear</i> LIMPAR
+        </button>
+      </div>
+    </div>
+
+    <!-- PAINEL DE FILTROS -->
+    <div class="rel-filtros no-print">
+
+      <!-- TIPO -->
+      <div class="rel-grupo">
+        <label class="rel-label">TIPO DE SERVIÇO</label>
+        <div id="rel-chips-tipo" style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="rchip rchip-on"  onclick="toggleTipo(this, 'TODOS')">🔍 Todos</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Filtro')">🧹 Filtro</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Preventiva')">🔧 Preventiva</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Corretiva')">⚡ Corretiva</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Duto')">🌀 Duto</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Exaustão')">💨 Exaustão</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Movimentação')">📦 Movimentação</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Pressão')">📊 Pressão</button>
+          <button class="rchip rchip-off" onclick="toggleTipo(this, 'Qualidade Ar')">🌡️ Qualidade Ar</button>
+        </div>
+      </div>
+
+      <!-- LINHA 2: data, fuel, tecnico -->
+      <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-top:12px;">
+
+        <div class="rel-grupo">
+          <label class="rel-label">DATA INÍCIO</label>
+          <input type="date" id="rel-data-ini" class="rel-input">
+        </div>
+
+        <div class="rel-grupo">
+          <label class="rel-label">DATA FIM</label>
+          <input type="date" id="rel-data-fim" class="rel-input">
+        </div>
+
+        <div class="rel-grupo">
+          <label class="rel-label">FUEL</label>
+          <input type="text" id="rel-fuel" placeholder="Ex: 285031" class="rel-input" style="width:110px;">
+        </div>
+
+        <div class="rel-grupo">
+          <label class="rel-label">TÉCNICO</label>
+          <select id="rel-tecnico" class="rel-input" style="min-width:160px;">
+            <option value="">— Todos os técnicos —</option>
+          </select>
+        </div>
+
+        <!-- ATALHOS DE PERÍODO -->
+        <div class="rel-grupo">
+          <label class="rel-label">ATALHOS</label>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button onclick="setPeriodo(7)"   class="rel-btn btn-outline" style="padding:6px 10px; font-size:11px;">7 dias</button>
+            <button onclick="setPeriodo(30)"  class="rel-btn btn-outline" style="padding:6px 10px; font-size:11px;">30 dias</button>
+            <button onclick="setPeriodo(90)"  class="rel-btn btn-outline" style="padding:6px 10px; font-size:11px;">3 meses</button>
+            <button onclick="setPeriodoMes()" class="rel-btn btn-outline" style="padding:6px 10px; font-size:11px;">Mês atual</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CARDS RESUMO -->
+    <div id="rel-cards" style="display:none;" class="rel-cards no-print">
+      <div class="rel-card-mini" style="border-top:4px solid #0ea5e9;">
+        <span class="rcn" id="rc-total">0</span>
+        <span class="rcl">Total</span>
+      </div>
+      <div class="rel-card-mini" style="border-top:4px solid #0ea5e9;">
+        <span class="rcn" id="rc-filtros">0</span>
+        <span class="rcl">Filtros</span>
+      </div>
+      <div class="rel-card-mini" style="border-top:4px solid #10b981;">
+        <span class="rcn" id="rc-prev">0</span>
+        <span class="rcl">Preventivas</span>
+      </div>
+      <div class="rel-card-mini" style="border-top:4px solid #f59e0b;">
+        <span class="rcn" id="rc-corr">0</span>
+        <span class="rcl">Corretivas</span>
+      </div>
+      <div class="rel-card-mini" style="border-top:4px solid #7c3aed;">
+        <span class="rcn" id="rc-outros">0</span>
+        <span class="rcl">Outros</span>
+      </div>
+      <div class="rel-card-mini" style="border-top:4px solid #64748b;">
+        <span class="rcn" id="rc-tec-destaque" style="font-size:13px; font-weight:800;">—</span>
+        <span class="rcl">Técnico +ativo</span>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div style="overflow-x:auto; border-radius:10px; border:1px solid #e2e8f0;">
+      <table style="width:100%; border-collapse:collapse; background:white; font-size:13px;" id="rel-tabela">
+        <thead>
+          <tr class="rel-thead">
+            <th>#</th>
+            <th>TIPO</th>
+            <th>FUEL</th>
+            <th>SETOR / LOCAL</th>
+            <th>DATA</th>
+            <th>INÍCIO</th>
+            <th>FIM</th>
+            <th>TÉCNICO</th>
+            <th>FOTO</th>
+          </tr>
+        </thead>
+        <tbody id="rel-corpo">
+          <tr>
+            <td colspan="9" class="rel-vazio">
+              <i class="material-icons" style="font-size:40px; display:block; margin:0 auto 10px; opacity:0.2;">assessment</i>
+              Configure os filtros acima e clique em <b>GERAR RELATÓRIO</b>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  #modulo-RELATORIO {
+    display: none;
+    flex-direction: column;
+    min-height: 100%;
+    height: auto !important;
+    overflow-y: auto !important;
+  }
+
+  #rel-wrapper {
+    padding: 20px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #f8fafc;
+    min-height: 100%;
+  }
+
+  .rel-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .rel-filtros {
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .rel-grupo { display:flex; flex-direction:column; gap:5px; }
+  .rel-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .rel-input {
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .rel-input:focus { border-color: #0ea5e9; background: white; }
+
+  /* CHIPS TIPO */
+  .rchip {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .rchip-on  { background: #0ea5e9; border-color: #0ea5e9; color: white; }
+  .rchip-off { background: white;   border-color: #e2e8f0; color: #64748b; }
+
+  /* BOTÕES */
+  .rel-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .rel-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+  .rel-btn .material-icons { font-size: 15px; }
+  .btn-blue    { background: #0ea5e9; color: white; }
+  .btn-gray    { background: #64748b; color: white; }
+  .btn-outline { background: white; border: 2px solid #e2e8f0; color: #475569; padding: 7px 14px; }
+  .btn-outline:hover { border-color: #0ea5e9; color: #0ea5e9; }
+
+  /* CARDS RESUMO */
+  .rel-cards {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .rel-card-mini {
+    background: white;
+    border-radius: 10px;
+    padding: 12px 20px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .rcn { font-size: 24px; font-weight: 900; color: #0f172a; line-height: 1; }
+  .rcl { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 3px; }
+
+  /* TABELA */
+  .rel-thead th {
+    background: #f1f5f9;
+    padding: 11px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #0ea5e9;
+    white-space: nowrap;
+  }
+  #rel-corpo tr td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    font-size: 13px;
+  }
+  #rel-corpo tr:hover { background: #f8fafc; }
+  .rel-vazio {
+    text-align: center;
+    padding: 70px 20px;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 2;
+  }
+
+  /* TIPO BADGES */
+  .rbdg {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .rbdg-filtro      { background:#dbeafe; color:#1d4ed8; }
+  .rbdg-preventiva  { background:#dcfce7; color:#15803d; }
+  .rbdg-corretiva   { background:#fee2e2; color:#dc2626; }
+  .rbdg-duto        { background:#ede9fe; color:#7c3aed; }
+  .rbdg-exaustao    { background:#fce7f3; color:#9d174d; }
+  .rbdg-movimentacao{ background:#fef9c3; color:#92400e; }
+  .rbdg-pressao     { background:#f0fdf4; color:#166534; }
+  .rbdg-qualidade   { background:#fff7ed; color:#9a3412; }
+  .rbdg-outro       { background:#f1f5f9; color:#475569; }
+
+  @keyframes rel-spin { 100% { transform: rotate(360deg); } }
+
+  @media print {
+    .no-print { display: none !important; }
+    #modulo-RELATORIO { display: block !important; overflow: visible !important; }
+    #rel-cab-print { display: block !important; }
+    #rel-wrapper { padding: 0; background: white; gap: 0; }
+    .rel-thead th, #rel-corpo tr td { font-size: 9px !important; padding: 5px 7px !important; }
+    body { background: white !important; }
+  }
+</style>
+
+<script>
+  var _relTipoAtivo = 'TODOS';
+  var _relDados     = [];
+
+  // ── Inicializa select de técnicos ao abrir o módulo ──
+  function inicializarRelatorio() {
+    var sel = document.getElementById('rel-tecnico');
+    if (sel.options.length > 1) return; // já carregou
+    google.script.run
+      .withSuccessHandler(function(lista) {
+        lista.forEach(function(nome) {
+          var opt = document.createElement('option');
+          opt.value = nome;
+          opt.innerText = nome;
+          sel.appendChild(opt);
+        });
+      })
+      .getListaTecnicosRelatorio();
+
+    // Data padrão: mês atual
+    setPeriodoMes();
+  }
+
+  // ── Chips de tipo ──────────────────────────────────────
+  function toggleTipo(btn, tipo) {
+    _relTipoAtivo = tipo;
+    document.querySelectorAll('.rchip').forEach(function(c) {
+      c.className = 'rchip rchip-off';
+    });
+    btn.className = 'rchip rchip-on';
+  }
+
+  // ── Atalhos de período ─────────────────────────────────
+  function setPeriodo(dias) {
+    var fim = new Date();
+    var ini = new Date();
+    ini.setDate(ini.getDate() - dias);
+    document.getElementById('rel-data-ini').value = fmtInputDate(ini);
+    document.getElementById('rel-data-fim').value = fmtInputDate(fim);
+  }
+
+  function setPeriodoMes() {
+    var hoje = new Date();
+    var ini  = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    var fim  = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    document.getElementById('rel-data-ini').value = fmtInputDate(ini);
+    document.getElementById('rel-data-fim').value = fmtInputDate(fim);
+  }
+
+  function fmtInputDate(d) {
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+
+  // ── Gerar relatório ────────────────────────────────────
+  function gerarRelatorio() {
+    var corpo = document.getElementById('rel-corpo');
+    corpo.innerHTML =
+      '<tr><td colspan="9" class="rel-vazio">' +
+      '<i class="material-icons" style="font-size:36px;display:block;margin:0 auto 8px;animation:rel-spin 1.5s linear infinite;">sync</i>' +
+      'Buscando registros...</td></tr>';
+    document.getElementById('rel-cards').style.display = 'none';
+
+    var filtros = {
+      dataIni : document.getElementById('rel-data-ini').value,
+      dataFim : document.getElementById('rel-data-fim').value,
+      fuel    : document.getElementById('rel-fuel').value.trim(),
+      tecnico : document.getElementById('rel-tecnico').value,
+      tipo    : _relTipoAtivo
+    };
+
+    google.script.run
+      .withSuccessHandler(function(dados) {
+        _relDados = dados;
+        renderizarRelatorio(dados, filtros);
+      })
+      .withFailureHandler(function(e) {
+        corpo.innerHTML = '<tr><td colspan="9" style="text-align:center;color:red;padding:40px;">Erro: ' + e.message + '</td></tr>';
+      })
+      .getRelatorio(filtros);
+  }
+
+  // ── Renderizar ─────────────────────────────────────────
+  function renderizarRelatorio(dados, filtros) {
+    var corpo = document.getElementById('rel-corpo');
+
+    // Contadores por tipo
+    var cnt = { Filtro:0, Preventiva:0, Corretiva:0, outros:0 };
+    var tecCount = {};
+    dados.forEach(function(d) {
+      if (d.tipo === 'Filtro')     cnt.Filtro++;
+      else if (d.tipo === 'Preventiva') cnt.Preventiva++;
+      else if (d.tipo === 'Corretiva')  cnt.Corretiva++;
+      else cnt.outros++;
+      tecCount[d.tecnico] = (tecCount[d.tecnico] || 0) + 1;
+    });
+
+    // Técnico mais ativo
+    var tecDestaque = '—';
+    var maxTec = 0;
+    Object.keys(tecCount).forEach(function(t) {
+      if (tecCount[t] > maxTec) { maxTec = tecCount[t]; tecDestaque = t + ' (' + tecCount[t] + ')'; }
+    });
+
+    document.getElementById('rc-total').innerText  = dados.length;
+    document.getElementById('rc-filtros').innerText = cnt.Filtro;
+    document.getElementById('rc-prev').innerText   = cnt.Preventiva;
+    document.getElementById('rc-corr').innerText   = cnt.Corretiva;
+    document.getElementById('rc-outros').innerText = cnt.outros;
+    document.getElementById('rc-tec-destaque').innerText = tecDestaque;
+    document.getElementById('rel-cards').style.display = 'flex';
+
+    // Cabeçalho impressão
+    var ini = filtros.dataIni || '—';
+    var fim = filtros.dataFim || '—';
+    document.getElementById('rel-cab-print').style.display = 'block';
+    document.getElementById('rel-cab-info').innerHTML =
+      'Período: <b>' + ini + ' a ' + fim + '</b> | ' +
+      'Tipo: <b>' + _relTipoAtivo + '</b> | ' +
+      'FUEL: <b>' + (filtros.fuel || 'Todos') + '</b> | ' +
+      'Técnico: <b>' + (filtros.tecnico || 'Todos') + '</b> | ' +
+      'Total: <b>' + dados.length + '</b> registros | ' +
+      'Emitido em: <b>' + new Date().toLocaleDateString('pt-BR') + '</b>';
+
+    if (dados.length === 0) {
+      corpo.innerHTML =
+        '<tr><td colspan="9" class="rel-vazio">' +
+        '<i class="material-icons" style="font-size:40px;display:block;margin:0 auto 10px;color:#10b981;">check_circle</i>' +
+        'Nenhum registro encontrado para os filtros selecionados.</td></tr>';
+      return;
+    }
+
+    corpo.innerHTML = '';
+
+    dados.forEach(function(item, idx) {
+      var tipoNorm = (item.tipo || '').toLowerCase().replace(/\s/g, '').replace('ã','a').replace('ç','c');
+      var bdgClass =
+        tipoNorm === 'filtro'       ? 'rbdg-filtro'
+        : tipoNorm === 'preventiva' ? 'rbdg-preventiva'
+        : tipoNorm === 'corretiva'  ? 'rbdg-corretiva'
+        : tipoNorm === 'duto'       ? 'rbdg-duto'
+        : tipoNorm === 'exaustao'   ? 'rbdg-exaustao'
+        : tipoNorm === 'movimentacao' ? 'rbdg-movimentacao'
+        : tipoNorm === 'pressao'    ? 'rbdg-pressao'
+        : tipoNorm === 'qualidadear'? 'rbdg-qualidade'
+        : 'rbdg-outro';
+
+      var fotoCell = '—';
+      if (item.foto && item.foto.indexOf('http') === 0) {
+        fotoCell =
+          '<a href="' + item.foto + '" target="_blank" ' +
+          'style="display:inline-flex;align-items:center;gap:4px;color:#0ea5e9;font-weight:700;font-size:11px;text-decoration:none;">' +
+          '<i class="material-icons" style="font-size:14px;">photo_camera</i> Ver foto</a>';
+      }
+
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td style="color:#94a3b8;font-size:11px;width:32px;">' + (idx + 1) + '</td>' +
+        '<td><span class="rbdg ' + bdgClass + '">' + item.tipo + '</span></td>' +
+        '<td style="font-weight:800;color:#0f172a;font-size:14px;">' + item.fuel + '</td>' +
+        '<td style="color:#334155;font-size:12px;max-width:200px;">' + item.local + '</td>' +
+        '<td style="font-weight:700;white-space:nowrap;">' + item.data + '</td>' +
+        '<td style="color:#475569;white-space:nowrap;">' + (item.horaIni || '—') + '</td>' +
+        '<td style="color:#475569;white-space:nowrap;">' + (item.horaFim || '—') + '</td>' +
+        '<td style="font-weight:600;color:#334155;">' + (item.tecnico || '—') + '</td>' +
+        '<td>' + fotoCell + '</td>';
+
+      corpo.appendChild(tr);
+    });
+  }
+
+  // ── Limpar ─────────────────────────────────────────────
+  function limparRelatorio() {
+    document.getElementById('rel-fuel').value    = '';
+    document.getElementById('rel-tecnico').value = '';
+    document.getElementById('rel-cards').style.display = 'none';
+    document.getElementById('rel-cab-print').style.display = 'none';
+    toggleTipo(document.querySelector('.rchip'), 'TODOS');
+    setPeriodoMes();
+    document.getElementById('rel-corpo').innerHTML =
+      '<tr><td colspan="9" class="rel-vazio">' +
+      '<i class="material-icons" style="font-size:40px;display:block;margin:0 auto 10px;opacity:0.2;">assessment</i>' +
+      'Configure os filtros acima e clique em <b>GERAR RELATÓRIO</b>.</td></tr>';
+  }
+</script>

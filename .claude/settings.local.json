@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze:*)",
+      "Bash(curl -s -o /tmp/gas_response.txt -w \"%{http_code}\" -L -X POST \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\" -H \"Content-Type: application/json\" -d '{\"\"action\"\":\"\"SALVAR_FILTRO\"\",\"\"FUEL\"\":\"\"99999\"\",\"\"TECNICO\"\":\"\"TESTE\"\",\"\"DATA_INICIO\"\":\"\"2026-03-31T10:00:00.000\"\",\"\"DATA_FINAL\"\":\"\"2026-03-31T10:30:00.000\"\",\"\"STATUS_GERAL\"\":\"\"OK\"\"}')",
+      "Read(//tmp/**)",
+      "Bash(DATA='{\"\"action\"\":\"\"SALVAR_FILTRO\"\",\"\"FUEL\"\":\"\"99999\"\",\"\"TECNICO\"\":\"\"TESTE\"\",\"\"DATA_INICIO\"\":\"\"2026-03-31T10:00:00.000\"\",\"\"DATA_FINAL\"\":\"\"2026-03-31T10:30:00.000\"\",\"\"STATUS_GERAL\"\":\"\"OK\"\"}')",
+      "Bash(curl -s -L -X POST \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\" -H \"Content-Type: application/json\" --data-raw \"$DATA\")",
+      "Bash(curl -s -L \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\" -H \"Content-Type: application/json\" --data-raw \"$DATA\")",
+      "Bash(curl -L \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec?action=LISTAR_MAQUINAS\")",
+      "Bash(curl -L \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\")"
+    ]
+  }
+}

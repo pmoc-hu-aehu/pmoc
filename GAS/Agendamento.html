@@ -1,0 +1,546 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<div id="modulo-AGENDAMENTO" class="modulo-oculto">
+  <div id="agen-wrapper">
+
+    <!-- CABEÇALHO IMPRESSÃO -->
+    <div id="cab-print" style="display:none; text-align:center; border-bottom:2px solid #000; margin-bottom:16px; padding-bottom:10px;">
+      <h3 style="margin:0; font-size:14px; text-transform:uppercase;">Ordem de Serviço PMOC — Hospital Universitário de Londrina</h3>
+      <p style="margin:4px 0; font-size:11px;">
+        Serviço: <b id="pr-tipo"></b> &nbsp;|&nbsp;
+        Setor: <b id="pr-setor"></b> &nbsp;|&nbsp;
+        Data: <b id="pr-data"></b> &nbsp;|&nbsp;
+        Total: <b id="pr-total"></b> itens
+      </p>
+    </div>
+
+    <!-- TOPO -->
+    <div class="agen-topo no-print">
+      <div class="agen-titulo">
+        <i class="material-icons" style="color:#0284c7; font-size:26px;">route</i>
+        <div>
+          <h2>Rota Diária PMOC</h2>
+          <p id="agen-auto-label">Clique em <b>ATUALIZAR MOTOR</b> para sincronizar a planilha, depois <b>GERAR ROTA</b>.</p>
+        </div>
+      </div>
+      <div class="agen-acoes">
+        <button onclick="processarMotor()" id="btn-motor" class="agen-btn btn-dark">
+          <i class="material-icons">sync</i> ATUALIZAR MOTOR
+        </button>
+        <button onclick="gerarRotaAuto()" class="agen-btn btn-auto">
+          <i class="material-icons">auto_fix_high</i> ROTA DO DIA
+        </button>
+        <button onclick="window.print()" class="agen-btn btn-gray">
+          <i class="material-icons">print</i> IMPRIMIR
+        </button>
+      </div>
+    </div>
+
+    <!-- FILTROS MANUAIS -->
+    <div class="agen-filtros no-print">
+
+      <div class="agen-filtro-grupo">
+        <label class="agen-label">TIPO DE SERVIÇO</label>
+        <div style="display:flex; gap:6px;">
+          <button id="btn-tf" onclick="setTipo('FILTRO')" class="chip chip-on">🧹 FILTRO</button>
+          <button id="btn-tp" onclick="setTipo('PREVENTIVA')" class="chip chip-off">🔧 PREVENTIVA</button>
+        </div>
+      </div>
+
+      <div class="agen-filtro-grupo">
+        <label class="agen-label">SETOR</label>
+        <select id="sel-setor" class="agen-select">
+          <option value="HU">HU — Hospital</option>
+          <option value="AEHU">AEHU — Ambulatório</option>
+          <option value="UCC">UCC — Unidade Crítica</option>
+          <option value="TODOS">🌐 TODOS</option>
+        </select>
+      </div>
+
+      <div class="agen-filtro-grupo">
+        <label class="agen-label">BUSCA LIVRE</label>
+        <input type="text" id="busca-livre" placeholder="Ex: UTI, CME, DND..."
+          class="agen-input" style="text-transform:uppercase; width:160px;">
+      </div>
+
+      <div class="agen-filtro-grupo">
+        <label class="agen-label">QTD / DIA</label>
+        <input type="number" id="meta-qtd" value="30" min="1" max="999"
+          class="agen-input" style="width:70px; text-align:center; font-size:16px; font-weight:900;">
+      </div>
+
+      <div class="agen-filtro-grupo" style="justify-content:flex-end;">
+        <label class="agen-label" style="color:transparent;">.</label>
+        <button onclick="gerarRota()" class="agen-btn btn-green">
+          <i class="material-icons">playlist_play</i> GERAR ROTA
+        </button>
+      </div>
+
+    </div>
+
+    <!-- CARDS TOTAIS -->
+    <div id="agen-cards" style="display:none;" class="agen-cards no-print">
+      <div class="card-mini card-red">
+        <i class="material-icons">warning</i>
+        <span id="cnt-venc" class="card-num">0</span>
+        <span class="card-lbl">VENCIDOS</span>
+      </div>
+      <div class="card-mini card-yellow">
+        <i class="material-icons">schedule</i>
+        <span id="cnt-hoje" class="card-num">0</span>
+        <span class="card-lbl">HOJE</span>
+      </div>
+      <div class="card-mini card-green">
+        <i class="material-icons">event_available</i>
+        <span id="cnt-agen" class="card-num">0</span>
+        <span class="card-lbl">AGENDADOS</span>
+      </div>
+      <div class="card-mini card-blue">
+        <i class="material-icons">format_list_numbered</i>
+        <span id="cnt-tot" class="card-num">0</span>
+        <span class="card-lbl">TOTAL ROTA</span>
+      </div>
+      <div class="card-mini card-purple" id="card-setor-info">
+        <i class="material-icons">place</i>
+        <span id="cnt-setor" class="card-num" style="font-size:14px;">—</span>
+        <span class="card-lbl">SETOR ATIVO</span>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div style="overflow-x:auto; border-radius:10px; border:1px solid #e2e8f0;">
+      <table id="tab-agen" style="width:100%; border-collapse:collapse; font-size:13px; background:white;">
+        <thead>
+          <tr class="tab-head">
+            <th>#</th>
+            <th>FUEL</th>
+            <th>SETOR / LOCALIZAÇÃO</th>
+            <th>CRITICIDADE</th>
+            <th>PRAZO</th>
+            <th>ÚLTIMA EXEC.</th>
+            <th>PRÓXIMA DATA</th>
+            <th>FALTAM</th>
+            <th>STATUS</th>
+            <th class="no-print">✓</th>
+          </tr>
+        </thead>
+        <tbody id="tab-corpo">
+          <tr>
+            <td colspan="10" class="tab-vazio">
+              <i class="material-icons" style="font-size:40px; display:block; margin-bottom:8px; opacity:0.25;">calendar_today</i>
+              Clique em <b>ROTA DO DIA</b> para carregar automaticamente<br>
+              ou configure manualmente e clique em <b>GERAR ROTA</b>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  #modulo-AGENDAMENTO {
+    display: none;
+    flex-direction: column;
+    min-height: 100%;
+    height: auto !important;
+    overflow-y: auto !important;
+  }
+
+  #agen-wrapper {
+    padding: 20px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #f8fafc;
+    min-height: 100%;
+  }
+
+  /* TOPO */
+  .agen-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .agen-titulo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .agen-titulo h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #0f172a;
+    font-weight: 800;
+  }
+  .agen-titulo p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: #64748b;
+  }
+  .agen-acoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* FILTROS */
+  .agen-filtros {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    background: white;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .agen-filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .agen-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .agen-select, .agen-input {
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .agen-select:focus, .agen-input:focus {
+    border-color: #0ea5e9;
+    background: white;
+  }
+
+  /* CHIPS TIPO */
+  .chip {
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 2px solid;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip-on  { background: #0ea5e9; border-color: #0ea5e9; color: white; }
+  .chip-off { background: white; border-color: #e2e8f0; color: #64748b; }
+
+  /* BOTÕES */
+  .agen-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .agen-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .agen-btn .material-icons { font-size: 16px; }
+  .btn-dark  { background: #0f172a; color: white; }
+  .btn-auto  { background: #7c3aed; color: white; }
+  .btn-green { background: #10b981; color: white; }
+  .btn-gray  { background: #64748b; color: white; }
+
+  /* CARDS */
+  .agen-cards {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 10px;
+    min-width: 90px;
+    gap: 2px;
+  }
+  .card-mini .material-icons { font-size: 18px; opacity: 0.7; }
+  .card-num  { font-size: 22px; font-weight: 900; line-height: 1; }
+  .card-lbl  { font-size: 9px;  font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; opacity: 0.8; }
+  .card-red    { background: #fee2e2; color: #dc2626; }
+  .card-yellow { background: #fef9c3; color: #92400e; }
+  .card-green  { background: #dcfce7; color: #15803d; }
+  .card-blue   { background: #dbeafe; color: #1d4ed8; }
+  .card-purple { background: #ede9fe; color: #7c3aed; }
+
+  /* TABELA */
+  .tab-head th {
+    background: #f1f5f9;
+    padding: 11px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #0ea5e9;
+    white-space: nowrap;
+  }
+  .tab-head th:last-child { text-align: center; }
+  #tab-corpo tr td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  #tab-corpo tr:hover { background: #f8fafc; }
+  .tab-vazio {
+    text-align: center;
+    padding: 70px 20px;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  /* BADGES */
+  .bdg { display:inline-block; padding:3px 9px; border-radius:4px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.4px; }
+  .bdg-vencido  { background:#fee2e2; color:#dc2626; }
+  .bdg-hoje     { background:#fef9c3; color:#92400e; }
+  .bdg-agendado { background:#dcfce7; color:#15803d; }
+  .bdg-alta     { background:#fee2e2; color:#dc2626; }
+  .bdg-media    { background:#fef9c3; color:#92400e; }
+  .bdg-baixa    { background:#dcfce7; color:#15803d; }
+  .bdg-setor-hu   { background:#dbeafe; color:#1d4ed8; }
+  .bdg-setor-aehu { background:#ede9fe; color:#7c3aed; }
+  .bdg-setor-ucc  { background:#fce7f3; color:#9d174d; }
+
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+
+  @media print {
+    .no-print { display: none !important; }
+    #modulo-AGENDAMENTO { display: block !important; overflow: visible !important; }
+    #cab-print { display: block !important; }
+    #agen-wrapper { padding: 0; background: white; gap: 0; }
+    .tab-head th, #tab-corpo tr td { font-size: 9px !important; padding: 5px 7px !important; }
+    body { background: white !important; }
+  }
+</style>
+
+<script>
+  var _tipoAtivo  = 'FILTRO';
+  var _dadosCache = [];
+
+  // ── Tipo ──────────────────────────────────────────────
+  function setTipo(tipo) {
+    _tipoAtivo = tipo;
+    var on  = tipo === 'FILTRO' ? 'btn-tf' : 'btn-tp';
+    var off = tipo === 'FILTRO' ? 'btn-tp' : 'btn-tf';
+    document.getElementById(on).className  = 'chip chip-on';
+    document.getElementById(off).className = 'chip chip-off';
+  }
+
+  // ── Motor (passo 1) ────────────────────────────────────
+  function processarMotor() {
+    var btn = document.getElementById('btn-motor');
+    btn.innerHTML = '<i class="material-icons" style="animation:spin 1s linear infinite;font-size:16px;">sync</i> Processando...';
+    btn.disabled = true;
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.innerHTML = '<i class="material-icons" style="font-size:16px;">check_circle</i> MOTOR OK';
+        btn.style.background = '#10b981';
+        btn.disabled = false;
+        setTimeout(function() {
+          btn.innerHTML = '<i class="material-icons" style="font-size:16px;">sync</i> ATUALIZAR MOTOR';
+          btn.style.background = '';
+          btn.className = 'agen-btn btn-dark';
+        }, 3000);
+        document.getElementById('agen-auto-label').innerHTML =
+          '✅ Motor sincronizado. Clique em <b>ROTA DO DIA</b> ou configure manualmente.';
+      })
+      .withFailureHandler(function(e) {
+        btn.innerHTML = '<i class="material-icons" style="font-size:16px;">error</i> ERRO';
+        btn.style.background = '#ef4444';
+        btn.disabled = false;
+      })
+      .atualizarAgendamentoGlobal();
+  }
+
+  // ── Rota automática do dia ─────────────────────────────
+  function gerarRotaAuto() {
+    google.script.run
+      .withSuccessHandler(function(auto) {
+        // Aplica as configurações automáticas na tela
+        setTipo(auto.tipo);
+
+        var sel = document.getElementById('sel-setor');
+        sel.value = auto.setor;
+
+        document.getElementById('busca-livre').value = '';
+        document.getElementById('agen-auto-label').innerHTML =
+          '🤖 <b>' + auto.motivo + '</b> — rota carregada automaticamente.';
+
+        gerarRota();
+      })
+      .getCronogramaAutoDia();
+  }
+
+  // ── Gerar rota (manual ou auto) ────────────────────────
+  function gerarRota() {
+    var corpo = document.getElementById('tab-corpo');
+    corpo.innerHTML =
+      '<tr><td colspan="10" class="tab-vazio">' +
+      '<i class="material-icons" style="font-size:36px;display:block;margin:0 auto 8px;animation:spin 1.5s linear infinite;">sync</i>' +
+      'Carregando dados da planilha...</td></tr>';
+    document.getElementById('agen-cards').style.display = 'none';
+
+    google.script.run
+      .withSuccessHandler(function(dados) {
+        _dadosCache = dados;
+        renderizar(dados);
+      })
+      .withFailureHandler(function(e) {
+        corpo.innerHTML = '<tr><td colspan="10" style="text-align:center;color:red;padding:40px;">Erro: ' + e.message + '</td></tr>';
+      })
+      .getAgendamentosAdmin(_tipoAtivo);
+  }
+
+  // ── Renderizar tabela ──────────────────────────────────
+  function renderizar(todos) {
+    var setorSel   = document.getElementById('sel-setor').value;
+    var buscaLivre = document.getElementById('busca-livre').value.toUpperCase().trim();
+    var meta       = parseInt(document.getElementById('meta-qtd').value) || 999;
+    var corpo      = document.getElementById('tab-corpo');
+
+    var setorReal = buscaLivre !== '' ? buscaLivre : setorSel;
+
+    // Filtra por tipo
+    var lista = todos.filter(function(d) { return d.tipo === _tipoAtivo; });
+
+    // Filtra por setor
+    if (setorReal !== 'TODOS') {
+      lista = lista.filter(function(d) {
+        var loc = (d.local || '').toUpperCase();
+        if (setorReal === 'HU')   return loc.indexOf('HU/')  === 0;
+        if (setorReal === 'AEHU') return loc.indexOf('AEHU') === 0;
+        if (setorReal === 'UCC')  return loc.indexOf('UCC')  === 0;
+        return loc.includes(setorReal);
+      });
+    }
+
+    // Ordena: vencidos primeiro, depois dias crescente, depois local
+    lista.sort(function(a, b) {
+      if (a.dias !== b.dias) return a.dias - b.dias;
+      return (a.local || '').localeCompare(b.local || '');
+    });
+
+    var final = lista.slice(0, meta);
+
+    // Totais
+    var nVenc = final.filter(function(d) { return d.status === 'VENCIDO'; }).length;
+    var nHoje = final.filter(function(d) { return d.status === 'HOJE';    }).length;
+    var nAgen = final.filter(function(d) { return d.status === 'AGENDADO';}).length;
+
+    document.getElementById('cnt-venc').innerText  = nVenc;
+    document.getElementById('cnt-hoje').innerText  = nHoje;
+    document.getElementById('cnt-agen').innerText  = nAgen;
+    document.getElementById('cnt-tot').innerText   = final.length;
+    document.getElementById('cnt-setor').innerText = setorReal;
+    document.getElementById('agen-cards').style.display = 'flex';
+
+    // Cabeçalho impressão
+    document.getElementById('cab-print').style.display = 'block';
+    document.getElementById('pr-tipo').innerText  = _tipoAtivo;
+    document.getElementById('pr-setor').innerText = setorReal;
+    document.getElementById('pr-data').innerText  = new Date().toLocaleDateString('pt-BR');
+    document.getElementById('pr-total').innerText = final.length;
+
+    if (final.length === 0) {
+      corpo.innerHTML =
+        '<tr><td colspan="10" class="tab-vazio">' +
+        '<i class="material-icons" style="font-size:40px;display:block;margin:0 auto 8px;color:#10b981;">check_circle</i>' +
+        '✅ Nenhuma pendência para <b>"' + setorReal + '"</b>.</td></tr>';
+      return;
+    }
+
+    corpo.innerHTML = '';
+
+    final.forEach(function(item, idx) {
+      var bdgStatus = item.status === 'VENCIDO'  ? 'bdg-vencido'
+                    : item.status === 'HOJE'      ? 'bdg-hoje'
+                    :                               'bdg-agendado';
+
+      var critNorm = (item.crit || '').toString().toUpperCase()
+                     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      var bdgCrit  = critNorm === 'ALTA'  ? 'bdg-alta'
+                   : critNorm === 'MEDIA' ? 'bdg-media'
+                   :                        'bdg-baixa';
+
+      var setorTag = (item.setor || '').toUpperCase();
+      var bdgSetor = setorTag === 'AEHU' ? 'bdg-setor-aehu'
+                   : setorTag === 'UCC'  ? 'bdg-setor-ucc'
+                   :                       'bdg-setor-hu';
+
+      var diasTxt;
+      if (item.dias < 0) {
+        diasTxt = '<span style="color:#dc2626;font-weight:800;">' + Math.abs(item.dias) + 'd atrás</span>';
+      } else if (item.dias === 0) {
+        diasTxt = '<span style="color:#92400e;font-weight:800;">HOJE</span>';
+      } else {
+        diasTxt = '<span style="color:#475569;">em ' + item.dias + 'd</span>';
+      }
+
+      var rowBg = item.status === 'VENCIDO' ? 'background:#fff5f5;' : '';
+
+      var tr = document.createElement('tr');
+      tr.id = 'row-' + item.fuel;
+      tr.setAttribute('style', rowBg);
+
+      tr.innerHTML =
+        '<td style="color:#94a3b8;font-size:11px;width:32px;">' + (idx + 1) + '</td>' +
+        '<td style="font-weight:800;color:#0f172a;font-size:14px;white-space:nowrap;">' + item.fuel + '</td>' +
+        '<td>' +
+          '<span class="bdg ' + bdgSetor + '" style="margin-right:6px;">' + (item.setor || '') + '</span>' +
+          '<span style="color:#334155;font-weight:600;">' + item.local + '</span>' +
+        '</td>' +
+        '<td><span class="bdg ' + bdgCrit + '">' + (item.crit || '—') + '</span></td>' +
+        '<td style="color:#64748b;font-size:12px;white-space:nowrap;">' + item.prazo + ' dias</td>' +
+        '<td style="color:#64748b;font-size:12px;white-space:nowrap;">' + item.ultima + '</td>' +
+        '<td style="font-weight:700;white-space:nowrap;">' + item.proxima + '</td>' +
+        '<td style="white-space:nowrap;">' + diasTxt + '</td>' +
+        '<td><span class="bdg ' + bdgStatus + '">' + item.status + '</span></td>' +
+        '<td style="text-align:center;" class="no-print">' +
+          '<i class="material-icons" id="chk-' + item.fuel + '" ' +
+          'onclick="marcar(\'' + item.fuel + '\')" ' +
+          'style="color:#cbd5e1;font-size:22px;cursor:pointer;transition:color 0.2s;">check_circle_outline</i>' +
+        '</td>';
+
+      corpo.appendChild(tr);
+    });
+  }
+
+  function marcar(fuel) {
+    var ico = document.getElementById('chk-' + fuel);
+    var row = document.getElementById('row-' + fuel);
+    if (ico) { ico.innerText = 'check_circle'; ico.style.color = '#10b981'; }
+    if (row) { row.style.opacity = '0.35'; row.style.textDecoration = 'line-through'; }
+  }
+</script>

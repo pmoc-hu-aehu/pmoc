@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <?!= include('CSS'); ?>
+    <style>
+      /* --- AJUSTES DE ROLAGEM (CORREÇÃO) --- */
+      html, body {
+        height: auto !important; /* Permite que o corpo cresça */
+        min-height: 100%;
+        overflow-y: auto !important; /* Garante a barra de rolagem do navegador */
+        margin: 0;
+      }
+
+      #tela-dashboard {
+        display: flex;
+        min-height: 100vh;
+        height: auto !important;
+      }
+
+      .main-content {
+        flex-grow: 1;
+        height: auto !important; /* Libera a altura */
+        min-height: 100vh;
+        overflow-y: visible !important; /* Não deixa a div prender a rolagem */
+        background-color: #f8fafc;
+      }
+
+      .modulos-container {
+        padding: 20px;
+        height: auto !important;
+        overflow: visible !important;
+      }
+
+      /* Manter a Sidebar fixa enquanto o conteúdo rola ao lado */
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        width: 260px;
+        height: 100vh;
+        position: sticky; /* Ela fica presa enquanto você rola o resto */
+        top: 0;
+        background-color: #0f172a;
+        flex-shrink: 0;
+      }
+      /* ------------------------------------ */
+
+      .sidebar-menu {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-top: 10px;
+      }
+
+      .menu-category {
+        width: 100%;
+        background: none;
+        border: none;
+        color: #0ea5e9;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        padding: 15px 20px;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+        border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+      }
+
+      .menu-category:hover { background: rgba(14, 165, 233, 0.05); }
+
+      .menu-category::after {
+        content: '▼';
+        font-size: 8px;
+        transition: transform 0.3s;
+      }
+
+      .menu-category.active::after { transform: rotate(-180deg); }
+
+      .submenu-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .submenu-content.show { max-height: 500px; }
+
+      .submenu-content .menu-btn {
+        padding-left: 35px;
+        font-size: 13px;
+        border-left: 2px solid transparent;
+      }
+
+      .btn-sair {
+        margin-top: auto;
+        border-radius: 0;
+        background: #1e293b;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+
+      @media print {
+        .sidebar, .header-top, .btn-sair, .no-print { display: none !important; }
+        .main-content { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
+        .modulo-visivel { display: block !important; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000 !important; padding: 5px; font-size: 10px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login-wrapper">
+      <div class="login-left">
+        <div class="login-left-content">
+          <h1 class="login-title">PMOC</h1>
+          <h2 class="login-subtitle">HOSPITAL UNIVERSITÁRIO DE LONDRINA</h2>
+          <div class="login-divider"></div>
+          <p class="login-desc">Sistema Integrado de Manutenção, Operação e Controle <br>HU | AEHU | UCC</p>
+        </div>
+        <div class="login-footer">Desenvolvido DMPE</div>
+      </div>
+      
+      <div class="login-right">
+        <div class="login-box">
+          <h2>Acesso Restrito</h2>
+          <p class="login-hint">Insira suas credenciais para continuar</p>
+          <label>Login</label>
+          <input type="text" id="login_user" class="input-form" placeholder="Usuário">
+          <label>Senha</label>
+          <input type="password" id="login_pass" class="input-form" placeholder="••••••••">
+          <button onclick="fazerLogin()" class="btn-primary">Entrar no Sistema</button>
+          <p id="msg-login" class="msg-alerta"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tela-dashboard" style="display: none;">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h2>PMOC <span style="color: #0ea5e9;">Pro</span></h2>
+          <p>Gestão Inteligente</p>
+        </div>
+        
+        <div class="sidebar-menu">
+          <button class="menu-category active" onclick="toggleSubmenu(this, 'sub-principal')">Principal</button>
+          <div id="sub-principal" class="submenu-content show"> 
+            <button id="btn-home" onclick="abrirModulo('HOME')" class="menu-btn active">Dashboard</button>
+          </div>
+          
+          <button class="menu-category" onclick="toggleSubmenu(this, 'sub-cadastros')">Cadastros</button>
+          <div id="sub-cadastros" class="submenu-content">
+            <button id="btn-maquinas" onclick="abrirModulo('MAQUINAS')" class="menu-btn">Máquinas</button>
+            <button id="btn-engenheiros" onclick="abrirModulo('ENGENHEIROS')" class="menu-btn">Engenheiros</button>
+            <button id="btn-tecnicos" onclick="abrirModulo('TECNICOS')" class="menu-btn">Técnicos</button>
+          </div>
+          
+          <button class="menu-category" onclick="toggleSubmenu(this, 'sub-operacional')">Operacional</button>
+          <div id="sub-operacional" class="submenu-content">
+            <button id="btn-agendamento" onclick="abrirModulo('AGENDAMENTO')" class="menu-btn">Agendamento</button>
+            <button id="btn-relatorio" onclick="abrirModulo('RELATORIO')" class="menu-btn">Relatórios</button>
+            <button id="btn-pmoc" onclick="abrirModulo('PMOC')" class="menu-btn">Doc. PMOC</button>
+          </div>
+        </div>
+        
+        <button onclick="sair()" class="btn-sair">Sair do Sistema</button>
+      </div>
+
+      <div class="main-content">
+        <div class="header-top no-print">
+          <div>
+            <h1>Painel Gerencial</h1>
+            <p id="boas-vindas"></p>
+          </div>
+          <div class="clock-container">
+            <div id="data-atual" class="clock-date"></div>
+            <div id="hora-atual" class="clock-time"></div>
+          </div>
+        </div>
+
+        <div class="modulos-container">
+          <?!= include('Dashboard'); ?>
+          <?!= include('Agendamento'); ?>
+          <?!= include('Maquinas'); ?>
+          <?!= include('CadTecnico'); ?>
+          <?!= include('CadEngenheiro'); ?>
+          
+          <?!= include('Relatorio'); ?>
+          <div id="modulo-PMOC" class="modulo-oculto"><h2>Documentação PMOC</h2><p>Módulo em desenvolvimento...</p></div>
+          <div id="modulo-PMOC" class="modulo-oculto"><h2>Documentação PMOC</h2><p>Módulo em desenvolvimento...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function toggleSubmenu(botao, idSubmenu) {
+        const submenu = document.getElementById(idSubmenu);
+        botao.classList.toggle('active');
+        submenu.classList.toggle('show');
+      }
+    </script>
+
+    <?!= include('JS'); ?>
+  </body>
+</html>

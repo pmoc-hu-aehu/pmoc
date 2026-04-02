@@ -1,0 +1,57 @@
+<div id="modulo-ENGENHEIROS" class="modulo-oculto" style="display: flex; flex-direction: column; height: 100%; overflow-y: hidden;">
+  <h3 class="section-title">Gestão de Engenheiros</h3>
+  
+  <div style="display: flex; gap: 20px; flex-grow: 1; overflow: hidden; padding-bottom: 10px;">
+    
+    <div class="form-container" style="flex: 1; min-width: 300px; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 20px;">
+      <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary);">Dados do Engenheiro</h4>
+      
+      <input type="hidden" id="eng_id" value=""> 
+      
+      <label>Nome Completo</label>
+      <input type="text" id="eng_nome" class="input-form" placeholder="Ex: Maria Souza">
+      
+      <label>CREA</label>
+      <input type="text" id="eng_crea" class="input-form" placeholder="Ex: 123456-7">
+      
+      <label>Login de Acesso</label>
+      <input type="text" id="eng_login" class="input-form" placeholder="Ex: maria.eng">
+      
+      <label>Senha</label>
+      <input type="text" id="eng_senha" class="input-form" placeholder="Defina a senha">
+      
+      <label>Telefone / WhatsApp</label>
+      <input type="text" id="eng_fone" class="input-form" placeholder="(00) 00000-0000">
+
+      <label>E-mail Corporativo</label>
+      <input type="text" id="eng_email" class="input-form" placeholder="email@dominio.com">
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px; margin-bottom: 10px; flex-shrink: 0;">
+        <button onclick="salvarEngenheiro()" class="btn-primary" style="flex: 1;" id="btn-salvar-eng">Salvar Engenheiro</button>
+        <button onclick="limparFormEngenheiro()" class="btn-primary" style="flex: 1; background: var(--text-muted); box-shadow: none;">Limpar</button>
+      </div>
+      
+      <p id="msg-engenheiro" style="margin-top: 10px; font-weight: bold; font-size: 13px; text-align: center; min-height: 20px; flex-shrink: 0;"></p>
+    </div>
+
+    <div class="form-container" style="flex: 2; min-width: 450px; overflow-y: auto; display: flex; flex-direction: column;">
+      <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary);">Engenheiros Cadastrados</h4>
+      
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--primary); color: var(--text-muted);">
+            <th style="padding: 10px 5px;">Nome</th>
+            <th style="padding: 10px 5px;">CREA</th>
+            <th style="padding: 10px 5px;">Login</th>
+            <th style="padding: 10px 5px;">Telefone</th>
+            <th style="padding: 10px 5px; text-align: center;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-engenheiros">
+          <tr><td colspan="5" style="text-align: center; padding: 20px;">Carregando engenheiros...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

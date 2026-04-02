@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static const String _baseUrl =
-      'https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec';
+      'https://script.google.com/macros/s/AKfycbyIc94AQeK-A-t4Cb6MiSH6fDJMTfngMyXRiUys8lrVIPh750AwmxhafdS9h29S4Q85XA/exec';
 
   static const String _keyUsuario         = 'pmoc_usuario';
   static const String _keySenha           = 'pmoc_senha';
@@ -161,5 +161,27 @@ class ApiService {
       print('[API] Erro em listarMaquinas: $e');
       return [];
     }
+  }
+
+  // ─── VERIFICAR LIMPEZA NO MÊS ────────────────────────────────────────────
+  // Retorna: {'jaLimpa': bool, 'autorizado': bool}
+  // Em caso de erro de conexão, retorna jaLimpa: false (não bloqueia offline)
+  static Future<Map<String, bool>> verificarLimpezaMes(String fuel, String tipo) async {
+    try {
+      final uri = Uri.parse(_baseUrl).replace(
+        queryParameters: {'action': 'VERIFICAR_LIMPEZA_MES', 'fuel': fuel, 'tipo': tipo},
+      );
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['sucesso'] == true) {
+          return {
+            'jaLimpa'   : data['jaLimpa']   == true,
+            'autorizado': data['autorizado'] == true,
+          };
+        }
+      }
+    } catch (_) {}
+    return {'jaLimpa': false, 'autorizado': false};
   }
 }
