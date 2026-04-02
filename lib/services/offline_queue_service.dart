@@ -94,48 +94,46 @@ class OfflineQueueService {
   /// move as fotos para diretório permanente e enfileira no SQLite.
   static Future<void> salvarPreventivaOffline({
     required ChecklistPreventiva checklist,
-    required String fotoInicioPath,
-    required String fotoProcessoPath,
-    // Adicionar fotoFinalPath e assinaturaByte aqui
-    required String fotoFinalPath,
+    required String fotoEvapSujaPath,
+    required String fotoEvapLimpaPath,
+    required String fotoCondSujaPath,
+    required String fotoCondLimpaPath,
     required Uint8List assinaturaByte,
   }) async {
     final docsDir   = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
-    final inicioFinal    = '${docsDir.path}/pmoc_${timestamp}_preventiva_inicio.jpg';
-    final processoFinal  = '${docsDir.path}/pmoc_${timestamp}_preventiva_processo.jpg';
-    final finalFinal     = '${docsDir.path}/pmoc_${timestamp}_preventiva_final.jpg';
-    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_assinatura.png';
+    final evapSujaFinal   = '${docsDir.path}/pmoc_${timestamp}_prev_evap_suja.jpg';
+    final evapLimpaFinal  = '${docsDir.path}/pmoc_${timestamp}_prev_evap_limpa.jpg';
+    final condSujaFinal   = '${docsDir.path}/pmoc_${timestamp}_prev_cond_suja.jpg';
+    final condLimpaFinal  = '${docsDir.path}/pmoc_${timestamp}_prev_cond_limpa.jpg';
+    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_prev_assinatura.png';
 
-    // Copia as fotos
-    await File(fotoInicioPath).copy(inicioFinal);
-    await File(fotoProcessoPath).copy(processoFinal);
-    await File(fotoFinalPath).copy(finalFinal);
-
-    // Salva a assinatura
+    await File(fotoEvapSujaPath).copy(evapSujaFinal);
+    await File(fotoEvapLimpaPath).copy(evapLimpaFinal);
+    await File(fotoCondSujaPath).copy(condSujaFinal);
+    await File(fotoCondLimpaPath).copy(condLimpaFinal);
     await File(assinaturaSalva).writeAsBytes(assinaturaByte);
 
-    // Remover links do payload, pois serão enviados como base64
     final payload = checklist.toJson()
-      ..remove('linkFotoInicio')
-      ..remove('linkFotoProcesso')
-      ..remove('linkFotoFinal')
+      ..remove('linkFotoEvapSuja')
+      ..remove('linkFotoEvapLimpa')
+      ..remove('linkFotoCondSuja')
+      ..remove('linkFotoCondLimpa')
       ..remove('linkAssinatura');
 
-    // Salvar todos os caminhos no ChecklistPendente
     await DatabaseService.salvarPendente(
       ChecklistPendente(
-        tipo: ChecklistType.preventiva.name,
-        payloadJson: jsonEncode(payload),
-        fotoSujaPath: inicioFinal, // fotoInicioPath
-        fotoLimpaPath: processoFinal, // fotoProcessoPath
-        fotoFinalPath: finalFinal, // Novo campo
-        assinaturaPath: assinaturaSalva, // Novo campo
-        criadoEm: DateTime.now(),
+        tipo          : ChecklistType.preventiva.name,
+        payloadJson   : jsonEncode(payload),
+        fotoSujaPath  : evapSujaFinal,
+        fotoLimpaPath : evapLimpaFinal,
+        fotoProcessoPath: condSujaFinal,
+        fotoFinalPath : condLimpaFinal,
+        assinaturaPath: assinaturaSalva,
+        criadoEm      : DateTime.now(),
       ),
     );
-
   }
 
   // ───────────────────── CORRETIVA ─────────────────────
@@ -307,49 +305,55 @@ class OfflineQueueService {
     );
 
     _formatAndTransformPayload(payload, [
-      {'field': 'chkDesmontagem',              'problemWhenTrue': false},
-      {'field': 'chkLavagemQuimica',           'problemWhenTrue': false},
-      {'field': 'chkDrenoBandeja',             'problemWhenTrue': false},
-      {'field': 'chkAntibactericida',          'problemWhenTrue': false},
-      {'field': 'chkRuidoVibracao',            'problemWhenTrue': true},
-      {'field': 'chkVazamento',                'problemWhenTrue': true},
-      {'field': 'chkEletrica',                 'problemWhenTrue': false},
-      {'field': 'chkIsolamentoOk',             'problemWhenTrue': false},
-      {'field': 'chkSubstituicaoIsolamento',   'problemWhenTrue': false},
+      {'field': 'chkDesmontagemEvap', 'problemWhenTrue': false},
+      {'field': 'chkLavagemEvap',     'problemWhenTrue': false},
+      {'field': 'chkDrenoBandeja',    'problemWhenTrue': false},
+      {'field': 'chkAntibactericida', 'problemWhenTrue': false},
+      {'field': 'chkRuidoEvap',       'problemWhenTrue': true},
+      {'field': 'chkIsolamentoOk',    'problemWhenTrue': false},
+      {'field': 'chkDesmontagemCond', 'problemWhenTrue': false},
+      {'field': 'chkLavagemCond',     'problemWhenTrue': false},
+      {'field': 'chkRuidoCond',       'problemWhenTrue': true},
+      {'field': 'chkVazamento',       'problemWhenTrue': true},
+      {'field': 'chkEletrica',        'problemWhenTrue': false},
+      {'field': 'chkIsolamentoOk',    'problemWhenTrue': false},
     ]);
 
-    // Anexa fotos como base64
-    if (p.fotoSujaPath != null) {
-      final f = File(p.fotoSujaPath!);
-      if (await f.exists()) {
-        payload['linkFotoInicio'] = base64Encode(await f.readAsBytes());
+    // Renomeia chaves para bater com os cabeçalhos da planilha (GAS)
+    void renomear(String de, String para) {
+      if (payload.containsKey(de)) {
+        payload[para] = payload.remove(de);
       }
     }
-    if (p.fotoLimpaPath != null) {
-      final f = File(p.fotoLimpaPath!);
+    renomear('chkDesmontagemEvap', 'chkDesmontagem');
+    renomear('chkLavagemEvap',     'chkLavagemQuimica');
+    renomear('chkRuidoEvap',       'chkRuidoVibracao');
+    renomear('metrosIsolamento',   'metrosIsolamentoTrocados');
+    renomear('observacoesTecnicas','observacoes');
+    // Remove campos da condensadora sem coluna na planilha
+    payload.remove('chkDesmontagemCond');
+    payload.remove('obsDesmontagemCond');
+    payload.remove('chkLavagemCond');
+    payload.remove('obsLavagemCond');
+    payload.remove('chkRuidoCond');
+    payload.remove('obsRuidoCond');
+
+    // Anexa fotos como base64 com as chaves esperadas pela planilha
+    // linkFotoInicio   = evap suja
+    // linkFotoProcesso = evap limpa
+    // linkFotoFinal    = cond limpa
+    Future<void> anexar(String? path, String campo) async {
+      if (path == null) return;
+      final f = File(path);
       if (await f.exists()) {
-        payload['linkFotoProcesso'] = base64Encode(await f.readAsBytes());
+        payload[campo] = base64Encode(await f.readAsBytes());
       }
     }
 
-    // Carrega foto final e assinatura dos novos campos em ChecklistPendente
-    if (p.fotoFinalPath != null) {
-      final fotoFinal = File(p.fotoFinalPath!);
-      if (await fotoFinal.exists()) {
-        payload['linkFotoFinal'] = base64Encode(await fotoFinal.readAsBytes());
-      } else {
-        print('[OFFLINE_QUEUE] Foto final não encontrada: ${p.fotoFinalPath}');
-      }
-    }
-
-    if (p.assinaturaPath != null) {
-      final assinatura = File(p.assinaturaPath!);
-      if (await assinatura.exists()) {
-        payload['linkAssinatura'] = base64Encode(await assinatura.readAsBytes());
-      } else {
-        print('[OFFLINE_QUEUE] Assinatura não encontrada: ${p.assinaturaPath}');
-      }
-    }
+    await anexar(p.fotoSujaPath,     'linkFotoInicio');
+    await anexar(p.fotoLimpaPath,    'linkFotoProcesso');
+    await anexar(p.fotoFinalPath,    'linkFotoFinal');
+    await anexar(p.assinaturaPath,   'linkAssinatura');
 
     payload['action'] = 'SALVAR_PREVENTIVA';
 
