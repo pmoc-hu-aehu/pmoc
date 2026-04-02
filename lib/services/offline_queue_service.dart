@@ -1,13 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 
 import '../models/checklist_filtro.dart';
 import '../models/checklist_duto.dart';
+import '../models/checklist_preventiva.dart';
+import '../models/checklist_corretiva.dart';
 import '../models/checklist_pendente.dart';
+import '../models/checklist_tipo.dart'; // Assuming you have a ChecklistType enum or similar
 import 'checklist_filtro_service.dart';
 import 'checklist_duto_service.dart';
+import 'checklist_preventiva_service.dart';
+import 'checklist_corretiva_service.dart';
 import 'database_service.dart';
 import 'sync_service.dart';
 
@@ -17,6 +23,10 @@ class OfflineQueueService {
   /// Salva checklist de filtro offline:
   /// move as fotos para diretório permanente e enfileira no SQLite.
   static Future<void> salvarFiltroOffline({
+    // Refatoração: Criar um helper genérico para salvar offline
+    // que lida com a cópia de fotos e salvamento no DB.
+    // Isso reduziria a duplicação entre os métodos salvar*Offline.
+    // Por enquanto, focando na correção do modelo.
     required ChecklistFiltro checklist,
     required String fotoSujaPath,
     required String fotoLimpaPath,
@@ -36,7 +46,7 @@ class OfflineQueueService {
 
     await DatabaseService.salvarPendente(
       ChecklistPendente(
-        tipo         : 'FILTRO',
+        tipo         : ChecklistType.filtro.name, // Usar enum para tipos
         payloadJson  : jsonEncode(payload),
         fotoSujaPath : sujaFinal,
         fotoLimpaPath: limpaFinal,
@@ -69,7 +79,7 @@ class OfflineQueueService {
 
     await DatabaseService.salvarPendente(
       ChecklistPendente(
-        tipo         : 'DUTO',
+        tipo         : ChecklistType.duto.name, // Usar enum para tipos
         payloadJson  : jsonEncode(payload),
         fotoSujaPath : inicialFinal,
         fotoLimpaPath: finalFinal,
@@ -78,10 +88,98 @@ class OfflineQueueService {
     );
   }
 
+  // ───────────────────── PREVENTIVA ─────────────────────
+
+  /// Salva checklist de preventiva offline:
+  /// move as fotos para diretório permanente e enfileira no SQLite.
+  static Future<void> salvarPreventivaOffline({
+    required ChecklistPreventiva checklist,
+    required String fotoInicioPath,
+    required String fotoProcessoPath,
+    // Adicionar fotoFinalPath e assinaturaByte aqui
+    required String fotoFinalPath,
+    required Uint8List assinaturaByte,
+  }) async {
+    final docsDir   = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    final inicioFinal    = '${docsDir.path}/pmoc_${timestamp}_preventiva_inicio.jpg';
+    final processoFinal  = '${docsDir.path}/pmoc_${timestamp}_preventiva_processo.jpg';
+    final finalFinal     = '${docsDir.path}/pmoc_${timestamp}_preventiva_final.jpg';
+    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_assinatura.png';
+
+    // Copia as fotos
+    await File(fotoInicioPath).copy(inicioFinal);
+    await File(fotoProcessoPath).copy(processoFinal);
+    await File(fotoFinalPath).copy(finalFinal);
+
+    // Salva a assinatura
+    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
+
+    // Remover links do payload, pois serão enviados como base64
+    final payload = checklist.toJson()
+      ..remove('linkFotoInicio')
+      ..remove('linkFotoProcesso')
+      ..remove('linkFotoFinal')
+      ..remove('linkAssinatura');
+
+    // Salvar todos os caminhos no ChecklistPendente
+    await DatabaseService.salvarPendente(
+      ChecklistPendente(
+        tipo: ChecklistType.preventiva.name,
+        payloadJson: jsonEncode(payload),
+        fotoSujaPath: inicioFinal, // fotoInicioPath
+        fotoLimpaPath: processoFinal, // fotoProcessoPath
+        fotoFinalPath: finalFinal, // Novo campo
+        assinaturaPath: assinaturaSalva, // Novo campo
+        criadoEm: DateTime.now(),
+      ),
+    );
+
+  }
+
+  // ───────────────────── CORRETIVA ─────────────────────
+
+  static Future<void> salvarCorretivaOffline({
+    required ChecklistCorretiva checklist,
+    required String fotoInicioPath,
+    required String fotoFinalPath,
+    required Uint8List assinaturaByte,
+  }) async {
+    final docsDir   = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    final inicioFinal    = '${docsDir.path}/pmoc_${timestamp}_corretiva_inicio.jpg';
+    final finalFinal     = '${docsDir.path}/pmoc_${timestamp}_corretiva_final.jpg';
+    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_corretiva_assinatura.png';
+
+    await File(fotoInicioPath).copy(inicioFinal);
+    await File(fotoFinalPath).copy(finalFinal);
+    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
+
+    // Remover links do payload, pois serão enviados como base64
+    final payload = checklist.toJson()
+      ..remove('linkFotoInicio')
+      ..remove('linkFotoFinal')
+      ..remove('linkAssinatura');
+
+    // Salvar todos os caminhos no ChecklistPendente
+    await DatabaseService.salvarPendente(
+      ChecklistPendente(
+        tipo: ChecklistType.corretiva.name,
+        payloadJson: jsonEncode(payload),
+        fotoSujaPath: inicioFinal, // fotoInicioPath
+        fotoLimpaPath: finalFinal, // fotoFinalPath
+        assinaturaPath: assinaturaSalva, // Novo campo
+        criadoEm: DateTime.now(),
+      ),
+    );
+  }
+
   // ───────────────────── PROCESSAR FILA ─────────────────────
 
   /// Processa a fila: envia todos os checklists pendentes
-  /// (FILTRO e DUTO) e apaga as fotos do celular após envio.
+  /// (FILTRO, DUTO e PREVENTIVA) e apaga as fotos do celular após envio.
   /// Retorna o número de itens enviados com sucesso.
   static Future<int> processarFila() async {
     final online = await SyncService.temConexao();
@@ -92,10 +190,14 @@ class OfflineQueueService {
 
     for (final p in pendentes) {
       try {
-        if (p.tipo == 'FILTRO') {
+        if (p.tipo == ChecklistType.filtro.name) {
           enviados += await _enviarFiltro(p);
-        } else if (p.tipo == 'DUTO') {
+        } else if (p.tipo == ChecklistType.duto.name) {
           enviados += await _enviarDuto(p);
+        } else if (p.tipo == ChecklistType.preventiva.name) {
+          enviados += await _enviarPreventiva(p);
+        } else if (p.tipo == ChecklistType.corretiva.name) {
+          enviados += await _enviarCorretiva(p);
         } else {
           print('[OFFLINE_QUEUE] Tipo desconhecido: ${p.tipo}');
         }
@@ -114,22 +216,8 @@ class OfflineQueueService {
       jsonDecode(p.payloadJson) as Map,
     );
 
-    // Converte datas ISO 8601 para data/hora formatadas que o GAS espera
-    if (payload['dataInicio'] != null) {
-      final dt = DateTime.parse(payload['dataInicio'] as String);
-      payload['dataInicio'] = '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year}';
-      payload['horaInicio'] = '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
-    }
-    if (payload['dataFinal'] != null) {
-      final dt = DateTime.parse(payload['dataFinal'] as String);
-      payload['dataFinal'] = '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year}';
-      payload['horaFinal'] = '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
-    }
-
-    // Transforma os campos booleanos de checklist em strings ('Sim', 'Não')
-    // e substitui 'Não' pela observação se houver.
-    final filtroCheckFieldsConfig = [
-      {'field': 'chkDesligado',    'problemWhenTrue': false}, // Para filtros, 'Não' é sempre o problema
+    _formatAndTransformPayload(payload, [
+      {'field': 'chkDesligado',    'problemWhenTrue': false},
       {'field': 'chkLavado',       'problemWhenTrue': false},
       {'field': 'chkEscova',       'problemWhenTrue': false},
       {'field': 'chkSecagem',      'problemWhenTrue': false},
@@ -139,8 +227,7 @@ class OfflineQueueService {
       {'field': 'chkDry',          'problemWhenTrue': false},
       {'field': 'chkAmbiente',     'problemWhenTrue': false},
       {'field': 'chkDreno',        'problemWhenTrue': false},
-    ];
-    _transformChecklistPayload(payload, filtroCheckFieldsConfig);
+    ]);
 
     // Anexa fotos como base64
     if (p.fotoSujaPath != null) {
@@ -161,8 +248,8 @@ class OfflineQueueService {
     final erro = await ChecklistFiltroService.enviarPayload(payload);
 
     if (erro == null) {
-      _apagarFoto(p.fotoSujaPath);
-      _apagarFoto(p.fotoLimpaPath);
+      // Apagar todas as fotos associadas a este pendente
+      _apagarFotosPendente(p);
       await DatabaseService.removerPendente(p.id!);
       return 1;
     }
@@ -176,28 +263,13 @@ class OfflineQueueService {
       jsonDecode(p.payloadJson) as Map,
     );
 
-    // Converte datas ISO 8601 para data/hora formatadas que o GAS espera
-    if (payload['dataInicio'] != null) {
-      final dt = DateTime.parse(payload['dataInicio'] as String);
-      payload['dataInicio'] = '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year}';
-      payload['horaInicio'] = '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
-    }
-    if (payload['dataFinal'] != null) {
-      final dt = DateTime.parse(payload['dataFinal'] as String);
-      payload['dataFinal'] = '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year}';
-      payload['horaFinal'] = '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
-    }
-
-    // Transforma os campos booleanos de checklist em strings ('Sim', 'Não')
-    // e substitui pela observação se houver, considerando 'problemaQuandoSim'.
-    final dutoCheckFieldsConfig = [
-      {'field': 'chkDanosIsolamento',  'problemWhenTrue': true},
+    _formatAndTransformPayload(payload, [
+      {'field': 'chkDanosIsolamento', 'problemWhenTrue': true},
       {'field': 'chkLimpezaRobo',      'problemWhenTrue': false},
       {'field': 'chkGrelhasDifusores', 'problemWhenTrue': false},
       {'field': 'chkSelosInspecao',    'problemWhenTrue': false},
       {'field': 'chkUmidadeMofo',      'problemWhenTrue': true},
-    ];
-    _transformChecklistPayload(payload, dutoCheckFieldsConfig);
+    ]); // <-- Parêntese de fechamento adicionado aqui
 
     // Foto inicial (salva em fotoSujaPath)
     if (p.fotoSujaPath != null) {
@@ -220,8 +292,7 @@ class OfflineQueueService {
     final erro = await ChecklistDutoService.enviarPayload(payload);
 
     if (erro == null) {
-      _apagarFoto(p.fotoSujaPath);
-      _apagarFoto(p.fotoLimpaPath);
+      _apagarFotosPendente(p);
       await DatabaseService.removerPendente(p.id!);
       return 1;
     }
@@ -230,6 +301,134 @@ class OfflineQueueService {
     return 0;
   }
 
+  static Future<int> _enviarPreventiva(ChecklistPendente p) async {
+    final payload = Map<String, dynamic>.from(
+      jsonDecode(p.payloadJson) as Map,
+    );
+
+    _formatAndTransformPayload(payload, [
+      {'field': 'chkDesmontagem',              'problemWhenTrue': false},
+      {'field': 'chkLavagemQuimica',           'problemWhenTrue': false},
+      {'field': 'chkDrenoBandeja',             'problemWhenTrue': false},
+      {'field': 'chkAntibactericida',          'problemWhenTrue': false},
+      {'field': 'chkRuidoVibracao',            'problemWhenTrue': true},
+      {'field': 'chkVazamento',                'problemWhenTrue': true},
+      {'field': 'chkEletrica',                 'problemWhenTrue': false},
+      {'field': 'chkIsolamentoOk',             'problemWhenTrue': false},
+      {'field': 'chkSubstituicaoIsolamento',   'problemWhenTrue': false},
+    ]);
+
+    // Anexa fotos como base64
+    if (p.fotoSujaPath != null) {
+      final f = File(p.fotoSujaPath!);
+      if (await f.exists()) {
+        payload['linkFotoInicio'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    if (p.fotoLimpaPath != null) {
+      final f = File(p.fotoLimpaPath!);
+      if (await f.exists()) {
+        payload['linkFotoProcesso'] = base64Encode(await f.readAsBytes());
+      }
+    }
+
+    // Carrega foto final e assinatura dos novos campos em ChecklistPendente
+    if (p.fotoFinalPath != null) {
+      final fotoFinal = File(p.fotoFinalPath!);
+      if (await fotoFinal.exists()) {
+        payload['linkFotoFinal'] = base64Encode(await fotoFinal.readAsBytes());
+      } else {
+        print('[OFFLINE_QUEUE] Foto final não encontrada: ${p.fotoFinalPath}');
+      }
+    }
+
+    if (p.assinaturaPath != null) {
+      final assinatura = File(p.assinaturaPath!);
+      if (await assinatura.exists()) {
+        payload['linkAssinatura'] = base64Encode(await assinatura.readAsBytes());
+      } else {
+        print('[OFFLINE_QUEUE] Assinatura não encontrada: ${p.assinaturaPath}');
+      }
+    }
+
+    payload['action'] = 'SALVAR_PREVENTIVA';
+
+    final erro = await ChecklistPreventivaService.enviarPayload(payload);
+
+    if (erro == null) {
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+      return 1;
+    }
+
+    print('[OFFLINE_QUEUE] Falha ao enviar PREVENTIVA id=${p.id}: $erro');
+    return 0;
+  }
+
+  static Future<int> _enviarCorretiva(ChecklistPendente p) async {
+    final payload = Map<String, dynamic>.from(
+      jsonDecode(p.payloadJson) as Map,
+    );
+
+    _formatAndTransformPayload(payload, []); // Corretiva tem lógica de transformação diferente
+
+    // Foto inicial
+    if (p.fotoSujaPath != null) {
+      final f = File(p.fotoSujaPath!);
+      if (await f.exists()) {
+        payload['linkFotoInicio'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    // Foto final
+    if (p.fotoLimpaPath != null) {
+      final f = File(p.fotoLimpaPath!);
+      if (await f.exists()) {
+        payload['linkFotoFinal'] = base64Encode(await f.readAsBytes());
+      }
+    }
+
+    // Carrega assinatura do novo campo em ChecklistPendente
+    if (p.assinaturaPath != null) {
+      final assinatura = File(p.assinaturaPath!);
+      if (await assinatura.exists()) {
+        payload['linkAssinatura'] = base64Encode(await assinatura.readAsBytes());
+      } else {
+        print('[OFFLINE_QUEUE] Assinatura não encontrada: ${p.assinaturaPath}');
+      }
+    }
+
+    payload['action'] = 'SALVAR_CORRETIVA';
+    // Lógica de transformação específica para Corretiva (mantida aqui por enquanto)
+    _transformCorretivaPayloadSpecifics(payload);
+
+
+    final erro = await ChecklistCorretivaService.enviarPayload(payload);
+
+    if (erro == null) {
+      _apagarFoto(p.fotoSujaPath);
+      _apagarFoto(p.fotoLimpaPath);
+      await DatabaseService.removerPendente(p.id!);
+      return 1;
+    }
+
+    print('[OFFLINE_QUEUE] Falha ao enviar CORRETIVA id=${p.id}: $erro');
+    return 0;
+  }
+
+  /// Apaga todas as fotos associadas a um ChecklistPendente.
+  static void _apagarFotosPendente(ChecklistPendente p) {
+    _apagarFoto(p.fotoSujaPath);
+    _apagarFoto(p.fotoLimpaPath);
+    _apagarFoto(p.fotoProcessoPath); // Novo campo
+    _apagarFoto(p.fotoFinalPath);     // Novo campo
+    _apagarFoto(p.assinaturaPath);    // Novo campo
+    // Se houver outros arquivos (e.g., metadados antigos), apagar aqui também
+    // Mas a ideia é que com a mudança, não haverá mais arquivos de metadados separados.
+    // Exemplo para apagar metadados antigos (se ainda existirem):
+    // if (p.metadataPath != null) _apagarFoto(p.metadataPath);
+  }
+
+  /// Apaga um arquivo de foto se o caminho for válido e o arquivo existir.
   static void _apagarFoto(String? path) {
     if (path == null) return;
     try {
@@ -237,6 +436,39 @@ class OfflineQueueService {
       if (f.existsSync()) f.deleteSync();
     } catch (e) {
       print('[OFFLINE_QUEUE] Erro ao apagar foto $path: $e');
+    }
+  }
+
+  /// Helper para transformar campos booleanos de checklist em strings
+  /// e formatar datas.
+  static void _formatAndTransformPayload(
+      Map<String, dynamic> payload, List<Map<String, dynamic>> checkFieldsConfig) {
+    // Converte datas ISO 8601 para data/hora formatadas que o GAS espera
+    if (payload['dataInicio'] != null) {
+      final dt = DateTime.parse(payload['dataInicio'] as String);
+      payload['dataInicio'] = '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year}';
+      payload['horaInicio'] = '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
+    }
+    if (payload['dataFinal'] != null) {
+      final dt = DateTime.parse(payload['dataFinal'] as String);
+      payload['dataFinal'] = '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year}';
+      payload['horaFinal'] = '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
+    }
+    _transformChecklistPayload(payload, checkFieldsConfig);
+  }
+
+  /// Lógica de transformação específica para ChecklistCorretiva
+  static void _transformCorretivaPayloadSpecifics(Map<String, dynamic> payload) {
+    // Converte booleanos em SIM/NÃO
+    if (payload['chkIsolamentoOk'] is bool) {
+      payload['chkIsolamentoOk'] = (payload['chkIsolamentoOk'] as bool) ? 'SIM' : 'NÃO';
+    }
+    if (payload['chkHigienePos'] is bool) {
+      payload['chkHigienePos'] = (payload['chkHigienePos'] as bool) ? 'SIM' : 'NÃO';
+    }
+    if (payload['equipamentoOperacional'] is bool) {
+      payload['statusOperacional'] = (payload['equipamentoOperacional'] as bool) ? 'OPERACIONAL' : 'INOPERANTE';
+      payload.remove('equipamentoOperacional');
     }
   }
 
@@ -252,16 +484,16 @@ class OfflineQueueService {
       final String? obsValue = payload['obs${field.substring(3)}'] as String?;
 
       if (chkValue == null) {
-        payload[field] = 'Não respondido'; // Caso o campo não tenha sido preenchido (embora a validação deva impedir)
+        payload[field] = 'Não respondido';
       } else if ((problemWhenTrue && chkValue == true && obsValue != null && obsValue.isNotEmpty) ||
                  (!problemWhenTrue && chkValue == false && obsValue != null && obsValue.isNotEmpty)) {
-        payload[field] = obsValue; // Envia o texto da observação
+        payload[field] = obsValue;
       } else if (chkValue == true) {
         payload[field] = 'Sim';
-      } else { // chkValue == false (e a observação está vazia ou não é um problema)
+      } else {
         payload[field] = 'Não';
       }
-      payload.remove('obs${field.substring(3)}'); // Remove o campo de observação separado
+      payload.remove('obs${field.substring(3)}');
     }
   }
 

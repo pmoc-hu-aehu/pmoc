@@ -38,8 +38,11 @@ dependencies:
   # Diretório permanente para fotos offline
   path_provider: ^2.1.4
 
-  # Leitor de código de barras / QR Code (NOVO - substitui barcode_widget)
+  # Leitor de código de barras / QR Code
   mobile_scanner: ^5.2.3
+
+  # Captura de assinatura digital (NOVO - para Preventiva)
+  hand_signature: ^3.1.0+2
 
 dev_dependencies:
   flutter_test:

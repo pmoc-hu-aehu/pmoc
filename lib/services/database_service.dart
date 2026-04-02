@@ -18,14 +18,19 @@ class DatabaseService {
 
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         await _criarTabelas(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 3) {
-          // Adiciona tabela de fila offline sem apagar dados existentes
           await _criarTabelaPendentes(db);
+        }
+        if (oldVersion < 4) {
+          // Adiciona colunas para preventiva/corretiva
+          await db.execute('ALTER TABLE checklist_pendente ADD COLUMN foto_processo_path TEXT');
+          await db.execute('ALTER TABLE checklist_pendente ADD COLUMN foto_final_path TEXT');
+          await db.execute('ALTER TABLE checklist_pendente ADD COLUMN assinatura_path TEXT');
         }
       },
       onOpen: (db) async {
@@ -63,12 +68,15 @@ class DatabaseService {
   static Future<void> _criarTabelaPendentes(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS checklist_pendente (
-        id             INTEGER PRIMARY KEY AUTOINCREMENT,
-        tipo           TEXT NOT NULL,
-        payload_json   TEXT NOT NULL,
-        foto_suja_path TEXT,
-        foto_limpa_path TEXT,
-        criado_em      TEXT NOT NULL
+        id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+        tipo                TEXT NOT NULL,
+        payload_json        TEXT NOT NULL,
+        foto_suja_path      TEXT,
+        foto_limpa_path     TEXT,
+        foto_processo_path  TEXT,
+        foto_final_path     TEXT,
+        assinatura_path     TEXT,
+        criado_em           TEXT NOT NULL
       )
     ''');
   }
@@ -89,6 +97,28 @@ class DatabaseService {
     final database = await db;
     final result = await database.rawQuery('SELECT COUNT(*) as total FROM checklist_pendente');
     return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  /// Verifica se há item pendente do mesmo FUEL+TIPO criado no mês/ano atual
+  static Future<bool> pendenteMesAtual(String fuel, String tipo) async {
+    final database = await db;
+    final agora = DateTime.now();
+    final rows = await database.query(
+      'checklist_pendente',
+      where: 'tipo = ?',
+      whereArgs: [tipo],
+    );
+    for (final row in rows) {
+      final dt = DateTime.parse(row['criado_em'] as String);
+      if (dt.month == agora.month && dt.year == agora.year) {
+        // Verifica se o fuel bate no payload JSON
+        final payload = row['payload_json'] as String;
+        if (payload.contains('"fuel":"$fuel"') || payload.contains('"fuel": "$fuel"')) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   static Future<void> removerPendente(int id) async {

@@ -179,10 +179,14 @@ class _DutosChecklistScreenState extends State<DutosChecklistScreen> {
       return;
     }
 
-    // Verifica se já foi limpo no mês
-    final resultado = await ApiService.verificarLimpezaMes(m.fuel, 'DUTO');
+    // Verifica localmente (fila offline) e no servidor
+    final localLimpa = await DatabaseService.pendenteMesAtual(m.fuel, 'DUTO');
+    final servidor   = await ApiService.verificarLimpezaMes(m.fuel, 'DUTO');
+    final jaLimpa    = localLimpa || servidor['jaLimpa'] == true;
+    final autorizado = servidor['autorizado'] == true;
+
     if (!mounted) return;
-    if (resultado['jaLimpa'] == true && resultado['autorizado'] != true) {
+    if (jaLimpa && !autorizado) {
       setState(() => _maquina = null);
       showDialog(
         context: context,
@@ -670,6 +674,7 @@ class _DutosChecklistScreenState extends State<DutosChecklistScreen> {
                 child: TextField(
                   controller: _obsGeraisController,
                   maxLines: 3,
+                  textInputAction: TextInputAction.done,
                   style: const TextStyle(color: Colors.black87),
                   decoration: _inputDecoration(
                     'Relate anomalias na rede de dutos, se houver',
@@ -854,6 +859,7 @@ class _DutosChecklistScreenState extends State<DutosChecklistScreen> {
             TextField(
               controller: obsController,
               maxLines: 2,
+              textInputAction: TextInputAction.done,
               style: const TextStyle(color: Colors.black87),
               decoration: _inputDecoration('Explique o motivo'),
             ),

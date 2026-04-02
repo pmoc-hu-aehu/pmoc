@@ -1,76 +1,80 @@
 import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'assinatura_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../services/database_service.dart';
 import '../services/offline_queue_service.dart';
-import '../services/api_service.dart';
+import '../services/checklist_preventiva_service.dart';
 import '../models/maquina.dart';
-import '../models/checklist_filtro.dart';
+import '../models/checklist_preventiva.dart';
 import 'barcode_scanner_screen.dart';
 
-class FiltrosChecklistScreen extends StatefulWidget {
+class PreventivaChecklistScreen extends StatefulWidget {
   final String tecnico;
 
-  const FiltrosChecklistScreen({
+  const PreventivaChecklistScreen({
     super.key,
     required this.tecnico,
   });
 
   @override
-  State<FiltrosChecklistScreen> createState() => _FiltrosChecklistScreenState();
+  State<PreventivaChecklistScreen> createState() =>
+      _PreventivaChecklistScreenState();
 }
 
-class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
-  // CONTROLLERS
-  final _codigoController      = TextEditingController(); // código de barras / FUEL
-  final _tempEntradaController = TextEditingController();
-  final _tempSaidaController   = TextEditingController();
-  final _obsDrenoController    = TextEditingController();
-  final _obsGeraisController   = TextEditingController();
+class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen> {
+  final _codigoController = TextEditingController();
+  final _tensaoVController = TextEditingController();
+  final _correnteAController = TextEditingController();
+  final _pressaoPsiController = TextEditingController();
+  final _tempRetornoController = TextEditingController();
+  final _tempInsuflamentoController = TextEditingController();
+  final _metrosIsolamentoController = TextEditingController();
+  final _observacoesTecnicasController = TextEditingController();
+  final _nomeChefeSectorController = TextEditingController();
+  final _chapaFuncionalController = TextEditingController();
 
   final Map<String, TextEditingController> _obsControllers = {
-    'desligado'   : TextEditingController(),
-    'lavado'      : TextEditingController(),
-    'escova'      : TextEditingController(),
-    'secagem'     : TextEditingController(),
-    'integridade' : TextEditingController(),
-    'limpezaExt'  : TextEditingController(),
-    'recolocado'  : TextEditingController(),
-    'dry'         : TextEditingController(),
-    'ambiente'    : TextEditingController(),
+    'desmontagem': TextEditingController(),
+    'lavagemQuimica': TextEditingController(),
+    'drenoBandeja': TextEditingController(),
+    'antibactericida': TextEditingController(),
+    'ruidoVibracao': TextEditingController(),
+    'vazamento': TextEditingController(),
+    'eletrica': TextEditingController(),
+    'isolamentoOk': TextEditingController(),
+    'substituicaoIsolamento': TextEditingController(),
   };
 
-  // ESTADO
   Maquina? _maquina;
   bool _carregandoMaquina = false;
-  bool _enviando          = false;
+  bool _enviando = false;
 
   String? _coordenadasGps;
   LocationPermission? _gpsPermissao;
 
-  String? _imagePathSuja;
-  String? _imagePathLimpa;
+  String? _imagePathInicio;
+  String? _imagePathProcesso;
+  String? _imagePathFinal;
+  Uint8List? _assinaturaByte;
 
-  bool? _chkDesligado;
-  bool? _chkLavado;
-  bool? _chkEscova;
-  bool? _chkSecagem;
-  bool? _chkIntegridade;
-  bool? _chkLimpezaExt;
-  bool? _chkRecolocado;
-  bool? _chkDry;
-  bool? _chkAmbiente;
-  bool? _chkDreno;
+  bool? _chkDesmontagem;
+  bool? _chkLavagemQuimica;
+  bool? _chkDrenoBandeja;
+  bool? _chkAntibactericida;
+  bool? _chkRuidoVibracao;
+  bool? _chkVazamento;
+  bool? _chkEletrica;
+  bool? _chkIsolamentoOk;
+  bool? _chkSubstituicaoIsolamento;
 
-  // EPIs: só ícone, sem label
   final List<Map<String, dynamic>> _epis = [
-    {'label': 'Luvas',              'icon': Icons.back_hand_outlined},
-    {'label': 'Óculos',             'icon': Icons.visibility_outlined},
-    {'label': 'Máscara PFF2',       'icon': Icons.masks_outlined},
+    {'label': 'Luvas', 'icon': Icons.back_hand_outlined},
+    {'label': 'Óculos', 'icon': Icons.visibility_outlined},
+    {'label': 'Máscara PFF2', 'icon': Icons.masks_outlined},
     {'label': 'Protetor auricular', 'icon': Icons.hearing_outlined},
   ];
   final Set<String> _episSelecionados = {};
@@ -92,17 +96,20 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
   @override
   void dispose() {
     _codigoController.dispose();
-    _tempEntradaController.dispose();
-    _tempSaidaController.dispose();
-    _obsDrenoController.dispose();
-    _obsGeraisController.dispose();
+    _tensaoVController.dispose();
+    _correnteAController.dispose();
+    _pressaoPsiController.dispose();
+    _tempRetornoController.dispose();
+    _tempInsuflamentoController.dispose();
+    _metrosIsolamentoController.dispose();
+    _observacoesTecnicasController.dispose();
+    _nomeChefeSectorController.dispose();
+    _chapaFuncionalController.dispose();
     for (final c in _obsControllers.values) {
       c.dispose();
     }
     super.dispose();
   }
-
-  // ───────────────────── PERMISSÕES / GPS ─────────────────────
 
   Future<void> _obterLocalizacao() async {
     try {
@@ -141,6 +148,7 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     final novoStatus = await Permission.camera.request();
     if (novoStatus.isGranted) return true;
 
+    if (!mounted) return false;
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -166,8 +174,6 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     return false;
   }
 
-  // ───────────────────── BUSCA MÁQUINA ─────────────────────
-
   Future<void> _buscarMaquina() async {
     final codigo = _codigoController.text.trim();
     if (codigo.isEmpty) {
@@ -177,55 +183,23 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
 
     setState(() {
       _carregandoMaquina = true;
-      _maquina           = null;
+      _maquina = null;
     });
 
-    // Por enquanto usamos o código como FUEL (pode mudar no futuro)
     final m = await DatabaseService.buscarPorFuel(codigo);
 
     setState(() {
       _carregandoMaquina = false;
-      _maquina           = m;
+      _maquina = m;
     });
 
     if (m == null) {
-      _snack('Nenhuma máquina encontrada para o código/FUEL $codigo.', erro: true);
-      return;
-    }
-
-    // Verifica localmente (fila offline) e no servidor
-    final localLimpa  = await DatabaseService.pendenteMesAtual(m.fuel, 'FILTRO');
-    final servidor    = await ApiService.verificarLimpezaMes(m.fuel, 'FILTRO');
-    final jaLimpa     = localLimpa || servidor['jaLimpa'] == true;
-    final autorizado  = servidor['autorizado'] == true;
-
-    if (!mounted) return;
-    if (jaLimpa && !autorizado) {
-      setState(() => _maquina = null);
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: const Color(0xFF1e293b),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Máquina já limpa', style: TextStyle(color: Colors.white)),
-          content: Text(
-            'O filtro FUEL ${m.fuel} (${m.localizacao}) já foi limpo este mês.\n\nPara realizar nova limpeza solicite autorização ao administrador.',
-            style: const TextStyle(color: Colors.white70),
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1d4ed8)),
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      _snack('Nenhuma máquina encontrada para o código/FUEL $codigo.',
+          erro: true);
     }
   }
 
   Future<void> _abrirScanner() async {
-    // Abre a tela de scanner e espera o código
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => const BarcodeScannerScreen(),
@@ -240,9 +214,7 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     }
   }
 
-  // ───────────────────── FOTOS ─────────────────────
-
-  Future<void> _tirarFoto({required bool suja}) async {
+  Future<void> _tirarFoto({required String tipo}) async {
     final ok = await _garantirPermissaoCamera();
     if (!ok) return;
 
@@ -253,122 +225,142 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     if (image == null) return;
 
     setState(() {
-      if (suja) {
-        _imagePathSuja = image.path;
-      } else {
-        _imagePathLimpa = image.path;
+      if (tipo == 'inicio') {
+        _imagePathInicio = image.path;
+      } else if (tipo == 'processo') {
+        _imagePathProcesso = image.path;
+      } else if (tipo == 'final') {
+        _imagePathFinal = image.path;
       }
     });
 
-    _snack('Foto ${suja ? "inicial" : "final"} registrada.');
+    _snack('Foto de $tipo registrada.');
   }
 
-  // ───────────────────── STATUS / VALIDAÇÃO ─────────────────────
+  Future<void> _salvarAssinatura() async {
+    final bytes = await Navigator.push<Uint8List>(
+      context,
+      MaterialPageRoute(builder: (_) => const AssinaturaScreen()),
+    );
+    if (bytes != null) setState(() => _assinaturaByte = bytes);
+  }
+
+  void _limparAssinatura() {
+    setState(() {
+      _assinaturaByte = null;
+    });
+  }
 
   String _calcularStatusGeral() {
-    if (_chkDesligado == false ||
-        _chkIntegridade == false ||
-        _chkRecolocado == false) {
+    if (_chkVazamento == true ||
+        _chkEletrica == false ||
+        _chkIsolamentoOk == false) {
       return 'CRITICO';
     }
-    if (_chkLavado == false ||
-        _chkEscova == false ||
-        _chkSecagem == false ||
-        _chkLimpezaExt == false ||
-        _chkDry == false ||
-        _chkAmbiente == false ||
-        _chkDreno == false) {
+
+    if (_chkDesmontagem == false ||
+        _chkLavagemQuimica == false ||
+        _chkDrenoBandeja == false ||
+        _chkAntibactericida == false ||
+        _chkRuidoVibracao == true) {
       return 'ATENCAO';
     }
+
     return 'OK';
   }
 
   bool _validar() {
     if (_maquina == null) {
-      _snack('Busque a máquina pelo código de barras / FUEL antes de continuar.', erro: true);
+      _snack('Busque a máquina antes de continuar.', erro: true);
       return false;
     }
-    if (_imagePathSuja == null) {
-      _snack('Tire a foto inicial da unidade antes da limpeza.', erro: true);
-      return false;
-    }
-    if (_imagePathLimpa == null) {
-      _snack('Tire a foto do filtro limpo.', erro: true);
+
+    if (_imagePathInicio == null || _imagePathProcesso == null || _imagePathFinal == null) {
+      _snack('Tire as 3 fotos obrigatórias.', erro: true);
       return false;
     }
 
     final checks = [
-      _chkDesligado,
-      _chkLavado,
-      _chkEscova,
-      _chkSecagem,
-      _chkIntegridade,
-      _chkLimpezaExt,
-      _chkRecolocado,
-      _chkDry,
-      _chkAmbiente,
-      _chkDreno,
+      _chkDesmontagem,
+      _chkLavagemQuimica,
+      _chkDrenoBandeja,
+      _chkAntibactericida,
+      _chkRuidoVibracao,
+      _chkVazamento,
+      _chkEletrica,
+      _chkIsolamentoOk,
+      _chkSubstituicaoIsolamento,
     ];
 
     if (checks.any((v) => v == null)) {
-      _snack('Responda todas as perguntas de Sim/Não.', erro: true);
-      return false;
-    }
-
-    if (_tempEntradaController.text.isEmpty ||
-        _tempSaidaController.text.isEmpty) {
-      _snack('Informe as temperaturas de entrada e insuflamento.', erro: true);
+      _snack('Responda todas as perguntas.', erro: true);
       return false;
     }
 
     bool precisaObs(bool? v, TextEditingController c) =>
         v == false && c.text.trim().isEmpty;
 
-    if (precisaObs(_chkDesligado, _obsControllers['desligado']!)) {
-      _snack('Explique o motivo do "Não" no desligamento.', erro: true);
+    if (precisaObs(_chkDesmontagem, _obsControllers['desmontagem']!)) {
+      _snack('Explique a desmontagem.', erro: true);
       return false;
     }
-    if (precisaObs(_chkLavado, _obsControllers['lavado']!)) {
-      _snack('Explique o motivo do filtro NÃO lavado.', erro: true);
+    if (precisaObs(_chkLavagemQuimica, _obsControllers['lavagemQuimica']!)) {
+      _snack('Explique a lavagem.', erro: true);
       return false;
     }
-    if (precisaObs(_chkEscova, _obsControllers['escova']!)) {
-      _snack('Explique o motivo de NÃO usar escova adequada.', erro: true);
+    if (precisaObs(_chkDrenoBandeja, _obsControllers['drenoBandeja']!)) {
+      _snack('Explique o dreno.', erro: true);
       return false;
     }
-    if (precisaObs(_chkSecagem, _obsControllers['secagem']!)) {
-      _snack('Explique a forma de secagem do filtro.', erro: true);
+    if (precisaObs(_chkAntibactericida, _obsControllers['antibactericida']!)) {
+      _snack('Explique o antibactericida.', erro: true);
       return false;
     }
-    if (precisaObs(_chkIntegridade, _obsControllers['integridade']!)) {
-      _snack('Descreva o dano na malha do filtro.', erro: true);
+    if (_chkRuidoVibracao == true && _obsControllers['ruidoVibracao']!.text.trim().isEmpty) {
+      _snack('Descreva o ruído.', erro: true);
       return false;
     }
-    if (precisaObs(_chkLimpezaExt, _obsControllers['limpezaExt']!)) {
-      _snack('Explique por que a limpeza externa não foi feita.', erro: true);
+    if (_chkVazamento == true && _obsControllers['vazamento']!.text.trim().isEmpty) {
+      _snack('Descreva o vazamento.', erro: true);
       return false;
     }
-    if (precisaObs(_chkRecolocado, _obsControllers['recolocado']!)) {
-      _snack('Explique por que o filtro não foi recolocado corretamente.', erro: true);
+    if (precisaObs(_chkEletrica, _obsControllers['eletrica']!)) {
+      _snack('Explique o problema elétrico.', erro: true);
       return false;
     }
-    if (precisaObs(_chkDry, _obsControllers['dry']!)) {
-      _snack('Explique por que a função DRY não foi usada.', erro: true);
+    if (precisaObs(_chkIsolamentoOk, _obsControllers['isolamentoOk']!)) {
+      _snack('Descreva o isolamento.', erro: true);
       return false;
     }
-    if (precisaObs(_chkAmbiente, _obsControllers['ambiente']!)) {
-      _snack('Explique por que o ambiente não estava desocupado/protegido.', erro: true);
+
+    if (_chkSubstituicaoIsolamento == true &&
+        _metrosIsolamentoController.text.trim().isEmpty) {
+      _snack('Informe metragem de isolamento.', erro: true);
       return false;
     }
-    if (_chkDreno == false && _obsDrenoController.text.trim().isEmpty) {
-      _snack('Explique o problema no dreno.', erro: true);
+
+    if (_tensaoVController.text.isEmpty ||
+        _correnteAController.text.isEmpty ||
+        _pressaoPsiController.text.isEmpty ||
+        _tempRetornoController.text.isEmpty ||
+        _tempInsuflamentoController.text.isEmpty) {
+      _snack('Preencha todas as medições.', erro: true);
+      return false;
+    }
+
+    if (_nomeChefeSectorController.text.trim().isEmpty ||
+        _chapaFuncionalController.text.trim().isEmpty) {
+      _snack('Preencha dados do chefe.', erro: true);
+      return false;
+    }
+
+    if (_assinaturaByte == null) {
+      _snack('Assinatura obrigatória.', erro: true);
       return false;
     }
 
     return true;
   }
-
-  // ───────────────────── ENVIO ─────────────────────
 
   Future<void> _enviar() async {
     if (!_validar()) return;
@@ -376,57 +368,85 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     setState(() => _enviando = true);
 
     final statusGeral = _calcularStatusGeral();
-    final now         = DateTime.now();
+    final now = DateTime.now();
 
-    final checklist = ChecklistFiltro(
-      dataInicio      : now,
-      dataFinal       : now,
-      tecnico         : widget.tecnico,
-      fuel            : _maquina!.fuel,
-      localizacao     : _maquina!.localizacao,
-      coordenadasGps  : _coordenadasGps ?? '',
-      linkFotoSuja    : null,
-      chkDesligado    : _chkDesligado!,
-      obsDesligado    : _obsControllers['desligado']!.text.trim().isEmpty    ? null : _obsControllers['desligado']!.text.trim(),
-      chkLavado       : _chkLavado!,
-      obsLavado       : _obsControllers['lavado']!.text.trim().isEmpty       ? null : _obsControllers['lavado']!.text.trim(),
-      chkEscova       : _chkEscova!,
-      obsEscova       : _obsControllers['escova']!.text.trim().isEmpty       ? null : _obsControllers['escova']!.text.trim(),
-      chkSecagem      : _chkSecagem!,
-      obsSecagem      : _obsControllers['secagem']!.text.trim().isEmpty      ? null : _obsControllers['secagem']!.text.trim(),
-      chkIntegridade  : _chkIntegridade!,
-      obsIntegridade  : _obsControllers['integridade']!.text.trim().isEmpty  ? null : _obsControllers['integridade']!.text.trim(),
-      chkLimpezaExt   : _chkLimpezaExt!,
-      obsLimpezaExt   : _obsControllers['limpezaExt']!.text.trim().isEmpty   ? null : _obsControllers['limpezaExt']!.text.trim(),
-      chkRecolocado   : _chkRecolocado!,
-      obsRecolocado   : _obsControllers['recolocado']!.text.trim().isEmpty   ? null : _obsControllers['recolocado']!.text.trim(),
-      linkFotoLimpa   : null,
-      chkDry          : _chkDry!,
-      obsDry          : _obsControllers['dry']!.text.trim().isEmpty          ? null : _obsControllers['dry']!.text.trim(),
-      chkAmbiente     : _chkAmbiente!,
-      obsAmbiente     : _obsControllers['ambiente']!.text.trim().isEmpty     ? null : _obsControllers['ambiente']!.text.trim(),
-      chkDreno        : _chkDreno!,
-      obsDreno        : _obsDrenoController.text.trim().isEmpty              ? null : _obsDrenoController.text.trim(),
-      tempEntrada     : double.tryParse(_tempEntradaController.text),
-      tempInsuflamento: double.tryParse(_tempSaidaController.text),
-      statusGeral     : statusGeral,
-      modelo          : _maquina!.modelo,
-      marca           : _maquina!.marca,
-      serie           : _maquina!.serie,
+    final checklist = ChecklistPreventiva(
+      dataInicio: now,
+      dataFinal: now,
+      tecnico: widget.tecnico,
+      fuel: _maquina!.fuel,
+      localizacao: _maquina!.localizacao,
+      coordenadasGps: _coordenadasGps ?? '',
+      linkFotoInicio: null,
+      chkDesmontagem: _chkDesmontagem!,
+      obsDesmontagem: _obsControllers['desmontagem']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['desmontagem']!.text.trim(),
+      chkLavagemQuimica: _chkLavagemQuimica!,
+      obsLavagemQuimica: _obsControllers['lavagemQuimica']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['lavagemQuimica']!.text.trim(),
+      chkDrenoBandeja: _chkDrenoBandeja!,
+      obsDrenoBandeja: _obsControllers['drenoBandeja']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['drenoBandeja']!.text.trim(),
+      chkAntibactericida: _chkAntibactericida!,
+      obsAntibactericida: _obsControllers['antibactericida']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['antibactericida']!.text.trim(),
+      chkRuidoVibracao: _chkRuidoVibracao!,
+      obsRuidoVibracao: _obsControllers['ruidoVibracao']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['ruidoVibracao']!.text.trim(),
+      chkVazamento: _chkVazamento!,
+      obsVazamento: _obsControllers['vazamento']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['vazamento']!.text.trim(),
+      chkEletrica: _chkEletrica!,
+      obsEletrica: _obsControllers['eletrica']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['eletrica']!.text.trim(),
+      chkIsolamentoOk: _chkIsolamentoOk!,
+      obsIsolamentoOk: _obsControllers['isolamentoOk']!.text.trim().isEmpty
+          ? null
+          : _obsControllers['isolamentoOk']!.text.trim(),
+      chkSubstituicaoIsolamento: _chkSubstituicaoIsolamento!,
+      obsSubstituicaoIsolamento: null,
+      metrosIsolamentoTrocados: _chkSubstituicaoIsolamento == true
+          ? double.tryParse(_metrosIsolamentoController.text)
+          : null,
+      linkFotoProcesso: null,
+      tensaoV: double.tryParse(_tensaoVController.text),
+      correnteA: double.tryParse(_correnteAController.text),
+      pressaoPsi: double.tryParse(_pressaoPsiController.text),
+      tempRetorno: double.tryParse(_tempRetornoController.text),
+      tempInsuflamento: double.tryParse(_tempInsuflamentoController.text),
+      linkFotoFinal: null,
+      observacoesTecnicas: _observacoesTecnicasController.text.trim().isEmpty
+          ? null
+          : _observacoesTecnicasController.text.trim(),
+      nomeChefe: _nomeChefeSectorController.text.trim(),
+      chapaFuncional: _chapaFuncionalController.text.trim(),
+      linkAssinatura: null,
+      statusGeral: statusGeral,
+      modelo: _maquina!.modelo,
+      marca: _maquina!.marca,
+      serie: _maquina!.serie,
     );
 
-    // Salva sempre na fila offline — fecha a tela imediatamente
-    await OfflineQueueService.salvarFiltroOffline(
-      checklist    : checklist,
-      fotoSujaPath : _imagePathSuja!,
-      fotoLimpaPath: _imagePathLimpa!,
+    await OfflineQueueService.salvarPreventivaOffline(
+      checklist: checklist,
+      fotoInicioPath: _imagePathInicio!,
+      fotoProcessoPath: _imagePathProcesso!,
+      fotoFinalPath: _imagePathFinal!,
+      assinaturaByte: _assinaturaByte!,
     );
 
     if (!mounted) return;
+    setState(() => _enviando = false);
+    _snack('Checklist salvo com sucesso!', sucesso: true);
     Navigator.pop(context);
   }
-
-  // ───────────────────── UI ─────────────────────
 
   void _snack(String msg, {bool erro = false, bool sucesso = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -443,10 +463,10 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0ea5e9),
+        backgroundColor: const Color(0xFF2563eb),
         elevation: 4,
         title: const Text(
-          'Checklist - Filtros',
+          'Checklist - Preventiva',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -456,8 +476,6 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-
-              // ── IDENTIFICAÇÃO DA MÁQUINA ──
               _buildCard(
                 title: 'Identificação da Máquina',
                 child: Column(
@@ -472,21 +490,21 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                             controller: _codigoController,
                             keyboardType: TextInputType.number,
                             style: const TextStyle(color: Colors.black87),
-                            decoration: _inputDecoration('Aponte a câmera ou digite o FUEL'),
+                            decoration: _inputDecoration(
+                                'Aponte a câmera ou digite o FUEL'),
                           ),
                         ),
                         const SizedBox(width: 6),
-                        // Botão scanner
                         IconButton(
                           tooltip: 'Ler código de barras',
                           onPressed: _abrirScanner,
                           icon: const Icon(Icons.qr_code_scanner),
-                          color: const Color(0xFF0ea5e9),
+                          color: const Color(0xFF2563eb),
                         ),
                         const SizedBox(width: 4),
-                        // Botão buscar (manual)
                         IconButton.filled(
-                          onPressed: _carregandoMaquina ? null : _buscarMaquina,
+                          onPressed:
+                              _carregandoMaquina ? null : _buscarMaquina,
                           icon: _carregandoMaquina
                               ? const SizedBox(
                                   width: 18,
@@ -498,7 +516,7 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                                 )
                               : const Icon(Icons.search),
                           style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFF0ea5e9),
+                            backgroundColor: const Color(0xFF2563eb),
                           ),
                         ),
                       ],
@@ -510,8 +528,6 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                   ],
                 ),
               ),
-
-              // ── TÉCNICO & LOCALIZAÇÃO ──
               _buildCard(
                 title: 'Técnico & Localização',
                 child: Column(
@@ -530,36 +546,20 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                         IconButton(
                           onPressed: _obterLocalizacao,
                           icon: const Icon(Icons.my_location, size: 22),
-                          color: const Color(0xFF0ea5e9),
+                          color: const Color(0xFF2563eb),
                         ),
                       ],
                     ),
-                    if (_gpsPermissao == LocationPermission.deniedForever ||
-                        _gpsPermissao == LocationPermission.denied)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: ElevatedButton.icon(
-                          onPressed: () => openAppSettings(),
-                          icon: const Icon(Icons.settings),
-                          label: const Text('Abrir configurações de permissão'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
-
-              // ── EPIs — só ícones, linha única ──
               _buildCard(
                 title: 'EPIs Utilizados',
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: _epis.map((epi) {
-                    final label       = epi['label'] as String;
-                    final icon        = epi['icon'] as IconData;
+                    final label = epi['label'] as String;
+                    final icon = epi['icon'] as IconData;
                     final selecionado = _episSelecionados.contains(label);
 
                     return GestureDetector(
@@ -578,32 +578,22 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                         height: 64,
                         decoration: BoxDecoration(
                           color: selecionado
-                              ? const Color(0xFF22c55e).withOpacity(0.15)
+                              ? const Color(0xFF2563eb).withOpacity(0.15)
                               : Colors.grey[100],
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: selecionado
-                                ? const Color(0xFF22c55e)
+                                ? const Color(0xFF2563eb)
                                 : Colors.grey[300]!,
                             width: selecionado ? 2.0 : 1.0,
                           ),
-                          boxShadow: selecionado
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(0xFF22c55e)
-                                        .withOpacity(0.25),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  )
-                                ]
-                              : [],
                         ),
                         child: Center(
                           child: Icon(
                             icon,
                             size: 32,
                             color: selecionado
-                                ? const Color(0xFF16a34a)
+                                ? const Color(0xFF1e40af)
                                 : Colors.grey[400],
                           ),
                         ),
@@ -612,137 +602,309 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                   }).toList(),
                 ),
               ),
-
-              // ── FOTOS ──
               _buildCard(
-                title: 'Fotos',
+                title: 'Foto Inicial',
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Foto inicial (unidade evaporadora antes)'),
+                    _label('Unidade antes de iniciar'),
                     const SizedBox(height: 6),
-                    _fotoWidget(_imagePathSuja, () => _tirarFoto(suja: true)),
-                    const SizedBox(height: 16),
-                    _label('Foto do filtro limpo (antes de recolocar)'),
-                    const SizedBox(height: 6),
-                    _fotoWidget(_imagePathLimpa, () => _tirarFoto(suja: false)),
+                    _fotoWidget(_imagePathInicio,
+                        () => _tirarFoto(tipo: 'inicio')),
                   ],
                 ),
               ),
-
-              // ── PROCEDIMENTOS ──
               _buildCard(
                 title: 'Procedimentos de Limpeza',
                 child: Column(
                   children: [
                     _yesNo(
-                      'Desligamento: equipamento e disjuntor desligados antes do início?',
-                      _chkDesligado,
-                      (v) => setState(() => _chkDesligado = v),
-                      _obsControllers['desligado']!,
+                      'Desmontagem realizada?',
+                      _chkDesmontagem,
+                      (v) => setState(() => _chkDesmontagem = v),
+                      _obsControllers['desmontagem']!,
                     ),
                     _yesNo(
-                      'Lavagem do filtro com água corrente e sabão neutro?',
-                      _chkLavado,
-                      (v) => setState(() => _chkLavado = v),
-                      _obsControllers['lavado']!,
+                      'Lavagem química realizada?',
+                      _chkLavagemQuimica,
+                      (v) => setState(() => _chkLavagemQuimica = v),
+                      _obsControllers['lavagemQuimica']!,
                     ),
                     _yesNo(
-                      'Utilizou escova macia (sem danificar a malha)?',
-                      _chkEscova,
-                      (v) => setState(() => _chkEscova = v),
-                      _obsControllers['escova']!,
+                      'Dreno/bandeja desobstruído?',
+                      _chkDrenoBandeja,
+                      (v) => setState(() => _chkDrenoBandeja = v),
+                      _obsControllers['drenoBandeja']!,
                     ),
                     _yesNo(
-                      'Secagem natural (sem álcool ou calor)?',
-                      _chkSecagem,
-                      (v) => setState(() => _chkSecagem = v),
-                      _obsControllers['secagem']!,
+                      'Antibactericida aplicado?',
+                      _chkAntibactericida,
+                      (v) => setState(() => _chkAntibactericida = v),
+                      _obsControllers['antibactericida']!,
                     ),
                     _yesNo(
-                      'Malha do filtro íntegra (sem furos/rasgos)?',
-                      _chkIntegridade,
-                      (v) => setState(() => _chkIntegridade = v),
-                      _obsControllers['integridade']!,
+                      'Ruído/vibração detectado?',
+                      _chkRuidoVibracao,
+                      (v) => setState(() => _chkRuidoVibracao = v),
+                      _obsControllers['ruidoVibracao']!,
+                      problemaQuandoSim: true,
                     ),
                     _yesNo(
-                      'Limpeza da face externa e grelhas com pano úmido?',
-                      _chkLimpezaExt,
-                      (v) => setState(() => _chkLimpezaExt = v),
-                      _obsControllers['limpezaExt']!,
+                      'Vazamento detectado?',
+                      _chkVazamento,
+                      (v) => setState(() => _chkVazamento = v),
+                      _obsControllers['vazamento']!,
+                      problemaQuandoSim: true,
                     ),
                     _yesNo(
-                      'Após secar, filtro recolocado corretamente?',
-                      _chkRecolocado,
-                      (v) => setState(() => _chkRecolocado = v),
-                      _obsControllers['recolocado']!,
+                      'Contatos elétricos OK?',
+                      _chkEletrica,
+                      (v) => setState(() => _chkEletrica = v),
+                      _obsControllers['eletrica']!,
                     ),
                     _yesNo(
-                      'Função DRY (se existente) acionada por 10 min após limpeza?',
-                      _chkDry,
-                      (v) => setState(() => _chkDry = v),
-                      _obsControllers['dry']!,
+                      'Isolamento íntegro?',
+                      _chkIsolamentoOk,
+                      (v) => setState(() => _chkIsolamentoOk = v),
+                      _obsControllers['isolamentoOk']!,
                     ),
                     _yesNo(
-                      'Ambiente desocupado ou com proteção adequada?',
-                      _chkAmbiente,
-                      (v) => setState(() => _chkAmbiente = v),
-                      _obsControllers['ambiente']!,
-                    ),
-                    _yesNo(
-                      'Dreno desobstruído?',
-                      _chkDreno,
-                      (v) => setState(() => _chkDreno = v),
-                      _obsDrenoController,
+                      'Substituição de isolamento?',
+                      _chkSubstituicaoIsolamento,
+                      (v) => setState(() => _chkSubstituicaoIsolamento = v),
+                      _obsControllers['substituicaoIsolamento']!,
                     ),
                   ],
                 ),
               ),
-
-              // ── TEMPERATURAS ──
+              if (_chkSubstituicaoIsolamento == true)
+                _buildCard(
+                  title: 'Metragem de Isolamento',
+                  child: TextField(
+                    controller: _metrosIsolamentoController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.black87),
+                    decoration: _inputDecoration('Metros instalados'),
+                  ),
+                ),
               _buildCard(
-                title: 'Medições de Temperatura',
+                title: 'Foto do Processo',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label('Máquina em limpeza'),
+                    const SizedBox(height: 6),
+                    _fotoWidget(_imagePathProcesso,
+                        () => _tirarFoto(tipo: 'processo')),
+                  ],
+                ),
+              ),
+              _buildCard(
+                title: 'Medições',
                 child: Column(
                   children: [
-                    _label('Temperatura de entrada do ar (°C)'),
+                    _label('Tensão (V)'),
                     const SizedBox(height: 6),
                     TextField(
-                      controller: _tempEntradaController,
+                      controller: _tensaoVController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       style: const TextStyle(color: Colors.black87),
-                      decoration: _inputDecoration('Ex.: 26.5'),
+                      decoration: _inputDecoration('Ex.: 220.5'),
                     ),
                     const SizedBox(height: 12),
-                    _label('Temperatura de insuflamento (°C)'),
+                    _label('Corrente (A)'),
                     const SizedBox(height: 6),
                     TextField(
-                      controller: _tempSaidaController,
+                      controller: _correnteAController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       style: const TextStyle(color: Colors.black87),
-                      decoration: _inputDecoration('Ex.: 18.2'),
+                      decoration: _inputDecoration('Ex.: 8.5'),
+                    ),
+                    const SizedBox(height: 12),
+                    _label('Pressão (PSI)'),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _pressaoPsiController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black87),
+                      decoration: _inputDecoration('Ex.: 350.0'),
+                    ),
+                    const SizedBox(height: 12),
+                    _label('Temp. Retorno (°C)'),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _tempRetornoController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black87),
+                      decoration: _inputDecoration('Ex.: 28.5'),
+                    ),
+                    const SizedBox(height: 12),
+                    _label('Temp. Insuflamento (°C)'),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _tempInsuflamentoController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black87),
+                      decoration: _inputDecoration('Ex.: 18.5'),
                     ),
                   ],
                 ),
               ),
-
-              // ── OBSERVAÇÕES GERAIS ──
+                            _buildCard(
+                title: 'Foto Final',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label('Máquina montada e organizada'),
+                    const SizedBox(height: 6),
+                    _fotoWidget(_imagePathFinal,
+                        () => _tirarFoto(tipo: 'final')),
+                  ],
+                ),
+              ),
               _buildCard(
-                title: 'Observações gerais',
+                title: 'Observações Técnicas',
                 child: TextField(
-                  controller: _obsGeraisController,
+                  controller: _observacoesTecnicasController,
                   maxLines: 3,
                   textInputAction: TextInputAction.done,
                   style: const TextStyle(color: Colors.black87),
                   decoration: _inputDecoration(
-                    'Algo relevante que não entrou nas perguntas acima',
+                    'Peças a comprar ou anomalias encontradas',
                   ),
                 ),
               ),
-
+              _buildCard(
+                title: 'Responsável / Chefe do Setor',
+                child: Column(
+                  children: [
+                    _label('Nome do Chefe'),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _nomeChefeSectorController,
+                      style: const TextStyle(color: Colors.black87),
+                      decoration: _inputDecoration('Nome completo'),
+                    ),
+                    const SizedBox(height: 12),
+                    _label('Número Funcional / Chapa'),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _chapaFuncionalController,
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.black87),
+                      decoration: _inputDecoration('Ex.: 12345'),
+                    ),
+                  ],
+                ),
+              ),
+              _buildCard(
+                title: 'Assinatura do Chefe (OBRIGATÓRIA)',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _assinaturaByte == null
+                              ? Colors.grey[400]!
+                              : const Color(0xFF22c55e),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.grey[50],
+                      ),
+                      child: _assinaturaByte != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                _assinaturaByte!,
+                                fit: BoxFit.contain,
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                'Toque em "Capturar" para assinar',
+                                style: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _assinaturaByte == null
+                                ? _salvarAssinatura
+                                : null,
+                            icon: const Icon(Icons.check),
+                            label: const Text('Capturar'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF22c55e),
+                              side: const BorderSide(
+                                  color: Color(0xFF22c55e)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _assinaturaByte != null
+                                ? _limparAssinatura
+                                : null,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Limpar'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.orange,
+                              side: const BorderSide(color: Colors.orange),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_assinaturaByte != null) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF22c55e).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFF22c55e),
+                          ),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.check_circle,
+                                color: Color(0xFF22c55e), size: 16),
+                            SizedBox(width: 8),
+                            Text(
+                              'Assinatura capturada',
+                              style: TextStyle(
+                                color: Color(0xFF16a34a),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
-
-              // ── BOTÃO FINALIZAR ──
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -773,7 +935,6 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                         ),
                 ),
               ),
-
               const SizedBox(height: 24),
             ],
           ),
@@ -781,8 +942,6 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
       ),
     );
   }
-
-  // ───────────────────── WIDGETS AUXILIARES ─────────────────────
 
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
@@ -839,8 +998,8 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
           icon: const Icon(Icons.camera_alt_outlined, size: 18),
           label: const Text('Tirar foto'),
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF0ea5e9),
-            side: const BorderSide(color: Color(0xFF0ea5e9)),
+            foregroundColor: const Color(0xFF2563eb),
+            side: const BorderSide(color: Color(0xFF2563eb)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -854,8 +1013,9 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     String pergunta,
     bool? valor,
     ValueChanged<bool?> onChanged,
-    TextEditingController obsController,
-  ) {
+    TextEditingController obsController, {
+    bool problemaQuandoSim = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -909,14 +1069,15 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
               ),
             ],
           ),
-          if (valor == false) ...[
+          if ((problemaQuandoSim && valor == true) ||
+              (!problemaQuandoSim && valor == false)) ...[
             const SizedBox(height: 6),
             TextField(
               controller: obsController,
               maxLines: 2,
               textInputAction: TextInputAction.done,
               style: const TextStyle(color: Colors.black87),
-              decoration: _inputDecoration('Explique o motivo do "Não"'),
+              decoration: _inputDecoration('Explique o motivo'),
             ),
           ],
         ],
@@ -981,8 +1142,6 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
   }
 }
 
-// ───────────────────── CARD DA MÁQUINA ─────────────────────
-
 class _MaquinaResumoCard extends StatelessWidget {
   final Maquina maquina;
 
@@ -994,24 +1153,22 @@ class _MaquinaResumoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFe0f2fe),
+        color: const Color(0xFFdbeafe),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF0ea5e9),
+          color: const Color(0xFF2563eb),
           width: 1.5,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Badge FUEL + ícone ar condicionado
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0ea5e9),
+                  color: const Color(0xFF2563eb),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -1027,15 +1184,12 @@ class _MaquinaResumoCard extends StatelessWidget {
               const Spacer(),
               const Icon(
                 Icons.ac_unit,
-                color: Color(0xFF0ea5e9),
+                color: Color(0xFF2563eb),
                 size: 24,
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Linha verde "Máquina encontrada"
           Row(
             children: const [
               Icon(Icons.check_circle, color: Color(0xFF22c55e), size: 16),
@@ -1050,10 +1204,7 @@ class _MaquinaResumoCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // Modelo em destaque
           Text(
             maquina.modelo,
             style: const TextStyle(
@@ -1062,10 +1213,7 @@ class _MaquinaResumoCard extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-
           const SizedBox(height: 8),
-
-          // Marca + capacidade
           Row(
             children: [
               const Icon(Icons.business, size: 15, color: Colors.black45),
@@ -1090,10 +1238,7 @@ class _MaquinaResumoCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
-
-          // Localização
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1111,10 +1256,7 @@ class _MaquinaResumoCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
-
-          // Série
           Row(
             children: [
               const Icon(Icons.qr_code, size: 15, color: Colors.black45),

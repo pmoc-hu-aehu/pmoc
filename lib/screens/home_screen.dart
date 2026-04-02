@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'filtros_checklist_screen.dart';
 import 'dutos_checklist_screen.dart';
+import 'preventiva_checklist_screen.dart';
+import 'corretiva_checklist_screen.dart';
 import '../services/api_service.dart';
 import '../services/offline_queue_service.dart';
 import 'login_screen.dart';
@@ -105,13 +107,32 @@ class _HomeScreenState extends State<HomeScreen> {
         titulo: 'PREVENTIVAS',
         cor: const Color(0xFF2563eb),
         icon: Icons.verified_outlined,
-        onTap: () => _emBreve(context, 'Preventivas'),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PreventivaChecklistScreen(tecnico: widget.nome),
+            ),
+          );
+          // Ao voltar, atualiza badge e tenta sync
+          _atualizarPendentes();
+          _sincronizarSeOnline();
+        },
       ),
       _ChecklistCardData(
         titulo: 'CORRETIVAS',
         cor: const Color(0xFFf97316),
         icon: Icons.build_outlined,
-        onTap: () => _emBreve(context, 'Corretivas'),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CorretivaChecklistScreen(tecnico: widget.nome),
+            ),
+          );
+          _atualizarPendentes();
+          _sincronizarSeOnline();
+        },
       ),
       _ChecklistCardData(
         titulo: 'MOVIMENTAÇÃO',

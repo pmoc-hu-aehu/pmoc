@@ -2,6 +2,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import 'database_service.dart';
+// import 'package:logger/logger.dart'; // Adicione ao pubspec.yaml
+// final _logger = Logger();
 import '../models/maquina.dart';
 
 class SyncService {
