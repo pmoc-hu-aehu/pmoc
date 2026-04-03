@@ -11,6 +11,7 @@ import '../models/checklist_corretiva.dart';
 import '../models/checklist_pressao.dart';
 import '../models/checklist_qualidade_ar.dart';
 import '../models/checklist_movimentacao.dart';
+import '../models/checklist_exaustao.dart';
 import '../models/checklist_pendente.dart';
 import '../models/checklist_tipo.dart'; // Assuming you have a ChecklistType enum or similar
 import 'checklist_filtro_service.dart';
@@ -18,6 +19,7 @@ import 'checklist_duto_service.dart';
 import 'checklist_preventiva_service.dart';
 import 'checklist_corretiva_service.dart';
 import 'checklist_pressao_service.dart';
+import 'checklist_exaustao_service.dart';
 import 'database_service.dart';
 import 'sync_service.dart';
 
@@ -245,6 +247,46 @@ class OfflineQueueService {
     );
   }
 
+  // ───────────────────── EXAUSTÃO ─────────────────────
+
+  static Future<void> salvarExaustaoOffline({
+    required ChecklistExaustao checklist,
+    required String fotoInicioPath,
+    String? fotoServicopath,
+    required String fotoFinalPath,
+  }) async {
+    final docsDir   = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    final inicioFinal = '${docsDir.path}/pmoc_${timestamp}_exaustao_inicio.jpg';
+    final finalFinal  = '${docsDir.path}/pmoc_${timestamp}_exaustao_final.jpg';
+
+    await File(fotoInicioPath).copy(inicioFinal);
+    await File(fotoFinalPath).copy(finalFinal);
+
+    String? servicoFinal;
+    if (fotoServicopath != null) {
+      servicoFinal = '${docsDir.path}/pmoc_${timestamp}_exaustao_servico.jpg';
+      await File(fotoServicopath).copy(servicoFinal);
+    }
+
+    final payload = checklist.toJson()
+      ..remove('linkFotoInicio')
+      ..remove('linkFotoServico')
+      ..remove('linkFotoFinal');
+
+    await DatabaseService.salvarPendente(
+      ChecklistPendente(
+        tipo          : ChecklistType.exaustao.name,
+        payloadJson   : jsonEncode(payload),
+        fotoSujaPath  : inicioFinal,
+        fotoLimpaPath : servicoFinal,
+        fotoFinalPath : finalFinal,
+        criadoEm      : DateTime.now(),
+      ),
+    );
+  }
+
   // ───────────────────── PRESSÃO ─────────────────────
 
   static Future<void> salvarPressaoOffline({
@@ -313,6 +355,8 @@ class OfflineQueueService {
           enviados += await _enviarQualidadeAr(p);
         } else if (p.tipo == ChecklistType.movimentacao.name) {
           enviados += await _enviarMovimentacao(p);
+        } else if (p.tipo == ChecklistType.exaustao.name) {
+          enviados += await _enviarExaustao(p);
         } else {
           print('[OFFLINE_QUEUE] Tipo desconhecido: ${p.tipo}');
         }
@@ -657,6 +701,53 @@ class OfflineQueueService {
     }
 
     print('[OFFLINE_QUEUE] Falha ao enviar MOVIMENTACAO id=${p.id}: $erro');
+    return 0;
+  }
+
+  static Future<int> _enviarExaustao(ChecklistPendente p) async {
+    final payload = Map<String, dynamic>.from(
+      jsonDecode(p.payloadJson) as Map,
+    );
+
+    _formatAndTransformPayload(payload, [
+      {'field': 'chkLimpezaRotor',    'problemWhenTrue': false},
+      {'field': 'chkCorreias',        'problemWhenTrue': false},
+      {'field': 'chkLubrificacao',    'problemWhenTrue': false},
+      {'field': 'chkVibracao',        'problemWhenTrue': true},
+      {'field': 'chkSensAcionamento', 'problemWhenTrue': false},
+      {'field': 'chkFiltrosTelas',    'problemWhenTrue': false},
+    ]);
+
+    if (p.fotoSujaPath != null) {
+      final f = File(p.fotoSujaPath!);
+      if (await f.exists()) {
+        payload['fotoInicioB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    if (p.fotoLimpaPath != null) {
+      final f = File(p.fotoLimpaPath!);
+      if (await f.exists()) {
+        payload['fotoServicioB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    if (p.fotoFinalPath != null) {
+      final f = File(p.fotoFinalPath!);
+      if (await f.exists()) {
+        payload['fotoFinalB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+
+    payload['action'] = 'SALVAR_EXAUSTAO';
+
+    final erro = await ChecklistExaustaoService.enviarPayload(payload);
+
+    if (erro == null) {
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+      return 1;
+    }
+
+    print('[OFFLINE_QUEUE] Falha ao enviar EXAUSTAO id=${p.id}: $erro');
     return 0;
   }
 
