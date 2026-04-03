@@ -8,12 +8,16 @@ import '../models/checklist_filtro.dart';
 import '../models/checklist_duto.dart';
 import '../models/checklist_preventiva.dart';
 import '../models/checklist_corretiva.dart';
+import '../models/checklist_pressao.dart';
+import '../models/checklist_qualidade_ar.dart';
+import '../models/checklist_movimentacao.dart';
 import '../models/checklist_pendente.dart';
 import '../models/checklist_tipo.dart'; // Assuming you have a ChecklistType enum or similar
 import 'checklist_filtro_service.dart';
 import 'checklist_duto_service.dart';
 import 'checklist_preventiva_service.dart';
 import 'checklist_corretiva_service.dart';
+import 'checklist_pressao_service.dart';
 import 'database_service.dart';
 import 'sync_service.dart';
 
@@ -174,6 +178,113 @@ class OfflineQueueService {
     );
   }
 
+  // ───────────────────── MOVIMENTAÇÃO ─────────────────────
+
+  static Future<void> salvarMovimentacaoOffline({
+    required ChecklistMovimentacao checklist,
+    required String fotoOrigemPath,
+    required String fotoDestinoPath,
+    required Uint8List assinaturaByte,
+  }) async {
+    final docsDir    = await getApplicationDocumentsDirectory();
+    final timestamp  = DateTime.now().millisecondsSinceEpoch;
+
+    final origemFinal    = '${docsDir.path}/pmoc_${timestamp}_mov_origem.jpg';
+    final destinoFinal   = '${docsDir.path}/pmoc_${timestamp}_mov_destino.jpg';
+    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_mov_assinatura.png';
+
+    await File(fotoOrigemPath).copy(origemFinal);
+    await File(fotoDestinoPath).copy(destinoFinal);
+    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
+
+    final payload = checklist.toJson()
+      ..remove('linkFotoOrigem')
+      ..remove('linkFotoDestino')
+      ..remove('linkAssinatura');
+
+    await DatabaseService.salvarPendente(
+      ChecklistPendente(
+        tipo          : ChecklistType.movimentacao.name,
+        payloadJson   : jsonEncode(payload),
+        fotoSujaPath  : origemFinal,
+        fotoLimpaPath : destinoFinal,
+        assinaturaPath: assinaturaSalva,
+        criadoEm      : DateTime.now(),
+      ),
+    );
+  }
+
+  // ───────────────────── QUALIDADE DO AR ─────────────────────
+
+  static Future<void> salvarQualidadeArOffline({
+    required ChecklistQualidadeAr checklist,
+    required String fotoColetaPath,
+    required Uint8List assinaturaByte,
+  }) async {
+    final docsDir    = await getApplicationDocumentsDirectory();
+    final timestamp  = DateTime.now().millisecondsSinceEpoch;
+
+    final coletaFinal    = '${docsDir.path}/pmoc_${timestamp}_qar_coleta.jpg';
+    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_qar_assinatura.png';
+
+    await File(fotoColetaPath).copy(coletaFinal);
+    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
+
+    final payload = checklist.toJson()
+      ..remove('linkFotoColeta')
+      ..remove('linkAssinatura');
+
+    await DatabaseService.salvarPendente(
+      ChecklistPendente(
+        tipo          : ChecklistType.qualidadeAr.name,
+        payloadJson   : jsonEncode(payload),
+        fotoSujaPath  : coletaFinal,
+        assinaturaPath: assinaturaSalva,
+        criadoEm      : DateTime.now(),
+      ),
+    );
+  }
+
+  // ───────────────────── PRESSÃO ─────────────────────
+
+  static Future<void> salvarPressaoOffline({
+    required ChecklistPressao checklist,
+    required String fotoManometroPath,
+    String? fotoVedacaoPath,
+    required Uint8List assinaturaByte,
+  }) async {
+    final docsDir    = await getApplicationDocumentsDirectory();
+    final timestamp  = DateTime.now().millisecondsSinceEpoch;
+
+    final manometroFinal  = '${docsDir.path}/pmoc_${timestamp}_pressao_manometro.jpg';
+    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_pressao_assinatura.png';
+
+    await File(fotoManometroPath).copy(manometroFinal);
+    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
+
+    String? vedacaoFinal;
+    if (fotoVedacaoPath != null) {
+      vedacaoFinal = '${docsDir.path}/pmoc_${timestamp}_pressao_vedacao.jpg';
+      await File(fotoVedacaoPath).copy(vedacaoFinal);
+    }
+
+    final payload = checklist.toJson()
+      ..remove('linkFotoManometro')
+      ..remove('linkFotoVedacao')
+      ..remove('linkAssinatura');
+
+    await DatabaseService.salvarPendente(
+      ChecklistPendente(
+        tipo          : ChecklistType.pressao.name,
+        payloadJson   : jsonEncode(payload),
+        fotoSujaPath  : manometroFinal,
+        fotoLimpaPath : vedacaoFinal,
+        assinaturaPath: assinaturaSalva,
+        criadoEm      : DateTime.now(),
+      ),
+    );
+  }
+
   // ───────────────────── PROCESSAR FILA ─────────────────────
 
   /// Processa a fila: envia todos os checklists pendentes
@@ -196,6 +307,12 @@ class OfflineQueueService {
           enviados += await _enviarPreventiva(p);
         } else if (p.tipo == ChecklistType.corretiva.name) {
           enviados += await _enviarCorretiva(p);
+        } else if (p.tipo == ChecklistType.pressao.name) {
+          enviados += await _enviarPressao(p);
+        } else if (p.tipo == ChecklistType.qualidadeAr.name) {
+          enviados += await _enviarQualidadeAr(p);
+        } else if (p.tipo == ChecklistType.movimentacao.name) {
+          enviados += await _enviarMovimentacao(p);
         } else {
           print('[OFFLINE_QUEUE] Tipo desconhecido: ${p.tipo}');
         }
@@ -416,6 +533,192 @@ class OfflineQueueService {
     }
 
     print('[OFFLINE_QUEUE] Falha ao enviar CORRETIVA id=${p.id}: $erro');
+    return 0;
+  }
+
+  static Future<int> _enviarPressao(ChecklistPendente p) async {
+    final payload = Map<String, dynamic>.from(
+      jsonDecode(p.payloadJson) as Map,
+    );
+
+    // ── Datas: mantém ISO 8601 — o GAS faz new Date(payload.dataInicio)
+    // NÃO chamar _formatAndTransformPayload pois converteria para dd/MM/yyyy
+    // e new Date("04/03/2026") retorna meia-noite (hora errada).
+
+    // ── Remapeia chaves para o padrão do GAS (Especiais.js) ─────────
+    payload['fuel']       = payload['codSala'] ?? '';
+    // GAS usa 'local' diretamente para LOCALIZACAO — mantém como está
+    payload['conformidade']  = payload['chkConformidade'];
+    payload['vedacaoPortas'] = payload['chkVedacaoPorras'];
+    payload['molaporta']     = payload['chkMolaPorta'];
+    payload['filtroHepa']    = payload['chkFiltroHepa'] ?? '';
+    payload['nomeChefe']     = payload['nomeChefSetor'] ?? '';
+    payload['observacoes']   = payload['observacoesTecnicas'] ?? '';
+
+    // Separa coordenadasGps em latitude e longitude para o GAS
+    final gps = (payload['coordenadasGps'] as String?) ?? '';
+    if (gps.contains(',')) {
+      final parts = gps.split(',');
+      payload['latitude']  = parts[0].trim();
+      payload['longitude'] = parts[1].trim();
+    }
+
+    // Remove chaves que o GAS não usa
+    payload.remove('codSala');
+    payload.remove('zona');
+    payload.remove('tipoInspecao');
+    payload.remove('chkConformidade');
+    payload.remove('chkVedacaoPorras');
+    payload.remove('chkMolaPorta');
+    payload.remove('chkFiltroHepa');
+    payload.remove('nomeChefSetor');
+    payload.remove('observacoesTecnicas');
+    payload.remove('coordenadasGps');
+    payload.remove('obsFotoVedacao');
+    payload.remove('versaoChecklist');
+    payload.remove('idChecklist');
+
+    // ── Fotos em base64 com as chaves que o GAS espera ──────────────
+    if (p.fotoSujaPath != null) {
+      final f = File(p.fotoSujaPath!);
+      if (await f.exists()) {
+        payload['fotoManometroB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    if (p.assinaturaPath != null) {
+      final f = File(p.assinaturaPath!);
+      if (await f.exists()) {
+        payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    // Foto vedação não é usada pelo GAS atual — ignora
+
+    payload['action'] = 'SALVAR_PRESSAO';
+
+    final erro = await ChecklistPressaoService.enviarPayload(payload);
+
+    if (erro == null) {
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+      return 1;
+    }
+
+    print('[OFFLINE_QUEUE] Falha ao enviar PRESSAO id=${p.id}: $erro');
+    return 0;
+  }
+
+  static Future<int> _enviarMovimentacao(ChecklistPendente p) async {
+    final payload = Map<String, dynamic>.from(
+      jsonDecode(p.payloadJson) as Map,
+    );
+
+    // ── Remapeia chaves para o padrão do GAS (Especiais.js) ─────────
+    payload['nomeChefe'] = payload['nomeChefSetor'] ?? '';
+
+    // Monta obs com isolamento igual ao GAS
+    final isolamento = payload['chkIsolamentoNecessario'] as bool? ?? false;
+    final metros     = payload['metrosEstimados'];
+    payload['chkIsolamentoNecessario'] = isolamento;
+    payload['metrosEstimados']         = metros ?? '';
+
+    payload.remove('nomeChefSetor');
+    payload.remove('linkFotoOrigem');
+    payload.remove('linkFotoDestino');
+    payload.remove('linkAssinatura');
+
+    // ── Fotos em base64 ─────────────────────────────────────────────
+    if (p.fotoSujaPath != null) {
+      final f = File(p.fotoSujaPath!);
+      if (await f.exists()) {
+        payload['fotoOrigemB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    if (p.fotoLimpaPath != null) {
+      final f = File(p.fotoLimpaPath!);
+      if (await f.exists()) {
+        payload['fotoDestinoB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    if (p.assinaturaPath != null) {
+      final f = File(p.assinaturaPath!);
+      if (await f.exists()) {
+        payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+
+    payload['action'] = 'SALVAR_RETIRADA_MAQUINA';
+
+    final erro = await ChecklistPressaoService.enviarPayload(payload);
+
+    if (erro == null) {
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+      return 1;
+    }
+
+    print('[OFFLINE_QUEUE] Falha ao enviar MOVIMENTACAO id=${p.id}: $erro');
+    return 0;
+  }
+
+  static Future<int> _enviarQualidadeAr(ChecklistPendente p) async {
+    final payload = Map<String, dynamic>.from(
+      jsonDecode(p.payloadJson) as Map,
+    );
+
+    // ── Remapeia chaves para o padrão do GAS (Especiais.js) ─────────
+    // GAS linha[5] = fuel → usa pontoColeta como identificador do local
+    payload['fuel']             = payload['pontoColeta'] ?? '';
+    // GAS linha[7] = localizacaoTexto → coordenadas GPS como string
+    payload['localizacaoTexto'] = payload['coordenadasGps'] ?? '';
+    payload['nomeChefe']        = payload['nomeChefSetor'] ?? '';
+
+    // Monta campo obs[] igual ao GAS: junta particulado + próx. análise + obs
+    final List<String> obs = [];
+    if ((payload['materialParticulado'] as String?)?.isNotEmpty == true) {
+      obs.add('Particulado: ${payload['materialParticulado']}');
+    }
+    if ((payload['dataProximaAnalise'] as String?)?.isNotEmpty == true) {
+      obs.add('Próx. Análise: ${payload['dataProximaAnalise']}');
+    }
+    if ((payload['observacoes'] as String?)?.isNotEmpty == true) {
+      obs.add('Obs: ${payload['observacoes']}');
+    }
+    payload['observacoes'] = obs.join(' | ');
+
+    // Remove chaves que o GAS não usa
+    payload.remove('codSala');
+    payload.remove('coordenadasGps');
+    payload.remove('nomeChefSetor');
+    payload.remove('materialParticulado');
+    payload.remove('dataProximaAnalise');
+    payload.remove('linkFotoColeta');
+    payload.remove('linkAssinatura');
+
+    // ── Fotos em base64 ─────────────────────────────────────────────
+    if (p.fotoSujaPath != null) {
+      final f = File(p.fotoSujaPath!);
+      if (await f.exists()) {
+        payload['fotoColetaB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+    if (p.assinaturaPath != null) {
+      final f = File(p.assinaturaPath!);
+      if (await f.exists()) {
+        payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
+      }
+    }
+
+    payload['action'] = 'SALVAR_QUALIDADE_AR';
+
+    final erro = await ChecklistPressaoService.enviarPayload(payload);
+
+    if (erro == null) {
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+      return 1;
+    }
+
+    print('[OFFLINE_QUEUE] Falha ao enviar QUALIDADE_AR id=${p.id}: $erro');
     return 0;
   }
 

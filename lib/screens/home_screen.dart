@@ -7,6 +7,9 @@ import 'filtros_checklist_screen.dart';
 import 'dutos_checklist_screen.dart';
 import 'preventiva_checklist_screen.dart';
 import 'corretiva_checklist_screen.dart';
+import 'pressao_checklist_screen.dart';
+import 'qualidade_ar_checklist_screen.dart';
+import 'movimentacao_checklist_screen.dart';
 import '../services/api_service.dart';
 import '../services/offline_queue_service.dart';
 import 'login_screen.dart';
@@ -138,19 +141,49 @@ class _HomeScreenState extends State<HomeScreen> {
         titulo: 'MOVIMENTAÇÃO',
         cor: const Color(0xFF7c3aed),
         icon: Icons.swap_horiz_rounded,
-        onTap: () => _emBreve(context, 'Movimentação'),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MovimentacaoChecklistScreen(
+                tecnico: widget.nome,
+                perfil : widget.perfil,
+              ),
+            ),
+          );
+          _atualizarPendentes();
+          _sincronizarSeOnline();
+        },
       ),
       _ChecklistCardData(
         titulo: 'PRESSÃO',
         cor: const Color(0xFFfacc15),
         icon: Icons.speed_outlined,
-        onTap: () => _emBreve(context, 'Pressão'),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PressaoChecklistScreen(tecnico: widget.nome),
+            ),
+          );
+          _atualizarPendentes();
+          _sincronizarSeOnline();
+        },
       ),
       _ChecklistCardData(
         titulo: 'QUALIDADE AR',
         cor: const Color(0xFF14b8a6),
         icon: Icons.cloud_outlined,
-        onTap: () => _emBreve(context, 'Qualidade do Ar'),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => QualidadeArChecklistScreen(tecnico: widget.nome),
+            ),
+          );
+          _atualizarPendentes();
+          _sincronizarSeOnline();
+        },
       ),
       _ChecklistCardData(
         titulo: 'EXAUSTÃO',
