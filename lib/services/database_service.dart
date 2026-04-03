@@ -146,6 +146,16 @@ class DatabaseService {
     print('[DB] Máquinas salvas com sucesso');
   }
 
+  // ─── INSERIR MÁQUINA INDIVIDUAL ──────────────────────────────────────────
+  static Future<void> inserirMaquina(Maquina maquina) async {
+    final database = await db;
+    await database.insert(
+      'maquinas',
+      maquina.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   // ─── BUSCAR POR FUEL ──────────────────────────────────────────────────────
   static Future<Maquina?> buscarPorFuel(String fuel) async {
     final database = await db;

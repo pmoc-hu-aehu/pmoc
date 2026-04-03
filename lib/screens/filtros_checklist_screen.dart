@@ -613,18 +613,15 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                 ),
               ),
 
-              // ── FOTOS ──
+              // ── FOTO INICIAL ──
               _buildCard(
-                title: 'Fotos',
+                title: 'Foto Inicial',
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Foto inicial (unidade evaporadora antes)'),
+                    _label('Foto da unidade evaporadora antes da intervenção'),
                     const SizedBox(height: 6),
                     _fotoWidget(_imagePathSuja, () => _tirarFoto(suja: true)),
-                    const SizedBox(height: 16),
-                    _label('Foto do filtro limpo (antes de recolocar)'),
-                    const SizedBox(height: 6),
-                    _fotoWidget(_imagePathLimpa, () => _tirarFoto(suja: false)),
                   ],
                 ),
               ),
@@ -694,6 +691,19 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                       (v) => setState(() => _chkDreno = v),
                       _obsDrenoController,
                     ),
+                  ],
+                ),
+              ),
+
+              // ── FOTO FINAL ──
+              _buildCard(
+                title: 'Foto Final',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label('Foto Maquina Limpa'),
+                    const SizedBox(height: 6),
+                    _fotoWidget(_imagePathLimpa, () => _tirarFoto(suja: false)),
                   ],
                 ),
               ),
