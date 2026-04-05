@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,6 +12,7 @@ import '../services/offline_queue_service.dart';
 import '../models/maquina.dart';
 import '../models/checklist_exaustao.dart';
 import 'barcode_scanner_screen.dart';
+import 'assinatura_screen.dart';
 
 class ExaustaoChecklistScreen extends StatefulWidget {
   final String tecnico;
@@ -63,6 +66,7 @@ class _ExaustaoChecklistScreenState extends State<ExaustaoChecklistScreen> {
   String? _fotoInicioPath;
   String? _fotoServicopath;
   String? _fotoFinalPath;
+  Uint8List? _assinaturaByte;
 
   final List<Map<String, dynamic>> _epis = [
     {'label': 'Luvas',              'icon': Icons.back_hand_outlined},
@@ -253,8 +257,20 @@ class _ExaustaoChecklistScreenState extends State<ExaustaoChecklistScreen> {
       _snack('Informe a chapa funcional.', erro: true);
       return false;
     }
+    if (_assinaturaByte == null) {
+      _snack('Assinatura do chefe é obrigatória.', erro: true);
+      return false;
+    }
 
     return true;
+  }
+
+  Future<void> _capturarAssinatura() async {
+    final bytes = await Navigator.push<Uint8List>(
+      context,
+      MaterialPageRoute(builder: (_) => const AssinaturaScreen()),
+    );
+    if (bytes != null) setState(() => _assinaturaByte = bytes);
   }
 
   // ── Envio ─────────────────────────────────────────────────────────
@@ -263,7 +279,7 @@ class _ExaustaoChecklistScreenState extends State<ExaustaoChecklistScreen> {
     if (!_validar()) return;
     setState(() => _enviando = true);
 
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
 
     final checklist = ChecklistExaustao(
       dataInicio          : now,
@@ -307,6 +323,7 @@ class _ExaustaoChecklistScreenState extends State<ExaustaoChecklistScreen> {
       fotoInicioPath  : _fotoInicioPath!,
       fotoServicopath : _fotoServicopath,
       fotoFinalPath   : _fotoFinalPath!,
+      assinaturaByte  : _assinaturaByte!,
     );
 
     if (!mounted) return;
@@ -481,8 +498,12 @@ class _ExaustaoChecklistScreenState extends State<ExaustaoChecklistScreen> {
                 child: DropdownButtonFormField<String>(
                   initialValue: _tipoEquip,
                   decoration: _inputDecoration('Selecione o tipo'),
+                  dropdownColor: Colors.white,
                   items: _tiposEquip
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .map((t) => DropdownMenuItem(
+                            value: t,
+                            child: Text(t, style: const TextStyle(color: Colors.black87)),
+                          ))
                       .toList(),
                   onChanged: (v) => setState(() => _tipoEquip = v!),
                   style: const TextStyle(color: Colors.black87),
@@ -643,6 +664,75 @@ class _ExaustaoChecklistScreenState extends State<ExaustaoChecklistScreen> {
                       keyboardType: TextInputType.number,
                       style: const TextStyle(color: Colors.black87),
                       decoration: _inputDecoration('Número da chapa'),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── ASSINATURA ──
+              _buildCard(
+                title: 'Assinatura do Chefe do Setor',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _assinaturaByte == null
+                              ? Colors.grey[400]!
+                              : const Color(0xFF22c55e),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.grey[50],
+                      ),
+                      child: _assinaturaByte != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(_assinaturaByte!, fit: BoxFit.contain),
+                            )
+                          : Center(
+                              child: Text(
+                                'Toque em "Capturar" para assinar',
+                                style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _assinaturaByte == null ? _capturarAssinatura : null,
+                            icon: const Icon(Icons.draw_outlined),
+                            label: const Text('Capturar'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF7c3aed),
+                              side: const BorderSide(color: Color(0xFF7c3aed)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _assinaturaByte != null
+                                ? () => setState(() => _assinaturaByte = null)
+                                : null,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Refazer'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.grey[600],
+                              side: BorderSide(color: Colors.grey[400]!),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

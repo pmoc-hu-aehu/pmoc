@@ -9,38 +9,41 @@ class ChecklistExaustaoService {
   // ───────────────────── ENVIO DIRETO (ONLINE) ─────────────────────
 
   static Future<String?> enviarChecklist(ChecklistExaustao checklist) async {
+    // Split GPS "lat, lon" em campos separados que o GAS espera
+    final gpsParts = checklist.coordenadasGps.split(',');
+    final lat = gpsParts.isNotEmpty ? gpsParts[0].trim() : '';
+    final lon = gpsParts.length > 1 ? gpsParts[1].trim() : '';
+
     final payload = {
       'action'              : 'SALVAR_EXAUSTAO',
-      'dataInicio'          : _formatarData(checklist.dataInicio),
-      'horaInicio'          : _formatarHora(checklist.dataInicio),
-      'dataFinal'           : _formatarData(checklist.dataFinal),
-      'horaFinal'           : _formatarHora(checklist.dataFinal),
+      // Datas como ISO UTC — GAS usa new Date() para calcular hora
+      'dataInicio'          : checklist.dataInicio.toUtc().toIso8601String(),
+      'dataFinal'           : checklist.dataFinal.toUtc().toIso8601String(),
       'tecnico'             : checklist.tecnico,
       'fuel'                : checklist.fuel,
-      'localizacao'         : checklist.localizacao,
-      'coordenadasGps'      : checklist.coordenadasGps,
-      'tipoEquip'           : checklist.tipoEquip,
-      'chkLimpezaRotor'     : _chk(checklist.chkLimpezaRotor,    checklist.obsLimpezaRotor),
-      'chkCorreias'         : _chk(checklist.chkCorreias,         checklist.obsCorreias),
-      'chkLubrificacao'     : _chk(checklist.chkLubrificacao,    checklist.obsLubrificacao),
-      'chkVibracao'         : _chk(checklist.chkVibracao,         checklist.obsVibracao, problemaQuandoSim: true),
-      'chkSensAcionamento'  : _chk(checklist.chkSensAcionamento, checklist.obsSensAcionamento),
-      'chkFiltrosTelas'     : _chk(checklist.chkFiltrosTelas,    checklist.obsFiltrosTelas),
-      'tensaoV'             : checklist.tensaoV       ?? '',
-      'correnteA'           : checklist.correnteA     ?? '',
-      'velocidadeArMs'      : checklist.velocidadeArMs ?? '',
-      'statusEquip'         : checklist.statusEquip,
-      'linkFotoInicio'      : checklist.linkFotoInicio  ?? '',
-      'linkFotoServico'     : checklist.linkFotoServico ?? '',
-      'linkFotoFinal'       : checklist.linkFotoFinal   ?? '',
-      'observacoes'         : checklist.observacoesTecnicas ?? '',
+      'local'               : checklist.localizacao,       // GAS: payload.local
+      'latitude'            : lat,                          // GAS: payload.latitude
+      'longitude'           : lon,                          // GAS: payload.longitude
+      'tipoEquipamento'     : checklist.tipoEquip,         // GAS: payload.tipoEquipamento
+      // Booleans — GAS converte para SIM/NÃO internamente
+      'limpezaRotor'        : checklist.chkLimpezaRotor,
+      // correias = string já processada (GAS usa || "" sem ternário)
+      'correias'            : _chkStr(checklist.chkCorreias, checklist.obsCorreias),
+      'lubrificacao'        : checklist.chkLubrificacao,
+      'fixacaoVibracao'     : checklist.chkVibracao,
+      'sensoresAcionamento' : checklist.chkSensAcionamento,
+      'tensaoV'             : checklist.tensaoV     ?? '',
+      'correnteA'           : checklist.correnteA   ?? '',
+      'velocidadeAr'        : checklist.velocidadeArMs ?? '', // GAS: payload.velocidadeAr
+      'filtrosTelas'        : checklist.chkFiltrosTelas,
+      'statusEquipamento'   : checklist.statusEquip,       // GAS: payload.statusEquipamento
+      // Fotos serão vazias no envio direto (offline queue envia base64)
+      'fotoInicialB64'      : '',
+      'fotoServicoB64'      : '',
+      'fotoFinalB64'        : '',
       'nomeChefe'           : checklist.nomeChefe,
       'chapaFuncional'      : checklist.chapaFuncional,
-      'linkAssinatura'      : checklist.linkAssinatura ?? '',
-      'statusGeral'         : checklist.statusGeral,
-      'modelo'              : checklist.modelo,
-      'marca'               : checklist.marca,
-      'serie'               : checklist.serie,
+      'assinaturaB64'       : '',
     };
 
     return enviarPayload(payload);
@@ -87,20 +90,9 @@ class ChecklistExaustaoService {
 
   // ───────────────────── HELPERS ─────────────────────
 
-  static String _formatarData(DateTime dt) {
-    return '${dt.day.toString().padLeft(2, '0')}/'
-        '${dt.month.toString().padLeft(2, '0')}/'
-        '${dt.year}';
-  }
-
-  static String _formatarHora(DateTime dt) {
-    return '${dt.hour.toString().padLeft(2, '0')}:'
-        '${dt.minute.toString().padLeft(2, '0')}';
-  }
-
-  static String _chk(bool valor, String? obs, {bool problemaQuandoSim = false}) {
-    final temProblema = problemaQuandoSim ? valor : !valor;
-    if (temProblema && obs != null && obs.isNotEmpty) return obs;
+  /// correias é tratado como string pelo GAS (usa || "" não ternário)
+  static String _chkStr(bool valor, String? obs) {
+    if (!valor && obs != null && obs.isNotEmpty) return obs;
     return valor ? 'SIM' : 'NÃO';
   }
 }

@@ -10,6 +10,7 @@ import 'corretiva_checklist_screen.dart';
 import 'pressao_checklist_screen.dart';
 import 'qualidade_ar_checklist_screen.dart';
 import 'movimentacao_checklist_screen.dart';
+import 'exaustao_checklist_screen.dart';
 import '../services/api_service.dart';
 import '../services/offline_queue_service.dart';
 import 'login_screen.dart';
@@ -189,7 +190,16 @@ class _HomeScreenState extends State<HomeScreen> {
         titulo: 'EXAUSTÃO',
         cor: const Color(0xFFef4444),
         icon: Icons.air_rounded,
-        onTap: () => _emBreve(context, 'Exaustão'),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ExaustaoChecklistScreen(tecnico: widget.nome),
+            ),
+          );
+          _atualizarPendentes();
+          _sincronizarSeOnline();
+        },
       ),
     ];
 
@@ -301,17 +311,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _emBreve(BuildContext ctx, String nome) {
-    ScaffoldMessenger.of(ctx).showSnackBar(
-      SnackBar(
-        content: Text('Checklist de $nome em breve'),
-        backgroundColor: const Color(0xFF1e293b),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

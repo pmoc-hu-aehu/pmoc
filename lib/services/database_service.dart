@@ -18,7 +18,7 @@ class DatabaseService {
 
     return openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: (db, version) async {
         await _criarTabelas(db);
       },
@@ -27,10 +27,12 @@ class DatabaseService {
           await _criarTabelaPendentes(db);
         }
         if (oldVersion < 4) {
-          // Adiciona colunas para preventiva/corretiva
           await db.execute('ALTER TABLE checklist_pendente ADD COLUMN foto_processo_path TEXT');
           await db.execute('ALTER TABLE checklist_pendente ADD COLUMN foto_final_path TEXT');
           await db.execute('ALTER TABLE checklist_pendente ADD COLUMN assinatura_path TEXT');
+        }
+        if (oldVersion < 5) {
+          await _criarTabelaHistorico(db);
         }
       },
       onOpen: (db) async {
@@ -63,6 +65,19 @@ class DatabaseService {
     ''');
 
     await _criarTabelaPendentes(db);
+    await _criarTabelaHistorico(db);
+  }
+
+  static Future<void> _criarTabelaHistorico(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS historico_manutencao (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        tecnico   TEXT NOT NULL,
+        fuel      TEXT NOT NULL,
+        tipo      TEXT NOT NULL,
+        data_hora TEXT NOT NULL
+      )
+    ''');
   }
 
   static Future<void> _criarTabelaPendentes(Database db) async {
@@ -187,6 +202,35 @@ class DatabaseService {
       'SELECT COUNT(*) as total FROM maquinas',
     );
     return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // ─── HISTÓRICO DIÁRIO ────────────────────────────────────────────────────
+  static Future<void> registrarManutencao(String tecnico, String fuel, String tipo) async {
+    final database = await db;
+    await database.insert('historico_manutencao', {
+      'tecnico'  : tecnico,
+      'fuel'     : fuel,
+      'tipo'     : tipo,
+      'data_hora': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static Future<List<Map<String, dynamic>>> manutencoesHoje(String tecnico) async {
+    final database = await db;
+    final hoje = DateTime.now();
+    final inicioDia = DateTime(hoje.year, hoje.month, hoje.day).toIso8601String();
+    final fimDia    = DateTime(hoje.year, hoje.month, hoje.day, 23, 59, 59).toIso8601String();
+    return database.query(
+      'historico_manutencao',
+      where    : 'tecnico = ? AND data_hora >= ? AND data_hora <= ?',
+      whereArgs: [tecnico, inicioDia, fimDia],
+      orderBy  : 'data_hora DESC',
+    );
+  }
+
+  static Future<int> totalManutencoesHoje(String tecnico) async {
+    final lista = await manutencoesHoje(tecnico);
+    return lista.length;
   }
 
   // ─── CONFIG ───────────────────────────────────────────────────────────────

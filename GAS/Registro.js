@@ -4,15 +4,20 @@
  */
 
 function limparLinhaProcessamento(fuel, tipo) {
-  var ss      = getPlanilha();
-  var abaProc = ss.getSheetByName("PROCESSAMENTO");
-  var dados   = abaProc.getDataRange().getValues();
-
-  for (var i = dados.length - 1; i >= 1; i--) {
-    if (dados[i][0] == fuel && dados[i][1] == tipo) {
-      abaProc.deleteRow(i + 1);
-      break;
+  try {
+    var ss      = getPlanilha();
+    var abaProc = ss.getSheetByName("PROCESSAMENTO");
+    if (!abaProc) return; // aba não existe, nada a limpar
+    var dados = abaProc.getDataRange().getValues();
+    for (var i = dados.length - 1; i >= 1; i--) {
+      if (dados[i][0] == fuel && dados[i][1] == tipo) {
+        abaProc.deleteRow(i + 1);
+        break;
+      }
     }
+  } catch(e) {
+    Logger.log("limparLinhaProcessamento erro: " + e.message);
+    // não relança — não deve bloquear o salvamento
   }
 }
 
