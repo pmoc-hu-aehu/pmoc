@@ -8,6 +8,12 @@ function salvarFiltroMobile(payload) {
     var ss    = getPlanilha();
     var sheet = ss.getSheetByName("FILTROS");
 
+    // Proteção servidor: bloqueia duplicata no mês sem autorização
+    var checagem = verificarLimpezaMes(payload.fuel, "FILTRO");
+    if (checagem.jaLimpa && !checagem.autorizado) {
+      return { sucesso: false, msg: "FUEL " + payload.fuel + " já foi limpo este mês. Solicite autorização para relimpeza." };
+    }
+
     var linkIni = "";
     var linkFim = "";
     if (payload.fotoSujaB64)  linkIni = salvarFotoDrive(payload.fotoSujaB64,  "FILT_INI_" + payload.fuel, payload.tecnico);
@@ -53,6 +59,12 @@ function salvarDutoMobile(payload) {
   try {
     var ss    = getPlanilha();
     var sheet = ss.getSheetByName("DUTOS");
+
+    // Proteção servidor: bloqueia duplicata no mês sem autorização
+    var checagem = verificarLimpezaMes(payload.fuel, "DUTO");
+    if (checagem.jaLimpa && !checagem.autorizado) {
+      return { sucesso: false, msg: "FUEL " + payload.fuel + " já foi limpo este mês. Solicite autorização para relimpeza." };
+    }
 
     var linkIni = "";
     var linkFim = "";
