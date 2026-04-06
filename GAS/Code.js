@@ -35,6 +35,14 @@ function doGet(e) {
     }
   }
 
+  // Página de download do APK
+  if (e.parameter && e.parameter.page === 'download') {
+    return HtmlService.createTemplateFromFile('Download')
+      .evaluate()
+      .setTitle('PMOC — Baixar Aplicativo')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  }
+
   // Sem parâmetro action = painel web normal
   return HtmlService.createTemplateFromFile('Index')
     .evaluate()
