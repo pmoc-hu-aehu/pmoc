@@ -40,6 +40,7 @@ function salvarFiltroMobile(payload) {
 
     sheet.appendRow(linha);
     limparLinhaProcessamento(payload.fuel, "FILTRO");
+    marcarAutorizacaoUsada(payload.fuel, "FILTRO");
     Logger.log("Checklist Filtro salvo com sucesso para FUEL: " + payload.fuel);
     return { sucesso: true, msg: "Checklist Filtro salvo com sucesso!" };
   } catch(e) {
@@ -79,6 +80,8 @@ function salvarDutoMobile(payload) {
     linha[17] = payload.statusGeral         || "CONCLUIDO";
 
     sheet.appendRow(linha);
+    limparLinhaProcessamento(payload.fuel, "DUTO");
+    marcarAutorizacaoUsada(payload.fuel, "DUTO");
     return { sucesso: true, msg: "Checklist Duto salvo!" };
   } catch(e) {
     return { sucesso: false, mensagem: e.message };

@@ -107,6 +107,9 @@ function abrirModulo(moduloNome) {
   var ativo = document.getElementById('modulo-' + moduloNome);
   if (ativo) ativo.style.display = 'flex';
 
+  // Marca qual módulo está ativo para controle de impressão
+  document.body.setAttribute('data-modulo-ativo', moduloNome);
+
   document.querySelectorAll('.menu-btn').forEach(function(btn) {
     btn.classList.remove('active');
   });

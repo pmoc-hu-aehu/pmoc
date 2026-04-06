@@ -283,9 +283,15 @@
     .no-print { display:none !important; }
     .so-print { display:block !important; }
     /* Oculta todos os outros módulos */
-    #modulo-HOME, #modulo-AGENDAMENTO, #modulo-TECNICOS, #modulo-ENGENHEIROS,
-    #modulo-MAQUINAS, #modulo-RELATORIO, #modulo-PMOC, #modulo-EMPRESAS { display:none !important; }
-    #modulo-PAGAMENTOS { display:block !important; overflow:visible !important; }
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-HOME,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-AGENDAMENTO,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-TECNICOS,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-ENGENHEIROS,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-MAQUINAS,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-RELATORIO,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-PMOC,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-EMPRESAS { display:none !important; }
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-PAGAMENTOS { display:block !important; overflow:visible !important; }
     #pag-painel-fechamento { display:block !important; }
     #fech-resultado       { display:block !important; }
     #pag-painel-precos    { display:none !important; }

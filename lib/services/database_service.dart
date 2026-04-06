@@ -114,10 +114,13 @@ class DatabaseService {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  /// Verifica se há item pendente do mesmo FUEL+TIPO criado no mês/ano atual
+  /// Verifica se há registro do mesmo FUEL+TIPO no mês/ano atual,
+  /// tanto na fila offline (pendente) quanto no histórico já sincronizado.
   static Future<bool> pendenteMesAtual(String fuel, String tipo) async {
     final database = await db;
     final agora = DateTime.now();
+
+    // 1. Fila offline (ainda não sincronizado)
     final rows = await database.query(
       'checklist_pendente',
       where: 'tipo = ?',
@@ -126,14 +129,23 @@ class DatabaseService {
     for (final row in rows) {
       final dt = DateTime.parse(row['criado_em'] as String);
       if (dt.month == agora.month && dt.year == agora.year) {
-        // Verifica se o fuel bate no payload JSON
         final payload = row['payload_json'] as String;
         if (payload.contains('"fuel":"$fuel"') || payload.contains('"fuel": "$fuel"')) {
           return true;
         }
       }
     }
-    return false;
+
+    // 2. Histórico local (já sincronizado com o servidor)
+    final iniciaMes = DateTime(agora.year, agora.month, 1).toIso8601String();
+    final fimMes    = DateTime(agora.year, agora.month + 1, 0, 23, 59, 59).toIso8601String();
+    final hist = await database.query(
+      'historico_manutencao',
+      where    : 'fuel = ? AND tipo = ? AND data_hora >= ? AND data_hora <= ?',
+      whereArgs: [fuel, tipo, iniciaMes, fimMes],
+      limit    : 1,
+    );
+    return hist.isNotEmpty;
   }
 
   static Future<void> removerPendente(int id) async {

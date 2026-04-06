@@ -60,6 +60,11 @@ function registrarManutencaoNativa(dados) {
     sheet.appendRow(novaLinha);
     limparLinhaProcessamento(dados.fuel, dados.tipo);
 
+    // Se havia autorização de relimpeza, marca como usada para evitar duplicatas
+    if (dados.tipo === "FILTRO" || dados.tipo === "DUTO") {
+      marcarAutorizacaoUsada(dados.fuel, dados.tipo);
+    }
+
     return jsonOut({ sucesso: true, msg: "Sincronizado!", fuel: dados.fuel });
 
   } catch (e) {
