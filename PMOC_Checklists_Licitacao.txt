@@ -1,0 +1,220 @@
+================================================================================
+      HOSPITAL UNIVERSITARIO DE LONDRINA - HU/UEL
+      PLANO DE MANUTENCAO, OPERACAO E CONTROLE - PMOC
+      Checklists de Manutencao - Campos Obrigatorios por Tipo de Servico
+================================================================================
+
+CAMPOS COMUNS A TODOS OS CHECKLISTS:
+  - Data e Hora de Inicio
+  - Data e Hora de Conclusao
+  - Codigo do Equipamento (FUEL)
+  - Localizacao do Equipamento
+  - Tecnico Responsavel
+  - Coordenadas GPS (registradas automaticamente pelo app)
+
+================================================================================
+1. LIMPEZA DE FILTROS
+   Executado mensalmente em todos os equipamentos de ar-condicionado.
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Equipamento desligado antes da limpeza?          Sim / Nao
+   2  Filtro lavado com agua corrente?                 Sim / Nao
+   3  Limpeza com escova realizada?                    Sim / Nao
+   4  Secagem completa antes da recolocacao?           Sim / Nao
+   5  Integridade fisica do filtro verificada?         Sim / Nao
+   6  Limpeza externa do gabinete realizada?           Sim / Nao
+   7  Filtro recolocado corretamente?                  Sim / Nao
+   8  Operacao em modo DRY verificada?                 Sim / Nao
+   9  Verificacao das condicoes do ambiente?           Sim / Nao
+  10  Observacao sobre dreno/bandeja                   Texto livre
+  11  Temperatura de entrada (graus C)                 Medicao numerica
+  12  Temperatura de insuflamento (graus C)            Medicao numerica
+      Foto antes do servico                            Imagem (camera app)
+      Foto apos o servico                              Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+2. LIMPEZA DE DUTOS
+   Verificacao e limpeza de dutos, grelhas e difusores de distribuicao de ar.
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Isolamento do duto sem danos visiveis?           Sim / Nao
+   2  Limpeza interna realizada (robo/escova)?         Sim / Nao
+   3  Grelhas e difusores limpos e alinhados?          Sim / Nao
+   4  Selos de inspecao integros e fechados?           Sim / Nao
+   5  Ausencia de umidade/mofo verificada?             Sim / Nao
+   6  Temperatura de saida do duto (graus C)           Medicao numerica
+   7  Observacoes                                      Texto livre
+      Foto antes do servico                            Imagem (camera app)
+      Foto apos o servico                              Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+3. MANUTENCAO PREVENTIVA
+   Intervencao programada com limpeza quimica, verificacao eletrica e medicoes.
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Desmontagem e limpeza quimica realizada?         Sim / Nao
+   2  Lavagem quimica da serpentina realizada?         Sim / Nao
+   3  Dreno e bandeja limpos com bactericida?          Sim / Nao
+   4  Aplicacao de antibactericida realizada?          Sim / Nao
+   5  Ruidos e vibracoes anormais verificados?         Sim / Nao
+   6  Ausencia de vazamentos confirmada?               Sim / Nao
+   7  Verificacao eletrica (terminais/conexoes)?       Sim / Nao
+   8  Isolamento termico das linhas OK?                Sim / Nao
+   9  Metros de isolamento trocados (m)                Medicao numerica
+  10  Tensao eletrica medida (V)                       Medicao numerica
+  11  Corrente eletrica medida (A)                     Medicao numerica
+  12  Pressao do gas (PSI)                             Medicao numerica
+  13  Temperatura de retorno (graus C)                 Medicao numerica
+  14  Temperatura de insuflamento (graus C)            Medicao numerica
+  15  Observacoes tecnicas                             Texto livre
+  16  Nome do responsavel que acompanhou o servico     Texto livre
+  17  Chapa funcional do responsavel                   Texto livre
+      Foto antes do servico                            Imagem (camera app)
+      Foto durante o servico                           Imagem (camera app)
+      Foto apos o servico                              Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+4. MANUTENCAO CORRETIVA
+   Atendimento a falhas, com registro de causa, servico executado e pecas.
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Descricao do defeito                             Texto livre
+   2  Causa provavel identificada                      Texto livre
+   3  Servico realizado                                Texto livre
+   4  Pecas trocadas/utilizadas                        Texto livre
+   5  NF / Requisicao                                  Texto livre
+   6  Isolamento termico verificado apos servico?      Sim / Nao
+   7  Metros de isolamento trocados (m)                Medicao numerica
+   8  Limpeza e higienizacao pos-servico realizada?    Sim / Nao
+   9  Tensao eletrica medida (V)                       Medicao numerica
+  10  Corrente eletrica medida (A)                     Medicao numerica
+  11  Pressao do gas (PSI)                             Medicao numerica
+  12  Temperatura de insuflamento (graus C)            Medicao numerica
+  13  Status operacional apos servico                  Texto livre
+  14  Motivo de inoperancia (se aplicavel)             Texto livre
+  15  Nome do responsavel que acompanhou o servico     Texto livre
+  16  Chapa funcional do responsavel                   Texto livre
+      Foto antes do servico                            Imagem (camera app)
+      Foto apos o servico                              Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+5. SISTEMA DE EXAUSTAO
+   Verificacao e manutencao de ventiladores e exaustores.
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Tipo de equipamento                              Texto livre
+   2  Limpeza do rotor realizada?                      Sim / Nao
+   3  Estado das correias                              Texto livre
+   4  Lubrificacao dos mancais realizada?              Sim / Nao
+   5  Fixacao e vibracao verificadas?                  Sim / Nao
+   6  Sensores de acionamento OK?                      Sim / Nao
+   7  Tensao eletrica medida (V)                       Medicao numerica
+   8  Corrente eletrica medida (A)                     Medicao numerica
+   9  Velocidade do ar (m/s)                           Medicao numerica
+  10  Filtros/telas limpos e integros?                 Sim / Nao
+  11  Status do equipamento                            Texto livre
+  12  Nome do responsavel que acompanhou o servico     Texto livre
+  13  Chapa funcional do responsavel                   Texto livre
+      Foto antes do servico                            Imagem (camera app)
+      Foto apos o servico                              Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+6. CONTROLE DE PRESSAO DE SALAS
+   Medicao de pressurizacao diferencial em salas especiais.
+   Referencia normativa: ANVISA RDC 50/2002
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Pressao diferencial medida (Pa)                  Medicao numerica
+   2  Tipo de sala                                     Texto livre
+   3  Sala em conformidade com pressao exigida?        Sim / Nao
+   4  Vedacao de portas e janelas OK?                  Sim / Nao
+   5  Mola de porta funcionando corretamente?          Sim / Nao
+   6  Situacao do filtro HEPA                          Texto livre
+   7  Status geral da sala                             Texto livre
+   8  Observacoes                                      Texto livre
+   9  Nome do responsavel que acompanhou o servico     Texto livre
+  10  Chapa funcional do responsavel                   Texto livre
+      Foto do manometro                                Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+7. QUALIDADE DO AR
+   Coleta e analise de parametros ambientais e microbiologicos.
+   Referencia normativa: ANVISA RDC 50/2002 e RE 9/2003
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Ponto de coleta                                  Texto livre
+   2  Localizacao / descricao do local                 Texto livre
+   3  Tipo de coleta                                   Texto livre
+   4  CO2 medido (ppm)                                 Medicao numerica
+   5  Umidade relativa (%)                             Medicao numerica
+   6  Temperatura (graus C)                            Medicao numerica
+   7  Velocidade do ar (m/s)                           Medicao numerica
+   8  ID da amostra microbiologica                     Texto livre
+   9  Status da qualidade do ar                        Texto livre
+  10  Observacoes                                      Texto livre
+  11  Nome do responsavel que acompanhou o servico     Texto livre
+  12  Chapa funcional do responsavel                   Texto livre
+      Foto da coleta                                   Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+8. MOVIMENTACAO DE EQUIPAMENTOS
+   Registro de transferencias e remanejamentos de equipamentos entre setores.
+================================================================================
+
+  Nr  Campo / Verificacao                              Tipo de Resposta
+  --- ------------------------------------------------ --------------------
+   1  Setor de origem                                  Texto livre
+   2  Tipo de movimentacao                             Texto livre
+   3  Motivo da movimentacao                           Texto livre
+   4  Setor de destino                                 Texto livre
+   5  Estado do equipamento                            Texto livre
+   6  Acessorios incluidos                             Texto livre
+   7  Protecao para transporte realizada?              Sim / Nao
+   8  Observacoes                                      Texto livre
+   9  Nome do responsavel que acompanhou               Texto livre
+  10  Chapa funcional do responsavel                   Texto livre
+      Foto equipamento na origem                       Imagem (camera app)
+      Foto equipamento no destino                      Imagem (camera app)
+      Assinatura digital do responsavel do setor       Assinatura digital
+
+================================================================================
+RESUMO - TOTAL DE CAMPOS POR CHECKLIST
+================================================================================
+
+  Checklist                        Campos especificos   Total (c/ comuns)
+  ------------------------------ -------------------- -------------------
+  1. Limpeza de Filtros                          12             18
+  2. Limpeza de Dutos                             7             13
+  3. Manutencao Preventiva                       17             23
+  4. Manutencao Corretiva                        16             22
+  5. Sistema de Exaustao                         13             19
+  6. Controle de Pressao de Salas               10             16
+  7. Qualidade do Ar                             12             18
+  8. Movimentacao de Equipamentos               10             16
+  ------------------------------ -------------------- -------------------
+  TOTAL GERAL                                    97            145
+
+================================================================================
+Documento gerado pelo Sistema PMOC Digital - Hospital Universitario de Londrina
+================================================================================
