@@ -432,13 +432,19 @@ class OfflineQueueService {
     final erro = await ChecklistFiltroService.enviarPayload(payload);
 
     if (erro == null) {
-      // Apagar todas as fotos associadas a este pendente
       _apagarFotosPendente(p);
       await DatabaseService.removerPendente(p.id!);
       return 1;
     }
 
-    debugPrint('[OFFLINE_QUEUE] Falha ao enviar FILTRO id=${p.id}: $erro');
+    // GAS rejeitou como duplicado — remove da fila para não tentar eternamente
+    if (erro.contains('já foi limpo')) {
+      debugPrint('[OFFLINE_QUEUE] FILTRO id=${p.id} rejeitado como duplicado — removendo da fila');
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+    } else {
+      debugPrint('[OFFLINE_QUEUE] Falha ao enviar FILTRO id=${p.id}: $erro');
+    }
     return 0;
   }
 
@@ -481,7 +487,14 @@ class OfflineQueueService {
       return 1;
     }
 
-    debugPrint('[OFFLINE_QUEUE] Falha ao enviar DUTO id=${p.id}: $erro');
+    // GAS rejeitou como duplicado — remove da fila para não tentar eternamente
+    if (erro.contains('já foi limpo')) {
+      debugPrint('[OFFLINE_QUEUE] DUTO id=${p.id} rejeitado como duplicado — removendo da fila');
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+    } else {
+      debugPrint('[OFFLINE_QUEUE] Falha ao enviar DUTO id=${p.id}: $erro');
+    }
     return 0;
   }
 
