@@ -342,10 +342,22 @@ class OfflineQueueService {
 
   // ───────────────────── PROCESSAR FILA ─────────────────────
 
+  static bool _processandoFila = false;
+
   /// Processa a fila: envia todos os checklists pendentes
   /// (FILTRO, DUTO e PREVENTIVA) e apaga as fotos do celular após envio.
   /// Retorna o número de itens enviados com sucesso.
   static Future<int> processarFila() async {
+    if (_processandoFila) return 0; // evita execuções concorrentes
+    _processandoFila = true;
+    try {
+      return await _processarFilaInterno();
+    } finally {
+      _processandoFila = false;
+    }
+  }
+
+  static Future<int> _processarFilaInterno() async {
     final online = await SyncService.temConexao();
     if (!online) return 0;
 
