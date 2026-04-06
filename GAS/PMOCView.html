@@ -114,6 +114,10 @@
     <div class="stat-box"><div class="val" id="st-dut" style="color:#7c3aed">0</div><div class="lab">Dutos</div></div>
     <div class="stat-box"><div class="val" id="st-pre" style="color:#16a34a">0</div><div class="lab">Preventivas</div></div>
     <div class="stat-box"><div class="val" id="st-cor" style="color:#dc2626">0</div><div class="lab">Corretivas</div></div>
+    <div class="stat-box"><div class="val" id="st-exa" style="color:#d97706">0</div><div class="lab">Exaustão</div></div>
+    <div class="stat-box"><div class="val" id="st-prs" style="color:#0891b2">0</div><div class="lab">Pressão</div></div>
+    <div class="stat-box"><div class="val" id="st-qar" style="color:#059669">0</div><div class="lab">Qualidade Ar</div></div>
+    <div class="stat-box"><div class="val" id="st-mov" style="color:#9333ea">0</div><div class="lab">Movimentação</div></div>
     <div id="pmoc-status"></div>
   </div>
 
@@ -128,11 +132,19 @@
       <button class="dict-tab" onclick="dictTab('duto',this)">Dutos</button>
       <button class="dict-tab" onclick="dictTab('preventiva',this)">Preventiva</button>
       <button class="dict-tab" onclick="dictTab('corretiva',this)">Corretiva</button>
+      <button class="dict-tab" onclick="dictTab('exaustao',this)">Exaustão</button>
+      <button class="dict-tab" onclick="dictTab('pressao',this)">Pressão</button>
+      <button class="dict-tab" onclick="dictTab('qualidadeAr',this)">Qualidade Ar</button>
+      <button class="dict-tab" onclick="dictTab('movimentacao',this)">Movimentação</button>
     </div>
-    <div id="dict-filtro"     class="dict-content on"></div>
-    <div id="dict-duto"       class="dict-content"></div>
-    <div id="dict-preventiva" class="dict-content"></div>
-    <div id="dict-corretiva"  class="dict-content"></div>
+    <div id="dict-filtro"       class="dict-content on"></div>
+    <div id="dict-duto"         class="dict-content"></div>
+    <div id="dict-preventiva"   class="dict-content"></div>
+    <div id="dict-corretiva"    class="dict-content"></div>
+    <div id="dict-exaustao"     class="dict-content"></div>
+    <div id="dict-pressao"      class="dict-content"></div>
+    <div id="dict-qualidadeAr"  class="dict-content"></div>
+    <div id="dict-movimentacao" class="dict-content"></div>
   </div>
 
   <script>
@@ -159,7 +171,7 @@
       // Carrega dicionário
       google.script.run
         .withSuccessHandler(function(dict) {
-          ['filtro','duto','preventiva','corretiva'].forEach(function(tipo) {
+          ['filtro','duto','preventiva','corretiva','exaustao','pressao','qualidadeAr','movimentacao'].forEach(function(tipo) {
             var items = dict[tipo] || [];
             var html = '<table class="dict-tbl"><thead><tr><th>#</th><th>Pergunta no Documento</th><th>Resposta</th></tr></thead><tbody>';
             items.forEach(function(item, i) {
@@ -210,9 +222,10 @@
     var MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
     function _renderGrid(resumo, mes, ano) {
-      var tFil=0, tDut=0, tPre=0, tCor=0, comReg=0, cards='';
+      var tFil=0,tDut=0,tPre=0,tCor=0,tExa=0,tPrs=0,tQar=0,tMov=0,comReg=0,cards='';
       resumo.forEach(function(m) {
-        tFil += m.filtros; tDut += m.dutos; tPre += m.preventivas; tCor += m.corretivas;
+        tFil += m.filtros||0; tDut += m.dutos||0; tPre += m.preventivas||0; tCor += m.corretivas||0;
+        tExa += m.exaustoes||0; tPrs += m.pressoes||0; tQar += m.qualidades||0; tMov += m.movimenta||0;
         if (m.total > 0) comReg++;
         var vazio = m.total === 0;
         cards += '<div class="pmoc-card' + (vazio ? ' pmoc-card-vazia' : '') + '">';
@@ -223,10 +236,14 @@
                  ' <span style="font-size:10px;color:#94a3b8">| ' + (m.criticidade || '—') + '</span></div>';
         if (m.empresaCnpj) cards += '<div><span class="pmoc-card-empresa">' + m.empresaCnpj + '</span></div>';
         cards += '<div class="pmoc-badges">' +
-          '<span class="pmoc-badge ' + (m.filtros ? 'filtro' : 'zero') + '">🧹 ' + m.filtros + '</span>' +
-          '<span class="pmoc-badge ' + (m.dutos ? 'duto' : 'zero') + '">🔧 ' + m.dutos + '</span>' +
-          '<span class="pmoc-badge ' + (m.preventivas ? 'prev' : 'zero') + '">✅ ' + m.preventivas + '</span>' +
-          '<span class="pmoc-badge ' + (m.corretivas ? 'corr' : 'zero') + '">⚠️ ' + m.corretivas + '</span>' +
+          '<span class="pmoc-badge ' + (m.filtros    ? 'filtro' : 'zero') + '">🧹 ' + (m.filtros||0)    + '</span>' +
+          '<span class="pmoc-badge ' + (m.dutos      ? 'duto'   : 'zero') + '">🔧 ' + (m.dutos||0)      + '</span>' +
+          '<span class="pmoc-badge ' + (m.preventivas? 'prev'   : 'zero') + '">✅ ' + (m.preventivas||0) + '</span>' +
+          '<span class="pmoc-badge ' + (m.corretivas ? 'corr'   : 'zero') + '">⚠️ ' + (m.corretivas||0) + '</span>' +
+          '<span class="pmoc-badge ' + (m.exaustoes  ? 'prev'   : 'zero') + '">💨 ' + (m.exaustoes||0)  + '</span>' +
+          '<span class="pmoc-badge ' + (m.pressoes   ? 'duto'   : 'zero') + '">🔵 ' + (m.pressoes||0)   + '</span>' +
+          '<span class="pmoc-badge ' + (m.qualidades ? 'filtro' : 'zero') + '">🌿 ' + (m.qualidades||0)  + '</span>' +
+          '<span class="pmoc-badge ' + (m.movimenta  ? 'corr'   : 'zero') + '">🚚 ' + (m.movimenta||0)  + '</span>' +
           '</div></div>';
       });
       document.getElementById('pmoc-grid').innerHTML = cards ||
@@ -238,6 +255,10 @@
       document.getElementById('st-dut').textContent = tDut;
       document.getElementById('st-pre').textContent = tPre;
       document.getElementById('st-cor').textContent = tCor;
+      document.getElementById('st-exa').textContent = tExa;
+      document.getElementById('st-prs').textContent = tPrs;
+      document.getElementById('st-qar').textContent = tQar;
+      document.getElementById('st-mov').textContent = tMov;
       document.getElementById('pmoc-status').textContent = MESES[mes] + '/' + ano + ' — ' + comReg + ' máquina(s) com registros';
       document.getElementById('pmoc-stats').style.display = 'flex';
     }
