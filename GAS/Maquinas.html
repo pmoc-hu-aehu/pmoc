@@ -40,7 +40,21 @@
 
       <label>Capacidade</label>
       <input type="text" id="maq_capacidade" class="input-form" placeholder="Ex: 18.000 BTUs">
-      
+
+      <label>Empresa Prestadora</label>
+      <select id="maq_empresa" class="input-form">
+        <option value="">— Sem vínculo —</option>
+      </select>
+
+      <label>Ocupantes Fixos</label>
+      <input type="number" id="maq_ocup_fixos" class="input-form" placeholder="Ex: 20" min="0">
+
+      <label>Ocupantes Variáveis</label>
+      <input type="number" id="maq_ocup_var" class="input-form" placeholder="Ex: 50" min="0">
+
+      <label>Área Climatizada (m²)</label>
+      <input type="number" id="maq_area" class="input-form" placeholder="Ex: 45" min="0" step="0.1">
+
       <div style="display: flex; gap: 10px; margin-top: 20px; margin-bottom: 10px; flex-shrink: 0;">
         <button onclick="salvarMaquina()" class="btn-primary" style="flex: 1;" id="btn-salvar-maq">Salvar</button>
         <button onclick="limparFormMaquina()" class="btn-primary" style="flex: 1; background: var(--text-muted); box-shadow: none;">Limpar</button>
@@ -65,6 +79,7 @@
               <th style="padding: 12px 8px;">Setor (Local)</th>
               <th style="padding: 12px 8px;">Nº Série</th>
               <th style="padding: 12px 8px;">Crit.</th>
+              <th style="padding: 12px 8px;">Empresa</th>
               <th style="padding: 12px 8px; text-align: center;">Ações</th>
             </tr>
           </thead>

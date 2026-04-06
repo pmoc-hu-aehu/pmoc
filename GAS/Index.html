@@ -210,7 +210,7 @@
           <?!= include('Relatorio'); ?>
           <?!= include('EmpresasView'); ?>
           <?!= include('PagamentosView'); ?>
-          <div id="modulo-PMOC" class="modulo-oculto"><h2>Documentação PMOC</h2><p>Módulo em desenvolvimento...</p></div>
+          <?!= include('PMOCView'); ?>
         </div>
       </div>
     </div>
@@ -222,19 +222,19 @@
         submenu.classList.toggle('show');
       }
 
-      // Carrega a foto de fundo dinamicamente (evita timeout do template)
+      // Foto de fundo: URL direta do Drive (arquivo já é público — sem chamada ao servidor)
       (function() {
-        google.script.run
-          .withSuccessHandler(function(url) {
-            if (!url) return;
-            var el = document.getElementById('login-wrapper');
-            el.style.backgroundImage =
-              'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.50) 45%, rgba(0,0,0,0.20) 100%), url("' + url + '")';
-            el.style.backgroundSize = 'cover';
-            el.style.backgroundPosition = 'center center';
-          })
-          .withFailureHandler(function() {}) // mantém cor sólida em caso de erro
-          .getBgUrl();
+        var BG_ID = "1QDdt_Zishx06iJ4kAFrlR1We7EIMmTP7";
+        var url   = "https://drive.google.com/thumbnail?id=" + BG_ID + "&sz=w1600";
+        var el    = document.getElementById('login-wrapper');
+        var img   = new Image();
+        img.onload = function() {
+          el.style.backgroundImage =
+            'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.50) 45%, rgba(0,0,0,0.20) 100%), url("' + url + '")';
+          el.style.backgroundSize     = 'cover';
+          el.style.backgroundPosition = 'center center';
+        };
+        img.src = url;
       })();
     </script>
 

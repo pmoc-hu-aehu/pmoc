@@ -3,10 +3,22 @@
  * ARQUIVO: Maquina.gs — GESTÃO DE MÁQUINAS (CRUD)
  */
 
+function _garantirCabecalhosMaquinas(sheet) {
+  var cab = sheet.getRange(1, 1, 1, 11).getValues()[0];
+  var esperado = ["FUEL","LOCALIZACAO","MODELO","MARCA","SERIE","CRITICIDADE","CAPACIDADE",
+                  "EMPRESA_CNPJ","OCUPANTES_FIXOS","OCUPANTES_VARIAVEIS","AREA_M2"];
+  for (var c = 0; c < esperado.length; c++) {
+    if (!cab[c] || cab[c] === "") {
+      sheet.getRange(1, c + 1).setValue(esperado[c]);
+    }
+  }
+}
+
 function salvarMaquinaBD(dados) {
   try {
     var ss = getPlanilha();
     var sheet = ss.getSheetByName("MAQUINAS");
+    _garantirCabecalhosMaquinas(sheet);
     var data = sheet.getDataRange().getValues();
 
     var isNew    = (dados.id === "" || dados.id === null || dados.id === undefined);
@@ -20,9 +32,9 @@ function salvarMaquinaBD(dados) {
     }
 
     if (isNew) {
-      sheet.appendRow([dados.fuel, dados.localizacao, dados.modelo, dados.marca, dados.serie, dados.criticidade, dados.capacidade]);
+      sheet.appendRow([dados.fuel, dados.localizacao, dados.modelo, dados.marca, dados.serie, dados.criticidade, dados.capacidade, dados.empresaCnpj || "", dados.ocupantesFixos || "", dados.ocupantesVariaveis || "", dados.areaM2 || ""]);
     } else {
-      sheet.getRange(updateRow, 1, 1, 7).setValues([[dados.fuel, dados.localizacao, dados.modelo, dados.marca, dados.serie, dados.criticidade, dados.capacidade]]);
+      sheet.getRange(updateRow, 1, 1, 11).setValues([[dados.fuel, dados.localizacao, dados.modelo, dados.marca, dados.serie, dados.criticidade, dados.capacidade, dados.empresaCnpj || "", dados.ocupantesFixos || "", dados.ocupantesVariaveis || "", dados.areaM2 || ""]]);
     }
 
     atualizarAgendamentoGlobal();
@@ -39,14 +51,18 @@ function getListaMaquinas() {
     for (var i = 1; i < data.length; i++) {
       if (data[i][0]) {
         lista.push({
-          id         : i + 1,
-          fuel       : data[i][0],
-          localizacao: data[i][1],
-          modelo     : data[i][2],
-          marca      : data[i][3],
-          serie      : data[i][4],
-          criticidade: data[i][5],
-          capacidade : data[i][6]
+          id                : i + 1,
+          fuel              : data[i][0],
+          localizacao       : data[i][1],
+          modelo            : data[i][2],
+          marca             : data[i][3],
+          serie             : data[i][4],
+          criticidade       : data[i][5],
+          capacidade        : data[i][6],
+          empresaCnpj       : data[i][7]  || "",
+          ocupantesFixos    : data[i][8]  || "",
+          ocupantesVariaveis: data[i][9]  || "",
+          areaM2            : data[i][10] || ""
         });
       }
     }
@@ -86,13 +102,17 @@ function buscarMaquinaPorFuel(fuel) {
         return {
           sucesso: true,
           maquina: {
-            fuel       : fuelPlanilha,
-            localizacao: dados[i][1] || "",
-            modelo     : dados[i][2] || "",
-            marca      : dados[i][3] || "",
-            serie      : dados[i][4] || "",
-            criticidade: dados[i][5] || "",
-            capacidade : dados[i][6] || ""
+            fuel               : fuelPlanilha,
+            localizacao        : dados[i][1]  || "",
+            modelo             : dados[i][2]  || "",
+            marca              : dados[i][3]  || "",
+            serie              : dados[i][4]  || "",
+            criticidade        : dados[i][5]  || "",
+            capacidade         : dados[i][6]  || "",
+            empresaCnpj        : dados[i][7]  || "",
+            ocupantesFixos     : dados[i][8]  || "",
+            ocupantesVariaveis : dados[i][9]  || "",
+            areaM2             : dados[i][10] || ""
           }
         };
       }
