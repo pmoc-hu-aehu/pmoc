@@ -4,7 +4,7 @@ import '../models/checklist_duto.dart';
 
 class ChecklistDutoService {
   static const String _url =
-      'https://script.google.com/macros/s/AKfycbzj3kxjMABcWcaIMCoW0MLMpN7sgmy5L4Z_KN2Q7E3wknlHG-cNnjcikPxrytCQy4OjpQ/exec';
+      'https://script.google.com/macros/s/AKfycbzaIeuS9NH8oluMTUiMmpFBpTWprh87RfER2GeDQc04fWWsx9Ci8ltGfLEfo0wnRNvy1g/exec';
 
   // ───────────────────── ENVIO DIRETO (ONLINE) ─────────────────────
 
