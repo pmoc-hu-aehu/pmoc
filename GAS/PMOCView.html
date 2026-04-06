@@ -211,7 +211,7 @@
             grid.innerHTML = '<p style="color:#dc2626;padding:10px">Erro: ' + res.msg + '</p>';
             return;
           }
-          _renderGrid(res.resumo, mes, ano);
+          _renderGrid(res.resumo, res.totalPressoes || 0, res.totalQualidades || 0, mes, ano);
         })
         .withFailureHandler(function(e) {
           grid.innerHTML = '<p style="color:#dc2626;padding:10px">Falha: ' + e.message + '</p>';
@@ -221,11 +221,11 @@
 
     var MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-    function _renderGrid(resumo, mes, ano) {
-      var tFil=0,tDut=0,tPre=0,tCor=0,tExa=0,tPrs=0,tQar=0,tMov=0,comReg=0,cards='';
+    function _renderGrid(resumo, totalPressoes, totalQualidades, mes, ano) {
+      var tFil=0,tDut=0,tPre=0,tCor=0,tExa=0,tMov=0,comReg=0,cards='';
       resumo.forEach(function(m) {
         tFil += m.filtros||0; tDut += m.dutos||0; tPre += m.preventivas||0; tCor += m.corretivas||0;
-        tExa += m.exaustoes||0; tPrs += m.pressoes||0; tQar += m.qualidades||0; tMov += m.movimenta||0;
+        tExa += m.exaustoes||0; tMov += m.movimenta||0;
         if (m.total > 0) comReg++;
         var vazio = m.total === 0;
         cards += '<div class="pmoc-card' + (vazio ? ' pmoc-card-vazia' : '') + '">';
@@ -241,8 +241,6 @@
           '<span class="pmoc-badge ' + (m.preventivas? 'prev'   : 'zero') + '">✅ ' + (m.preventivas||0) + '</span>' +
           '<span class="pmoc-badge ' + (m.corretivas ? 'corr'   : 'zero') + '">⚠️ ' + (m.corretivas||0) + '</span>' +
           '<span class="pmoc-badge ' + (m.exaustoes  ? 'prev'   : 'zero') + '">💨 ' + (m.exaustoes||0)  + '</span>' +
-          '<span class="pmoc-badge ' + (m.pressoes   ? 'duto'   : 'zero') + '">🔵 ' + (m.pressoes||0)   + '</span>' +
-          '<span class="pmoc-badge ' + (m.qualidades ? 'filtro' : 'zero') + '">🌿 ' + (m.qualidades||0)  + '</span>' +
           '<span class="pmoc-badge ' + (m.movimenta  ? 'corr'   : 'zero') + '">🚚 ' + (m.movimenta||0)  + '</span>' +
           '</div></div>';
       });
@@ -256,8 +254,8 @@
       document.getElementById('st-pre').textContent = tPre;
       document.getElementById('st-cor').textContent = tCor;
       document.getElementById('st-exa').textContent = tExa;
-      document.getElementById('st-prs').textContent = tPrs;
-      document.getElementById('st-qar').textContent = tQar;
+      document.getElementById('st-prs').textContent = totalPressoes;
+      document.getElementById('st-qar').textContent = totalQualidades;
       document.getElementById('st-mov').textContent = tMov;
       document.getElementById('pmoc-status').textContent = MESES[mes] + '/' + ano + ' — ' + comReg + ' máquina(s) com registros';
       document.getElementById('pmoc-stats').style.display = 'flex';

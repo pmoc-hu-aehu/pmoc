@@ -358,8 +358,6 @@ function getDadosPmocPreview(mes, ano) {
       var preventivas = _filtrarPorFuel(todasPreventivas, maq.fuel).length;
       var corretivas  = _filtrarPorFuel(todasCorretivas,  maq.fuel).length;
       var exaustoes   = _filtrarPorFuel(todasExaustoes,   maq.fuel).length;
-      var pressoes    = _filtrarPorFuel(todasPressoes,    maq.fuel).length;
-      var qualidades  = _filtrarPorFuel(todasQualidades,  maq.fuel).length;
       var movimenta   = _filtrarMovimentacaoPorFuel(todasMovimenta, maq.fuel).length;
       return {
         fuel        : maq.fuel,
@@ -373,14 +371,18 @@ function getDadosPmocPreview(mes, ano) {
         preventivas : preventivas,
         corretivas  : corretivas,
         exaustoes   : exaustoes,
-        pressoes    : pressoes,
-        qualidades  : qualidades,
         movimenta   : movimenta,
-        total       : filtros + dutos + preventivas + corretivas + exaustoes + pressoes + qualidades + movimenta
+        total       : filtros + dutos + preventivas + corretivas + exaustoes + movimenta
       };
     });
 
-    return { sucesso: true, resumo: resumo };
+    // Pressão e Qualidade do Ar são por SALA (codSala), não por máquina — contagem global
+    return {
+      sucesso         : true,
+      resumo          : resumo,
+      totalPressoes   : todasPressoes.length,
+      totalQualidades : todasQualidades.length
+    };
   } catch(e) {
     return { sucesso: false, msg: e.message };
   }
@@ -470,16 +472,17 @@ function _gerarHtmlPmoc(maquinas, mes, ano, nomeMes, engenheiro, mapaEmpresas,
     var preventivas = _filtrarPorFuel(todasPreventivas, maq.fuel);
     var corretivas  = _filtrarPorFuel(todasCorretivas,  maq.fuel);
     var exaustoes   = _filtrarPorFuel(todasExaustoes,   maq.fuel);
-    var pressoes    = _filtrarPorFuel(todasPressoes,    maq.fuel);
-    var qualidades  = _filtrarPorFuel(todasQualidades,  maq.fuel);
     var movimenta   = _filtrarMovimentacaoPorFuel(todasMovimenta, maq.fuel);
     var total = filtros.length + dutos.length + preventivas.length + corretivas.length +
-                exaustoes.length + pressoes.length + qualidades.length + movimenta.length;
+                exaustoes.length + movimenta.length;
     if (total === 0) return;
     var nomeEmpresa = mapaEmpresas[String(maq.empresaCnpj || "").trim()] || "";
-    secoes += _secaoMaquina(maq, filtros, dutos, preventivas, corretivas,
-                            exaustoes, pressoes, qualidades, movimenta, nomeEmpresa);
+    secoes += _secaoMaquina(maq, filtros, dutos, preventivas, corretivas, exaustoes, movimenta, nomeEmpresa);
   });
+
+  // Pressão e Qualidade do Ar são por SALA — seções independentes no final do relatório
+  if (todasPressoes.length)   secoes += _secaoAmbiental("Verificação de Pressão de Salas",  todasPressoes,  DICT_PRESSAO,       FOTOS_PRESSAO,   5);
+  if (todasQualidades.length) secoes += _secaoAmbiental("Qualidade do Ar — Análise de Salas", todasQualidades, DICT_QUALIDADE_AR, FOTOS_QUALIDADE, 5);
 
   if (!secoes) secoes = '<p style="text-align:center;color:#666;padding:40px">Nenhum registro encontrado para ' + nomeMes + '/' + ano + '.</p>';
 
@@ -528,7 +531,7 @@ function _gerarHtmlPmoc(maquinas, mes, ano, nomeMes, engenheiro, mapaEmpresas,
 }
 
 function _secaoMaquina(maq, filtros, dutos, preventivas, corretivas,
-                        exaustoes, pressoes, qualidades, movimenta, nomeEmpresa) {
+                        exaustoes, movimenta, nomeEmpresa) {
   var out = '<div class="secao-maquina">';
 
   // ── Dados do equipamento em tabela organizada ──
@@ -551,15 +554,25 @@ function _secaoMaquina(maq, filtros, dutos, preventivas, corretivas,
     '</tr>' +
     '</tbody></table>';
 
-  if (filtros.length)     out += _blocoRegistros("Limpeza de Filtros",         filtros,     DICT_FILTRO,         FOTOS_FILTRO);
-  if (dutos.length)       out += _blocoRegistros("Limpeza de Dutos",           dutos,       DICT_DUTO,           FOTOS_DUTO);
-  if (preventivas.length) out += _blocoRegistros("Manutenção Preventiva",      preventivas, DICT_PREVENTIVA,     FOTOS_PREVENTIVA);
-  if (corretivas.length)  out += _blocoRegistros("Manutenção Corretiva",       corretivas,  DICT_CORRETIVA,      FOTOS_CORRETIVA);
-  if (exaustoes.length)   out += _blocoRegistros("Sistema de Exaustão",        exaustoes,   DICT_EXAUSTAO,       FOTOS_EXAUSTAO);
-  if (pressoes.length)    out += _blocoRegistros("Verificação de Pressão",     pressoes,    DICT_PRESSAO,        FOTOS_PRESSAO);
-  if (qualidades.length)  out += _blocoRegistros("Qualidade do Ar",            qualidades,  DICT_QUALIDADE_AR,   FOTOS_QUALIDADE);
+  if (filtros.length)     out += _blocoRegistros("Limpeza de Filtros",    filtros,     DICT_FILTRO,     FOTOS_FILTRO);
+  if (dutos.length)       out += _blocoRegistros("Limpeza de Dutos",      dutos,       DICT_DUTO,       FOTOS_DUTO);
+  if (preventivas.length) out += _blocoRegistros("Manutenção Preventiva", preventivas, DICT_PREVENTIVA, FOTOS_PREVENTIVA);
+  if (corretivas.length)  out += _blocoRegistros("Manutenção Corretiva",  corretivas,  DICT_CORRETIVA,  FOTOS_CORRETIVA);
+  if (exaustoes.length)   out += _blocoRegistros("Sistema de Exaustão",   exaustoes,   DICT_EXAUSTAO,   FOTOS_EXAUSTAO);
   if (movimenta.length)   out += _blocoMovimentacao(movimenta);
 
+  out += '</div>';
+  return out;
+}
+
+// Seção independente para checklists por SALA (Pressão, Qualidade do Ar)
+// colFuel = coluna onde está o codSala (identificador do ambiente)
+function _secaoAmbiental(titulo, registros, dicionario, defFotos, colSala) {
+  var out = '<div class="secao-maquina" style="border-color:#0891b2">' +
+    '<div style="background:#0891b2;color:#fff;font-weight:700;font-size:10px;padding:6px 10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">' +
+    titulo + ' — ' + registros.length + ' registro' + (registros.length > 1 ? 's' : '') +
+    '</div>';
+  out += _blocoRegistros(titulo, registros, dicionario, defFotos);
   out += '</div>';
   return out;
 }
