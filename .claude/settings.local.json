@@ -8,7 +8,8 @@
       "Bash(curl -s -L -X POST \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\" -H \"Content-Type: application/json\" --data-raw \"$DATA\")",
       "Bash(curl -s -L \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\" -H \"Content-Type: application/json\" --data-raw \"$DATA\")",
       "Bash(curl -L \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec?action=LISTAR_MAQUINAS\")",
-      "Bash(curl -L \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\")"
+      "Bash(curl -L \"https://script.google.com/macros/s/AKfycbx-8tvC4s9PRpml1SaQ1zsuAIEZrC7eAeVuuHJt8G56Du645tX87DW7IIUaLDFFto7lTA/exec\")",
+      "Bash(cmd.exe /c start \"\" \"C:\\\\\\\\develop\\\\\\\\pmoc\\\\\\\\teste.docx\")"
     ]
   }
 }
