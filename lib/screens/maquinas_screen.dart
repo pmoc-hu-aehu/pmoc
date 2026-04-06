@@ -30,6 +30,29 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
     super.initState();
     _carregarDados();
     _verificarConexao();
+    _autoSyncSeNecessario();
+  }
+
+  Future<void> _autoSyncSeNecessario() async {
+    final online = await SyncService.temConexao();
+    if (!online) return;
+
+    final hoje       = _dataHoje();
+    final ultimaAuto = await DatabaseService.lerConfig('maquinas_auto_sync_data');
+    if (ultimaAuto == hoje) return; // já sincronizou hoje
+
+    await DatabaseService.salvarConfig('maquinas_auto_sync_data', hoje);
+    if (!mounted) return;
+    setState(() => _sincronizando = true);
+    final result = await SyncService.sincronizarMaquinas();
+    if (!mounted) return;
+    setState(() => _sincronizando = false);
+    if (result.sucesso) _carregarDados();
+  }
+
+  String _dataHoje() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
   Future<void> _verificarConexao() async {

@@ -111,27 +111,44 @@
         th, td { border: 1px solid #000 !important; padding: 5px; font-size: 10px; }
       }
     </style>
+  <style>
+    /* ── BACKGROUND dinâmico carregado via JS ── */
+    #login-wrapper {
+      background-color: #1a2a3a;
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+    }
+  </style>
   </head>
   <body>
     <div id="login-wrapper">
+
+      <!-- LADO ESQUERDO: identidade -->
       <div class="login-left">
         <div class="login-left-content">
           <h1 class="login-title">PMOC</h1>
           <h2 class="login-subtitle">HOSPITAL UNIVERSITÁRIO DE LONDRINA</h2>
           <div class="login-divider"></div>
-          <p class="login-desc">Sistema Integrado de Manutenção, Operação e Controle <br>HU | AEHU | UCC</p>
+          <p class="login-desc">
+            Plano de Manutenção, Operação e Controle<br>
+            HU &nbsp;|&nbsp; AEHU &nbsp;|&nbsp; UCC
+          </p>
         </div>
         <div class="login-footer">Desenvolvido DMPE</div>
       </div>
-      
+
+      <!-- LADO DIREITO: formulário com glassmorphism -->
       <div class="login-right">
         <div class="login-box">
           <h2>Acesso Restrito</h2>
           <p class="login-hint">Insira suas credenciais para continuar</p>
           <label>Login</label>
-          <input type="text" id="login_user" class="input-form" placeholder="Usuário">
+          <input type="text" id="login_user" class="input-form" placeholder="Usuário"
+                 onkeydown="if(event.key==='Enter') document.getElementById('login_pass').focus()">
           <label>Senha</label>
-          <input type="password" id="login_pass" class="input-form" placeholder="••••••••">
+          <input type="password" id="login_pass" class="input-form" placeholder="••••••••"
+                 onkeydown="if(event.key==='Enter') fazerLogin()">
           <button onclick="fazerLogin()" class="btn-primary">Entrar no Sistema</button>
           <p id="msg-login" class="msg-alerta"></p>
         </div>
@@ -156,12 +173,14 @@
             <button id="btn-maquinas" onclick="abrirModulo('MAQUINAS')" class="menu-btn">Máquinas</button>
             <button id="btn-engenheiros" onclick="abrirModulo('ENGENHEIROS')" class="menu-btn">Engenheiros</button>
             <button id="btn-tecnicos" onclick="abrirModulo('TECNICOS')" class="menu-btn">Técnicos</button>
+            <button id="btn-empresas" onclick="abrirModulo('EMPRESAS')" class="menu-btn">Empresas</button>
           </div>
-          
+
           <button class="menu-category" onclick="toggleSubmenu(this, 'sub-operacional')">Operacional</button>
           <div id="sub-operacional" class="submenu-content">
             <button id="btn-agendamento" onclick="abrirModulo('AGENDAMENTO')" class="menu-btn">Agendamento</button>
             <button id="btn-relatorio" onclick="abrirModulo('RELATORIO')" class="menu-btn">Relatórios</button>
+            <button id="btn-pagamentos" onclick="abrirModulo('PAGAMENTOS')" class="menu-btn">Pagamentos</button>
             <button id="btn-pmoc" onclick="abrirModulo('PMOC')" class="menu-btn">Doc. PMOC</button>
           </div>
         </div>
@@ -189,7 +208,8 @@
           <?!= include('CadEngenheiro'); ?>
           
           <?!= include('Relatorio'); ?>
-          <div id="modulo-PMOC" class="modulo-oculto"><h2>Documentação PMOC</h2><p>Módulo em desenvolvimento...</p></div>
+          <?!= include('EmpresasView'); ?>
+          <?!= include('PagamentosView'); ?>
           <div id="modulo-PMOC" class="modulo-oculto"><h2>Documentação PMOC</h2><p>Módulo em desenvolvimento...</p></div>
         </div>
       </div>
@@ -201,6 +221,21 @@
         botao.classList.toggle('active');
         submenu.classList.toggle('show');
       }
+
+      // Carrega a foto de fundo dinamicamente (evita timeout do template)
+      (function() {
+        google.script.run
+          .withSuccessHandler(function(url) {
+            if (!url) return;
+            var el = document.getElementById('login-wrapper');
+            el.style.backgroundImage =
+              'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.50) 45%, rgba(0,0,0,0.20) 100%), url("' + url + '")';
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center center';
+          })
+          .withFailureHandler(function() {}) // mantém cor sólida em caso de erro
+          .getBgUrl();
+      })();
     </script>
 
     <?!= include('JS'); ?>

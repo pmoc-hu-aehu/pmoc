@@ -21,6 +21,9 @@ function doGet(e) {
         },
         "VERIFICAR_LIMPEZA_MES": function() {
           return jsonOut(verificarLimpezaMes(e.parameter.fuel, e.parameter.tipo));
+        },
+        "LISTAR_PASTA": function() {
+          return jsonOut(listarArquivosPasta(e.parameter.pastaId));
         }
       };
 
@@ -62,7 +65,17 @@ function doPost(e) {
       "SALVAR_EXAUSTAO"        : function() { return jsonOut(salvarExaustaoMobile(payload)); },
       "GET_REPORTS"            : function() { return jsonOut(getRelatorio(payload)); },
       "AUTORIZAR_RELIMPEZA"    : function() { return jsonOut(autorizarRelimpeza(payload.fuel, payload.tipo)); },
-      "MARCAR_AUTH_USADA"      : function() { return jsonOut(marcarAutorizacaoUsada(payload.fuel, payload.tipo)); }
+      "MARCAR_AUTH_USADA"      : function() { return jsonOut(marcarAutorizacaoUsada(payload.fuel, payload.tipo)); },
+      // Empresas
+      "GET_EMPRESAS"           : function() { return jsonOut(getListaEmpresas()); },
+      "SALVAR_EMPRESA"         : function() { return jsonOut(salvarEmpresa(payload)); },
+      "EXCLUIR_EMPRESA"        : function() { return jsonOut(excluirEmpresa(payload.row)); },
+      // Pagamentos
+      "GET_TAB_PRECOS"         : function() { return jsonOut(getTabPrecos()); },
+      "SALVAR_PRECO"           : function() { return jsonOut(salvarPreco(payload)); },
+      "EXCLUIR_PRECO"          : function() { return jsonOut(excluirPreco(payload.row)); },
+      "GET_FECHAMENTO_MENSAL"  : function() { return jsonOut(getFechamentoMensal(payload.mes, payload.ano)); },
+      "UPLOAD_BG_FOTO"         : function() { return jsonOut(salvarFotoFundoDrive(payload.base64, payload.mimeType)); }
     };
 
     if (rotas[acao]) return rotas[acao]();

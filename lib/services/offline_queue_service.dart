@@ -918,7 +918,13 @@ class OfflineQueueService {
       final field = config['field'] as String;
       final bool problemWhenTrue = config['problemWhenTrue'] as bool;
 
-      final bool? chkValue = payload[field] as bool?;
+      final raw = payload[field];
+      // Se já foi convertido para String em ciclo anterior, mantém e pula
+      if (raw is String) {
+        payload.remove('obs${field.substring(3)}');
+        continue;
+      }
+      final bool? chkValue = raw is bool ? raw : null;
       final String? obsValue = payload['obs${field.substring(3)}'] as String?;
 
       if (chkValue == null) {

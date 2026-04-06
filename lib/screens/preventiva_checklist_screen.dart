@@ -368,9 +368,11 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
   // ── Status geral ─────────────────────────────────────────────────────────
 
   String _calcularStatus() {
-    if (_chkIsolamentoOk == false || _chkVazamento == true ||
-        _chkEletrica == false) return 'CRITICO';
-    if (_chkDesmontagemEvap == false || _chkLavagemEvap == false ||
+    // CRITICO: apenas falhas elétricas ou vazamento de óleo
+    if (_chkVazamento == true || _chkEletrica == false) return 'CRITICO';
+    // ATENCAO: isolamento trocado, desmontagem/lavagem não realizadas, ruído
+    if (_chkIsolamentoOk == false ||
+        _chkDesmontagemEvap == false || _chkLavagemEvap == false ||
         _chkDesmontagemCond == false || _chkLavagemCond == false ||
         _chkRuidoEvap == true || _chkRuidoCond == true) return 'ATENCAO';
     return 'OK';
@@ -1063,6 +1065,12 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
         (problemaQuandoNao && valor == false) ||
         (!problemaQuandoSim && !problemaQuandoNao && valor == false);
 
+    final corSim  = problemaQuandoSim ? _kRed   : _kGreen;
+    final corNao  = problemaQuandoNao ? _kRed   : _kGreen;
+    final grey400 = Colors.grey[400]!;
+    final grey700 = Colors.grey[700]!;
+    final grey100 = Colors.grey[100]!;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -1081,12 +1089,10 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
                   label: const Text('Sim'),
                   selected: valor == true,
                   onSelected: (_) => onChanged(true),
-                  selectedColor: _kGreen,
-                  labelStyle: TextStyle(
-                      color: valor == true ? Colors.white : Colors.grey[700]),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(
-                      color: valor == true ? _kGreen : Colors.grey[400]!),
+                  selectedColor: corSim,
+                  labelStyle: TextStyle(color: valor == true ? Colors.white : grey700),
+                  backgroundColor: grey100,
+                  side: BorderSide(color: valor == true ? corSim : grey400),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1095,12 +1101,10 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
                   label: const Text('Não'),
                   selected: valor == false,
                   onSelected: (_) => onChanged(false),
-                  selectedColor: _kRed,
-                  labelStyle: TextStyle(
-                      color: valor == false ? Colors.white : Colors.grey[700]),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(
-                      color: valor == false ? _kRed : Colors.grey[400]!),
+                  selectedColor: corNao,
+                  labelStyle: TextStyle(color: valor == false ? Colors.white : grey700),
+                  backgroundColor: grey100,
+                  side: BorderSide(color: valor == false ? corNao : grey400),
                 ),
               ),
             ],

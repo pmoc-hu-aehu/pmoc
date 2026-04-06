@@ -1,0 +1,448 @@
+<div id="modulo-EMPRESAS" class="modulo-oculto">
+<div style="padding:20px 24px 40px; display:flex; flex-direction:column; gap:14px; background:#f8fafc; min-height:100%;">
+
+  <!-- TOPO -->
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+              background:white; padding:16px 20px; border-radius:12px; border:1px solid #e2e8f0;
+              box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <i class="material-icons" style="color:#0284c7; font-size:26px;">business</i>
+      <div>
+        <h2 style="margin:0; font-size:18px; font-weight:800; color:#0f172a;">Empresas Prestadoras</h2>
+        <p style="margin:3px 0 0; font-size:12px; color:#64748b;">Cadastro oficial de empresas contratadas para manutenção do PMOC.</p>
+      </div>
+    </div>
+    <button onclick="novaEmpresa()" class="emp-btn emp-btn-blue">
+      <i class="material-icons">add</i> NOVA EMPRESA
+    </button>
+  </div>
+
+  <!-- CORPO -->
+  <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start;">
+
+    <!-- FORMULÁRIO (painel lateral) -->
+    <div id="emp-form-card" style="background:white; border-radius:12px; border:1px solid #e2e8f0;
+                                   box-shadow:0 1px 4px rgba(0,0,0,0.04); padding:20px;
+                                   width:380px; flex-shrink:0; display:none; flex-direction:column;">
+      <h3 style="margin:0 0 14px; font-size:15px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px;">
+        <i class="material-icons" style="color:#0ea5e9; font-size:18px;">edit</i>
+        <span id="emp-form-titulo">Nova Empresa</span>
+      </h3>
+      <input type="hidden" id="emp-id">
+
+      <!-- SEÇÃO 1: IDENTIFICAÇÃO -->
+      <div class="emp-secao">IDENTIFICAÇÃO</div>
+
+      <div class="emp-campo">
+        <label class="emp-label">RAZÃO SOCIAL *</label>
+        <input type="text" id="emp-razao" class="emp-input" placeholder="Ex: Frigelar Manutenções LTDA">
+      </div>
+      <div class="emp-campo">
+        <label class="emp-label">NOME FANTASIA</label>
+        <input type="text" id="emp-fantasia" class="emp-input" placeholder="Ex: Frigelar">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div class="emp-campo" style="flex:2;">
+          <label class="emp-label">CNPJ *</label>
+          <input type="text" id="emp-cnpj" class="emp-input" placeholder="00.000.000/0000-00" maxlength="18" oninput="mascaraCnpj(this)">
+        </div>
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">SITUAÇÃO</label>
+          <select id="emp-situacao" class="emp-input">
+            <option value="Ativo">Ativo</option>
+            <option value="Irregular">Irregular</option>
+            <option value="Suspenso">Suspenso</option>
+            <option value="Baixado">Baixado</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 2: ENDEREÇO -->
+      <div class="emp-secao">ENDEREÇO</div>
+
+      <div class="emp-campo">
+        <label class="emp-label">LOGRADOURO</label>
+        <input type="text" id="emp-endereco" class="emp-input" placeholder="Rua, Av., Alameda...">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">NÚMERO</label>
+          <input type="text" id="emp-numero" class="emp-input" placeholder="123">
+        </div>
+        <div class="emp-campo" style="flex:2;">
+          <label class="emp-label">COMPLEMENTO</label>
+          <input type="text" id="emp-complemento" class="emp-input" placeholder="Sala, Andar...">
+        </div>
+      </div>
+      <div class="emp-campo">
+        <label class="emp-label">BAIRRO</label>
+        <input type="text" id="emp-bairro" class="emp-input" placeholder="Bairro">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div class="emp-campo" style="flex:2;">
+          <label class="emp-label">CIDADE</label>
+          <input type="text" id="emp-cidade" class="emp-input" placeholder="Londrina">
+        </div>
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">UF</label>
+          <select id="emp-uf" class="emp-input">
+            <option value="PR">PR</option><option value="SP">SP</option><option value="SC">SC</option>
+            <option value="RS">RS</option><option value="MG">MG</option><option value="RJ">RJ</option>
+            <option value="DF">DF</option><option value="GO">GO</option><option value="MT">MT</option>
+            <option value="MS">MS</option><option value="BA">BA</option><option value="PE">PE</option>
+            <option value="CE">CE</option><option value="AM">AM</option><option value="PA">PA</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="emp-campo">
+        <label class="emp-label">CEP</label>
+        <input type="text" id="emp-cep" class="emp-input" placeholder="00000-000" maxlength="9" oninput="mascaraCep(this)">
+      </div>
+
+      <!-- SEÇÃO 3: REPRESENTANTE LEGAL -->
+      <div class="emp-secao">REPRESENTANTE LEGAL</div>
+
+      <div class="emp-campo">
+        <label class="emp-label">NOME COMPLETO *</label>
+        <input type="text" id="emp-rep-nome" class="emp-input" placeholder="Nome do representante legal">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">CPF</label>
+          <input type="text" id="emp-rep-cpf" class="emp-input" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCpf(this)">
+        </div>
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">RG</label>
+          <input type="text" id="emp-rep-rg" class="emp-input" placeholder="0.000.000-0">
+        </div>
+      </div>
+
+      <!-- SEÇÃO 4: CONTATO -->
+      <div class="emp-secao">CONTATO</div>
+
+      <div class="emp-campo">
+        <label class="emp-label">RESPONSÁVEL / CONTATO</label>
+        <input type="text" id="emp-resp" class="emp-input" placeholder="Nome para contato">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">TELEFONE</label>
+          <input type="text" id="emp-tel" class="emp-input" placeholder="(43) 99999-9999" maxlength="15" oninput="mascaraTelefone(this)">
+        </div>
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">E-MAIL</label>
+          <input type="email" id="emp-email" class="emp-input" placeholder="contato@empresa.com">
+        </div>
+      </div>
+
+      <!-- SEÇÃO 5: SERVIÇOS -->
+      <div class="emp-secao">TIPOS DE SERVIÇO</div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;" id="emp-chips-servicos">
+        <label class="emp-chip"><input type="checkbox" value="Filtro"> Filtro</label>
+        <label class="emp-chip"><input type="checkbox" value="Preventiva"> Preventiva</label>
+        <label class="emp-chip"><input type="checkbox" value="Corretiva"> Corretiva</label>
+        <label class="emp-chip"><input type="checkbox" value="Duto"> Duto</label>
+        <label class="emp-chip"><input type="checkbox" value="Exaustão"> Exaustão</label>
+        <label class="emp-chip"><input type="checkbox" value="Pressão"> Pressão</label>
+        <label class="emp-chip"><input type="checkbox" value="Qualidade Ar"> Qualidade Ar</label>
+        <label class="emp-chip"><input type="checkbox" value="Movimentação"> Movimentação</label>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <div class="emp-campo" style="flex:1;">
+          <label class="emp-label">STATUS</label>
+          <select id="emp-status" class="emp-input">
+            <option value="Ativa">Ativa</option>
+            <option value="Inativa">Inativa</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="emp-campo">
+        <label class="emp-label">OBSERVAÇÕES</label>
+        <textarea id="emp-obs" class="emp-input" rows="2" placeholder="Informações adicionais..."></textarea>
+      </div>
+
+      <p id="emp-msg" style="font-size:12px; font-weight:700; min-height:18px; margin:6px 0 0;"></p>
+
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button onclick="salvarEmpresa()" class="emp-btn emp-btn-blue" style="flex:1;">
+          <i class="material-icons">save</i> SALVAR
+        </button>
+        <button onclick="fecharFormEmpresa()" class="emp-btn emp-btn-outline">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div style="flex:1; min-width:0; background:white; border-radius:12px; border:1px solid #e2e8f0;
+                box-shadow:0 1px 4px rgba(0,0,0,0.04); overflow:hidden;">
+      <div style="padding:14px 20px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span style="font-size:13px; font-weight:700; color:#475569;">Empresas Cadastradas</span>
+        <input type="text" id="emp-busca" onkeyup="filtrarEmpresas()" placeholder="Buscar por nome, CNPJ..."
+               style="padding:7px 12px; border:2px solid #e2e8f0; border-radius:8px; font-size:12px; outline:none; width:220px;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#f1f5f9;">
+              <th class="emp-th">Empresa</th>
+              <th class="emp-th">CNPJ</th>
+              <th class="emp-th">Situação</th>
+              <th class="emp-th">Representante</th>
+              <th class="emp-th">Contato</th>
+              <th class="emp-th">Serviços</th>
+              <th class="emp-th">Status</th>
+              <th class="emp-th" style="text-align:center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="emp-tabela">
+            <tr><td colspan="8" class="emp-vazio">
+              <i class="material-icons" style="display:block;font-size:36px;margin:0 auto 8px;opacity:0.3;">business</i>
+              Nenhuma empresa cadastrada. Clique em <b>NOVA EMPRESA</b> para começar.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #modulo-EMPRESAS { display:none; flex-direction:column; min-height:100%; height:auto !important; }
+  .emp-secao  { font-size:10px; font-weight:800; color:#0ea5e9; text-transform:uppercase;
+                letter-spacing:1px; border-bottom:1px solid #e2e8f0; padding-bottom:5px;
+                margin:12px 0 8px; }
+  .emp-campo  { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+  .emp-label  { font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.7px; }
+  .emp-input  { padding:7px 10px; border:2px solid #e2e8f0; border-radius:8px; font-size:12px;
+                font-weight:600; color:#1e293b; background:#f8fafc; outline:none;
+                transition:border-color 0.2s; resize:vertical; width:100%; box-sizing:border-box; }
+  .emp-input:focus { border-color:#0ea5e9; background:white; }
+  .emp-chip   { display:flex; align-items:center; gap:5px; padding:5px 10px; background:#f1f5f9;
+                border-radius:20px; font-size:11px; font-weight:600; color:#475569; cursor:pointer;
+                transition:all 0.15s; user-select:none; }
+  .emp-chip:has(input:checked) { background:#0ea5e9; color:white; }
+  .emp-chip input { display:none; }
+  .emp-btn    { display:inline-flex; align-items:center; gap:5px; padding:9px 16px; border:none;
+                border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;
+                transition:all 0.2s; white-space:nowrap; }
+  .emp-btn:hover { opacity:0.85; transform:translateY(-1px); }
+  .emp-btn .material-icons { font-size:15px; }
+  .emp-btn-blue    { background:#0ea5e9; color:white; }
+  .emp-btn-red     { background:#ef4444; color:white; }
+  .emp-btn-outline { background:white; border:2px solid #e2e8f0; color:#475569; padding:7px 10px; }
+  .emp-btn-outline:hover { border-color:#0ea5e9; color:#0ea5e9; }
+  .emp-th     { padding:10px 12px; text-align:left; font-size:10px; font-weight:800; color:#475569;
+                text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #0ea5e9;
+                background:#f1f5f9; white-space:nowrap; }
+  .emp-vazio  { text-align:center; padding:50px; color:#94a3b8; font-size:13px; }
+  .emp-status-ativa   { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:800; background:#dcfce7; color:#15803d; }
+  .emp-status-inativa { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:800; background:#fee2e2; color:#dc2626; }
+  .emp-sit-ativo    { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:800; background:#dcfce7; color:#15803d; }
+  .emp-sit-irregular{ display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:800; background:#fee2e2; color:#dc2626; }
+  .emp-sit-outro    { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:800; background:#fef9c3; color:#92400e; }
+</style>
+
+<script>
+  var _empDados = [];
+
+  function inicializarEmpresas() { carregarEmpresas(); }
+
+  function carregarEmpresas() {
+    var tbody = document.getElementById('emp-tabela');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#94a3b8;">Carregando...</td></tr>';
+    google.script.run
+      .withSuccessHandler(function(lista) {
+        _empDados = lista || [];
+        renderizarEmpresas(_empDados);
+      })
+      .withFailureHandler(function(e) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:red;">Erro: ' + e.message + '</td></tr>';
+      })
+      .getListaEmpresas();
+  }
+
+  function renderizarEmpresas(lista) {
+    var tbody = document.getElementById('emp-tabela');
+    if (!lista || lista.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="emp-vazio">' +
+        '<i class="material-icons" style="display:block;font-size:36px;margin:0 auto 8px;opacity:0.3;">business</i>' +
+        'Nenhuma empresa cadastrada. Clique em <b>NOVA EMPRESA</b> para começar.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    lista.forEach(function(emp) {
+      var servicos = (emp.servicos || '').split(',').filter(Boolean).map(function(s) {
+        return '<span style="display:inline-block;padding:1px 5px;background:#f1f5f9;border-radius:3px;font-size:10px;margin:1px;">' + s.trim() + '</span>';
+      }).join('');
+      var statusClass = emp.status === 'Ativa' ? 'emp-status-ativa' : 'emp-status-inativa';
+      var sitClass    = emp.situacaoCadastral === 'Ativo' ? 'emp-sit-ativo'
+                      : emp.situacaoCadastral === 'Irregular' ? 'emp-sit-irregular' : 'emp-sit-outro';
+      var nomeExibir  = emp.nomeFantasia
+        ? '<b>' + emp.nomeFantasia + '</b><br><span style="color:#94a3b8;font-size:11px;">' + emp.razaoSocial + '</span>'
+        : '<b>' + emp.razaoSocial + '</b>';
+      var enderecoFmt = [emp.endereco, emp.numero, emp.bairro, emp.cidade + (emp.uf ? '/' + emp.uf : '')].filter(Boolean).join(', ');
+      var tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid #f1f5f9';
+      tr.innerHTML =
+        '<td style="padding:10px 12px;vertical-align:top;">' + nomeExibir +
+          (enderecoFmt ? '<br><span style="color:#94a3b8;font-size:10px;">' + enderecoFmt + '</span>' : '') + '</td>' +
+        '<td style="padding:10px 12px;vertical-align:top;font-family:monospace;font-size:12px;">' +
+          (emp.cnpj || '—') + '<br><span class="' + sitClass + '">' + (emp.situacaoCadastral || '—') + '</span></td>' +
+        '<td style="padding:10px 12px;vertical-align:top;">' + (emp.repNome || '—') +
+          (emp.repCpf ? '<br><span style="color:#64748b;font-size:10px;">CPF: ' + emp.repCpf + '</span>' : '') + '</td>' +
+        '<td style="padding:10px 12px;vertical-align:top;">' + (emp.responsavel || '—') +
+          '<br><span style="color:#64748b;font-size:11px;">' + (emp.telefone || '') + '</span></td>' +
+        '<td style="padding:10px 12px;vertical-align:top;">' + (servicos || '—') + '</td>' +
+        '<td style="padding:10px 12px;vertical-align:top;"><span class="' + statusClass + '">' + emp.status + '</span></td>' +
+        '<td style="padding:10px 12px;vertical-align:middle;text-align:center;white-space:nowrap;">' +
+          '<button onclick="editarEmpresa(' + emp.id + ')" class="emp-btn emp-btn-outline" style="padding:5px 8px;margin-right:4px;" title="Editar">' +
+            '<i class="material-icons" style="font-size:14px;">edit</i></button>' +
+          '<button onclick="confirmarExcluirEmpresa(' + emp.id + ', \'' + (emp.nomeFantasia || emp.razaoSocial).replace(/'/g,'') + '\')" class="emp-btn emp-btn-red" style="padding:5px 8px;" title="Excluir">' +
+            '<i class="material-icons" style="font-size:14px;">delete</i></button>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filtrarEmpresas() {
+    var t = document.getElementById('emp-busca').value.toLowerCase();
+    renderizarEmpresas(_empDados.filter(function(e) {
+      return (e.razaoSocial + e.nomeFantasia + e.cnpj + e.responsavel + e.repNome).toLowerCase().indexOf(t) >= 0;
+    }));
+  }
+
+  function novaEmpresa() {
+    document.getElementById('emp-id').value        = '';
+    ['emp-razao','emp-fantasia','emp-cnpj','emp-endereco','emp-numero','emp-complemento',
+     'emp-bairro','emp-cidade','emp-cep','emp-rep-nome','emp-rep-cpf','emp-rep-rg',
+     'emp-resp','emp-tel','emp-email','emp-obs'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('emp-situacao').value = 'Ativo';
+    document.getElementById('emp-uf').value       = 'PR';
+    document.getElementById('emp-status').value   = 'Ativa';
+    document.querySelectorAll('#emp-chips-servicos input[type=checkbox]').forEach(function(c){ c.checked = false; });
+    document.getElementById('emp-form-titulo').innerText = 'Nova Empresa';
+    document.getElementById('emp-msg').innerText  = '';
+    document.getElementById('emp-form-card').style.display = 'flex';
+    document.getElementById('emp-form-card').scrollIntoView({ behavior:'smooth' });
+  }
+
+  function fecharFormEmpresa() {
+    document.getElementById('emp-form-card').style.display = 'none';
+  }
+
+  function editarEmpresa(id) {
+    var emp = _empDados.find(function(e){ return e.id === id; });
+    if (!emp) return;
+    document.getElementById('emp-id').value           = emp.id;
+    document.getElementById('emp-razao').value        = emp.razaoSocial;
+    document.getElementById('emp-fantasia').value     = emp.nomeFantasia;
+    document.getElementById('emp-cnpj').value         = emp.cnpj;
+    document.getElementById('emp-situacao').value     = emp.situacaoCadastral || 'Ativo';
+    document.getElementById('emp-endereco').value     = emp.endereco;
+    document.getElementById('emp-numero').value       = emp.numero;
+    document.getElementById('emp-complemento').value  = emp.complemento;
+    document.getElementById('emp-bairro').value       = emp.bairro;
+    document.getElementById('emp-cidade').value       = emp.cidade;
+    document.getElementById('emp-uf').value           = emp.uf || 'PR';
+    document.getElementById('emp-cep').value          = emp.cep;
+    document.getElementById('emp-rep-nome').value     = emp.repNome;
+    document.getElementById('emp-rep-cpf').value      = emp.repCpf;
+    document.getElementById('emp-rep-rg').value       = emp.repRg;
+    document.getElementById('emp-resp').value         = emp.responsavel;
+    document.getElementById('emp-tel').value          = emp.telefone;
+    document.getElementById('emp-email').value        = emp.email;
+    document.getElementById('emp-obs').value          = emp.obs;
+    document.getElementById('emp-status').value       = emp.status || 'Ativa';
+    var servSalvos = (emp.servicos || '').split(',').map(function(s){ return s.trim(); });
+    document.querySelectorAll('#emp-chips-servicos input[type=checkbox]').forEach(function(c){
+      c.checked = servSalvos.indexOf(c.value) >= 0;
+    });
+    document.getElementById('emp-form-titulo').innerText = 'Editar Empresa';
+    document.getElementById('emp-msg').innerText = '';
+    document.getElementById('emp-form-card').style.display = 'flex';
+    document.getElementById('emp-form-card').scrollIntoView({ behavior:'smooth' });
+  }
+
+  function salvarEmpresa() {
+    var razao = document.getElementById('emp-razao').value.trim();
+    var cnpj  = document.getElementById('emp-cnpj').value.trim();
+    if (!razao) { empMsg('Razão Social é obrigatória.','red'); return; }
+    if (!cnpj)  { empMsg('CNPJ é obrigatório.','red'); return; }
+    var servicos = [];
+    document.querySelectorAll('#emp-chips-servicos input[type=checkbox]:checked').forEach(function(c){ servicos.push(c.value); });
+    var dados = {
+      id             : document.getElementById('emp-id').value,
+      razaoSocial    : razao,
+      nomeFantasia   : document.getElementById('emp-fantasia').value.trim(),
+      cnpj           : cnpj,
+      situacaoCadastral: document.getElementById('emp-situacao').value,
+      endereco       : document.getElementById('emp-endereco').value.trim(),
+      numero         : document.getElementById('emp-numero').value.trim(),
+      complemento    : document.getElementById('emp-complemento').value.trim(),
+      bairro         : document.getElementById('emp-bairro').value.trim(),
+      cidade         : document.getElementById('emp-cidade').value.trim(),
+      uf             : document.getElementById('emp-uf').value,
+      cep            : document.getElementById('emp-cep').value.trim(),
+      repNome        : document.getElementById('emp-rep-nome').value.trim(),
+      repCpf         : document.getElementById('emp-rep-cpf').value.trim(),
+      repRg          : document.getElementById('emp-rep-rg').value.trim(),
+      responsavel    : document.getElementById('emp-resp').value.trim(),
+      telefone       : document.getElementById('emp-tel').value.trim(),
+      email          : document.getElementById('emp-email').value.trim(),
+      servicos       : servicos.join(', '),
+      status         : document.getElementById('emp-status').value,
+      obs            : document.getElementById('emp-obs').value.trim()
+    };
+    empMsg('Salvando...', '#0ea5e9');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.sucesso) { empMsg(res.msg,'green'); carregarEmpresas(); setTimeout(fecharFormEmpresa,1200); }
+        else              empMsg(res.msg,'red');
+      })
+      .withFailureHandler(function(e){ empMsg('Erro: '+e.message,'red'); })
+      .salvarEmpresa(dados);
+  }
+
+  function confirmarExcluirEmpresa(id, nome) {
+    if (!confirm('Excluir a empresa "' + nome + '"?\n\nEsta ação não pode ser desfeita.')) return;
+    google.script.run
+      .withSuccessHandler(function(res){ if (res.sucesso) carregarEmpresas(); else alert('Erro: ' + res.msg); })
+      .excluirEmpresa(id);
+  }
+
+  function empMsg(txt, cor) {
+    var el = document.getElementById('emp-msg');
+    el.innerText = txt; el.style.color = cor;
+  }
+
+  function mascaraCnpj(input) {
+    var v = input.value.replace(/\D/g,'').substring(0,14);
+    v = v.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3')
+         .replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2');
+    input.value = v;
+  }
+  function mascaraCpf(input) {
+    var v = input.value.replace(/\D/g,'').substring(0,11);
+    v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+    input.value = v;
+  }
+  function mascaraTelefone(input) {
+    var v = input.value.replace(/\D/g,'').substring(0,11);
+    if (v.length <= 10) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+    else                v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3');
+    input.value = v;
+  }
+  function mascaraCep(input) {
+    var v = input.value.replace(/\D/g,'').substring(0,8);
+    v = v.replace(/(\d{5})(\d)/,'$1-$2');
+    input.value = v;
+  }
+</script>
+</div>

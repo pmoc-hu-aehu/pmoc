@@ -65,27 +65,30 @@ function fazerLogin() {
 // ==========================================
 
 function configurarPermissoes(perfil) {
-  var botoes = ['btn-agendamento','btn-maquinas','btn-engenheiros',
-                'btn-tecnicos','btn-relatorio','btn-pmoc'];
-
-  botoes.forEach(function(b) {
+  // Oculta todos os botões de menu primeiro
+  var todos = ['btn-agendamento','btn-maquinas','btn-engenheiros','btn-tecnicos',
+               'btn-relatorio','btn-pmoc','btn-empresas','btn-pagamentos'];
+  todos.forEach(function(b) {
     var el = document.getElementById(b);
     if (el) el.style.display = 'none';
   });
 
   if (perfil === "ADMIN") {
-    botoes.forEach(function(b) {
+    // Admin vê tudo
+    todos.forEach(function(b) {
+      var el = document.getElementById(b);
+      if (el) el.style.display = 'block';
+    });
+  } else if (perfil === "ENGENHEIRO") {
+    // Engenheiro: relatórios, pagamentos e doc pmoc
+    ['btn-relatorio','btn-pmoc','btn-pagamentos'].forEach(function(b) {
       var el = document.getElementById(b);
       if (el) el.style.display = 'block';
     });
   } else if (perfil === "PLENO") {
+    // Pleno: só relatórios
     var r = document.getElementById('btn-relatorio');
     if (r) r.style.display = 'block';
-  } else if (perfil === "ENGENHEIRO") {
-    var r = document.getElementById('btn-relatorio');
-    var p = document.getElementById('btn-pmoc');
-    if (r) r.style.display = 'block';
-    if (p) p.style.display = 'block';
   }
 }
 
@@ -94,7 +97,8 @@ function configurarPermissoes(perfil) {
 // ==========================================
 
 function abrirModulo(moduloNome) {
-  var modulos = ['HOME','AGENDAMENTO','TECNICOS','ENGENHEIROS','MAQUINAS','RELATORIO','PMOC'];
+  var modulos = ['HOME','AGENDAMENTO','TECNICOS','ENGENHEIROS','MAQUINAS',
+                 'RELATORIO','PMOC','EMPRESAS','PAGAMENTOS'];
   modulos.forEach(function(m) {
     var el = document.getElementById('modulo-' + m);
     if (el) el.style.display = 'none';
@@ -112,6 +116,9 @@ function abrirModulo(moduloNome) {
   if (moduloNome === 'TECNICOS')    listarTecnicos();
   if (moduloNome === 'ENGENHEIROS') listarEngenheiros();
   if (moduloNome === 'MAQUINAS')    listarMaquinas();
+  if (moduloNome === 'EMPRESAS')    inicializarEmpresas();
+  if (moduloNome === 'RELATORIO')   inicializarRelatorio();
+  if (moduloNome === 'PAGAMENTOS')  inicializarPagamentos();
 }
 
 function sair() {
