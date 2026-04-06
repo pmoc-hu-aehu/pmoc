@@ -23,9 +23,10 @@ function setApkDriveId(fileId, versao) {
 function getInfoApk() {
   try {
     var props  = PropertiesService.getScriptProperties();
-    var fileId = props.getProperty('APK_FILE_ID') || '';
-    var versao = props.getProperty('APK_VERSAO')  || '1.0.0';
-    var data   = props.getProperty('APK_DATA')    || '—';
+    // Usa a constante do Config.js como valor padrão
+    var fileId = props.getProperty('APK_FILE_ID') || APK_FILE_ID || '';
+    var versao = props.getProperty('APK_VERSAO')  || APK_VERSAO  || '1.0.0';
+    var data   = props.getProperty('APK_DATA')    || '06/04/2026';
 
     var url = '';
     if (fileId) {

@@ -12,6 +12,10 @@ var PRAZO_FILTRO  = 30;
 // copie o FILE_ID da URL e cole aqui.
 var BG_FOTO_ID = "1QDdt_Zishx06iJ4kAFrlR1We7EIMmTP7"; // ar condicionado.png
 
+// ID do APK no Google Drive para distribuição
+var APK_FILE_ID = "1sH3zB1iOw1T54VO-xk8IiIBZbswSg-Zc";
+var APK_VERSAO  = "1.0.0";
+
 function getBgUrl() {
   if (!BG_FOTO_ID || BG_FOTO_ID === "") {
     return "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=1600&q=80";
