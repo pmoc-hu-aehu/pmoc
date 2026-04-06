@@ -6,4 +6,5 @@ enum ChecklistType {
   pressao,
   qualidadeAr,
   movimentacao,
+  exaustao,
 }

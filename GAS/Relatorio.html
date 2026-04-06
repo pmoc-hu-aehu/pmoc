@@ -312,7 +312,15 @@
 
   @media print {
     .no-print { display: none !important; }
-    #modulo-RELATORIO { display: block !important; overflow: visible !important; }
+    body[data-modulo-ativo="RELATORIO"] #modulo-RELATORIO { display: block !important; overflow: visible !important; }
+    body[data-modulo-ativo="RELATORIO"] #modulo-PAGAMENTOS,
+    body[data-modulo-ativo="RELATORIO"] #modulo-HOME,
+    body[data-modulo-ativo="RELATORIO"] #modulo-AGENDAMENTO,
+    body[data-modulo-ativo="RELATORIO"] #modulo-TECNICOS,
+    body[data-modulo-ativo="RELATORIO"] #modulo-ENGENHEIROS,
+    body[data-modulo-ativo="RELATORIO"] #modulo-MAQUINAS,
+    body[data-modulo-ativo="RELATORIO"] #modulo-PMOC,
+    body[data-modulo-ativo="RELATORIO"] #modulo-EMPRESAS { display: none !important; }
     #rel-cab-print { display: block !important; }
     #rel-wrapper { padding: 0; background: white; gap: 0; }
     .rel-thead th, #rel-corpo tr td { font-size: 9px !important; padding: 5px 7px !important; }

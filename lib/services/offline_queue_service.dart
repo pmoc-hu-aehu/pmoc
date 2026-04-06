@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -11,6 +11,7 @@ import '../models/checklist_corretiva.dart';
 import '../models/checklist_pressao.dart';
 import '../models/checklist_qualidade_ar.dart';
 import '../models/checklist_movimentacao.dart';
+import '../models/checklist_exaustao.dart';
 import '../models/checklist_pendente.dart';
 import '../models/checklist_tipo.dart'; // Assuming you have a ChecklistType enum or similar
 import 'checklist_filtro_service.dart';
@@ -18,6 +19,7 @@ import 'checklist_duto_service.dart';
 import 'checklist_preventiva_service.dart';
 import 'checklist_corretiva_service.dart';
 import 'checklist_pressao_service.dart';
+import 'checklist_exaustao_service.dart';
 import 'database_service.dart';
 import 'sync_service.dart';
 
@@ -50,13 +52,14 @@ class OfflineQueueService {
 
     await DatabaseService.salvarPendente(
       ChecklistPendente(
-        tipo         : ChecklistType.filtro.name, // Usar enum para tipos
+        tipo         : ChecklistType.filtro.name,
         payloadJson  : jsonEncode(payload),
         fotoSujaPath : sujaFinal,
         fotoLimpaPath: limpaFinal,
         criadoEm     : DateTime.now(),
       ),
     );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.fuel, ChecklistType.filtro.name);
   }
 
   // ───────────────────── DUTO ─────────────────────
@@ -83,13 +86,14 @@ class OfflineQueueService {
 
     await DatabaseService.salvarPendente(
       ChecklistPendente(
-        tipo         : ChecklistType.duto.name, // Usar enum para tipos
+        tipo         : ChecklistType.duto.name,
         payloadJson  : jsonEncode(payload),
         fotoSujaPath : inicialFinal,
         fotoLimpaPath: finalFinal,
         criadoEm     : DateTime.now(),
       ),
     );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.fuel, ChecklistType.duto.name);
   }
 
   // ───────────────────── PREVENTIVA ─────────────────────
@@ -138,6 +142,7 @@ class OfflineQueueService {
         criadoEm      : DateTime.now(),
       ),
     );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.fuel, ChecklistType.preventiva.name);
   }
 
   // ───────────────────── CORRETIVA ─────────────────────
@@ -170,12 +175,13 @@ class OfflineQueueService {
       ChecklistPendente(
         tipo: ChecklistType.corretiva.name,
         payloadJson: jsonEncode(payload),
-        fotoSujaPath: inicioFinal, // fotoInicioPath
-        fotoLimpaPath: finalFinal, // fotoFinalPath
-        assinaturaPath: assinaturaSalva, // Novo campo
+        fotoSujaPath: inicioFinal,
+        fotoLimpaPath: finalFinal,
+        assinaturaPath: assinaturaSalva,
         criadoEm: DateTime.now(),
       ),
     );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.fuel, ChecklistType.corretiva.name);
   }
 
   // ───────────────────── MOVIMENTAÇÃO ─────────────────────
@@ -212,6 +218,7 @@ class OfflineQueueService {
         criadoEm      : DateTime.now(),
       ),
     );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.fuel, ChecklistType.movimentacao.name);
   }
 
   // ───────────────────── QUALIDADE DO AR ─────────────────────
@@ -243,6 +250,53 @@ class OfflineQueueService {
         criadoEm      : DateTime.now(),
       ),
     );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.codSala, ChecklistType.qualidadeAr.name);
+  }
+
+  // ───────────────────── EXAUSTÃO ─────────────────────
+
+  static Future<void> salvarExaustaoOffline({
+    required ChecklistExaustao checklist,
+    required String fotoInicioPath,
+    String? fotoServicopath,
+    required String fotoFinalPath,
+    required Uint8List assinaturaByte,
+  }) async {
+    final docsDir   = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    final inicioFinal     = '${docsDir.path}/pmoc_${timestamp}_exaustao_inicio.jpg';
+    final finalFinal      = '${docsDir.path}/pmoc_${timestamp}_exaustao_final.jpg';
+    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_exaustao_assinatura.png';
+
+    await File(fotoInicioPath).copy(inicioFinal);
+    await File(fotoFinalPath).copy(finalFinal);
+    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
+
+    String? servicoFinal;
+    if (fotoServicopath != null) {
+      servicoFinal = '${docsDir.path}/pmoc_${timestamp}_exaustao_servico.jpg';
+      await File(fotoServicopath).copy(servicoFinal);
+    }
+
+    final payload = checklist.toJson()
+      ..remove('linkFotoInicio')
+      ..remove('linkFotoServico')
+      ..remove('linkFotoFinal')
+      ..remove('linkAssinatura');
+
+    await DatabaseService.salvarPendente(
+      ChecklistPendente(
+        tipo          : ChecklistType.exaustao.name,
+        payloadJson   : jsonEncode(payload),
+        fotoSujaPath  : inicioFinal,
+        fotoLimpaPath : servicoFinal,
+        fotoFinalPath : finalFinal,
+        assinaturaPath: assinaturaSalva,
+        criadoEm      : DateTime.now(),
+      ),
+    );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.fuel, ChecklistType.exaustao.name);
   }
 
   // ───────────────────── PRESSÃO ─────────────────────
@@ -283,14 +337,27 @@ class OfflineQueueService {
         criadoEm      : DateTime.now(),
       ),
     );
+    await DatabaseService.registrarManutencao(checklist.tecnico, checklist.codSala, ChecklistType.pressao.name);
   }
 
   // ───────────────────── PROCESSAR FILA ─────────────────────
+
+  static bool _processandoFila = false;
 
   /// Processa a fila: envia todos os checklists pendentes
   /// (FILTRO, DUTO e PREVENTIVA) e apaga as fotos do celular após envio.
   /// Retorna o número de itens enviados com sucesso.
   static Future<int> processarFila() async {
+    if (_processandoFila) return 0; // evita execuções concorrentes
+    _processandoFila = true;
+    try {
+      return await _processarFilaInterno();
+    } finally {
+      _processandoFila = false;
+    }
+  }
+
+  static Future<int> _processarFilaInterno() async {
     final online = await SyncService.temConexao();
     if (!online) return 0;
 
@@ -313,11 +380,13 @@ class OfflineQueueService {
           enviados += await _enviarQualidadeAr(p);
         } else if (p.tipo == ChecklistType.movimentacao.name) {
           enviados += await _enviarMovimentacao(p);
+        } else if (p.tipo == ChecklistType.exaustao.name) {
+          enviados += await _enviarExaustao(p);
         } else {
-          print('[OFFLINE_QUEUE] Tipo desconhecido: ${p.tipo}');
+          debugPrint('[OFFLINE_QUEUE] Tipo desconhecido: ${p.tipo}');
         }
       } catch (e) {
-        print('[OFFLINE_QUEUE] Erro ao sincronizar id=${p.id}: $e');
+        debugPrint('[OFFLINE_QUEUE] Erro ao sincronizar id=${p.id}: $e');
       }
     }
 
@@ -363,13 +432,19 @@ class OfflineQueueService {
     final erro = await ChecklistFiltroService.enviarPayload(payload);
 
     if (erro == null) {
-      // Apagar todas as fotos associadas a este pendente
       _apagarFotosPendente(p);
       await DatabaseService.removerPendente(p.id!);
       return 1;
     }
 
-    print('[OFFLINE_QUEUE] Falha ao enviar FILTRO id=${p.id}: $erro');
+    // GAS rejeitou como duplicado — remove da fila para não tentar eternamente
+    if (erro.contains('já foi limpo')) {
+      debugPrint('[OFFLINE_QUEUE] FILTRO id=${p.id} rejeitado como duplicado — removendo da fila');
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+    } else {
+      debugPrint('[OFFLINE_QUEUE] Falha ao enviar FILTRO id=${p.id}: $erro');
+    }
     return 0;
   }
 
@@ -412,7 +487,14 @@ class OfflineQueueService {
       return 1;
     }
 
-    print('[OFFLINE_QUEUE] Falha ao enviar DUTO id=${p.id}: $erro');
+    // GAS rejeitou como duplicado — remove da fila para não tentar eternamente
+    if (erro.contains('já foi limpo')) {
+      debugPrint('[OFFLINE_QUEUE] DUTO id=${p.id} rejeitado como duplicado — removendo da fila');
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+    } else {
+      debugPrint('[OFFLINE_QUEUE] Falha ao enviar DUTO id=${p.id}: $erro');
+    }
     return 0;
   }
 
@@ -446,7 +528,6 @@ class OfflineQueueService {
     renomear('chkLavagemEvap',     'chkLavagemQuimica');
     renomear('chkRuidoEvap',       'chkRuidoVibracao');
     renomear('metrosIsolamento',   'metrosIsolamentoTrocados');
-    renomear('observacoesTecnicas','observacoes');
     // Remove campos da condensadora sem coluna na planilha
     payload.remove('chkDesmontagemCond');
     payload.remove('obsDesmontagemCond');
@@ -482,7 +563,7 @@ class OfflineQueueService {
       return 1;
     }
 
-    print('[OFFLINE_QUEUE] Falha ao enviar PREVENTIVA id=${p.id}: $erro');
+    debugPrint('[OFFLINE_QUEUE] Falha ao enviar PREVENTIVA id=${p.id}: $erro');
     return 0;
   }
 
@@ -514,7 +595,7 @@ class OfflineQueueService {
       if (await assinatura.exists()) {
         payload['linkAssinatura'] = base64Encode(await assinatura.readAsBytes());
       } else {
-        print('[OFFLINE_QUEUE] Assinatura não encontrada: ${p.assinaturaPath}');
+        debugPrint('[OFFLINE_QUEUE] Assinatura não encontrada: ${p.assinaturaPath}');
       }
     }
 
@@ -532,7 +613,7 @@ class OfflineQueueService {
       return 1;
     }
 
-    print('[OFFLINE_QUEUE] Falha ao enviar CORRETIVA id=${p.id}: $erro');
+    debugPrint('[OFFLINE_QUEUE] Falha ao enviar CORRETIVA id=${p.id}: $erro');
     return 0;
   }
 
@@ -603,7 +684,7 @@ class OfflineQueueService {
       return 1;
     }
 
-    print('[OFFLINE_QUEUE] Falha ao enviar PRESSAO id=${p.id}: $erro');
+    debugPrint('[OFFLINE_QUEUE] Falha ao enviar PRESSAO id=${p.id}: $erro');
     return 0;
   }
 
@@ -656,7 +737,82 @@ class OfflineQueueService {
       return 1;
     }
 
-    print('[OFFLINE_QUEUE] Falha ao enviar MOVIMENTACAO id=${p.id}: $erro');
+    debugPrint('[OFFLINE_QUEUE] Falha ao enviar MOVIMENTACAO id=${p.id}: $erro');
+    return 0;
+  }
+
+  static Future<int> _enviarExaustao(ChecklistPendente p) async {
+    final raw = Map<String, dynamic>.from(jsonDecode(p.payloadJson) as Map);
+
+    // ── GPS: split "lat, lon" em campos separados ──────────────────
+    final gps   = (raw['coordenadasGps'] as String?) ?? '';
+    final parts = gps.split(',');
+    final lat   = parts.isNotEmpty ? parts[0].trim() : '';
+    final lon   = parts.length > 1 ? parts[1].trim() : '';
+
+    // ── correias: único campo tratado como string pelo GAS ─────────
+    final chkCorreias = raw['chkCorreias'] as bool? ?? false;
+    final obsCorreias = raw['obsCorreias'] as String?;
+    final correias    = (!chkCorreias && obsCorreias != null && obsCorreias.isNotEmpty)
+        ? obsCorreias
+        : (chkCorreias ? 'SIM' : 'NÃO');
+
+    // ── Monta payload com chaves que o GAS espera ──────────────────
+    final payload = <String, dynamic>{
+      'action'              : 'SALVAR_EXAUSTAO',
+      // Datas como ISO UTC — GAS usa new Date() para calcular hora
+      'dataInicio'          : raw['dataInicio']          ?? '',
+      'dataFinal'           : raw['dataFinal']           ?? '',
+      'tecnico'             : raw['tecnico']             ?? '',
+      'fuel'                : raw['fuel']                ?? '',
+      'local'               : raw['localizacao']         ?? '',
+      'latitude'            : lat,
+      'longitude'           : lon,
+      'tipoEquipamento'     : raw['tipoEquip']           ?? '',
+      // Booleans — GAS converte para SIM/NÃO com ternário
+      'limpezaRotor'        : raw['chkLimpezaRotor']     ?? false,
+      'correias'            : correias,
+      'lubrificacao'        : raw['chkLubrificacao']     ?? false,
+      'fixacaoVibracao'     : raw['chkVibracao']         ?? false,
+      'sensoresAcionamento' : raw['chkSensAcionamento']  ?? false,
+      'tensaoV'             : raw['tensaoV']             ?? '',
+      'correnteA'           : raw['correnteA']           ?? '',
+      'velocidadeAr'        : raw['velocidadeArMs']      ?? '',
+      'filtrosTelas'        : raw['chkFiltrosTelas']     ?? false,
+      'statusEquipamento'   : raw['statusEquip']         ?? '',
+      'nomeChefe'           : raw['nomeChefe']           ?? '',
+      'chapaFuncional'      : raw['chapaFuncional']      ?? '',
+    };
+
+    // ── Fotos em base64 ────────────────────────────────────────────
+    if (p.fotoSujaPath != null) {
+      final f = File(p.fotoSujaPath!);
+      if (await f.exists()) payload['fotoInicialB64'] = base64Encode(await f.readAsBytes());
+    }
+    if (p.fotoLimpaPath != null) {
+      final f = File(p.fotoLimpaPath!);
+      if (await f.exists()) payload['fotoServicoB64'] = base64Encode(await f.readAsBytes());
+    }
+    if (p.fotoFinalPath != null) {
+      final f = File(p.fotoFinalPath!);
+      if (await f.exists()) payload['fotoFinalB64'] = base64Encode(await f.readAsBytes());
+    }
+    if (p.assinaturaPath != null) {
+      final f = File(p.assinaturaPath!);
+      if (await f.exists()) payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
+    }
+
+    payload['action'] = 'SALVAR_EXAUSTAO';
+
+    final erro = await ChecklistExaustaoService.enviarPayload(payload);
+
+    if (erro == null) {
+      _apagarFotosPendente(p);
+      await DatabaseService.removerPendente(p.id!);
+      return 1;
+    }
+
+    debugPrint('[OFFLINE_QUEUE] Falha ao enviar EXAUSTAO id=${p.id}: $erro');
     return 0;
   }
 
@@ -718,7 +874,7 @@ class OfflineQueueService {
       return 1;
     }
 
-    print('[OFFLINE_QUEUE] Falha ao enviar QUALIDADE_AR id=${p.id}: $erro');
+    debugPrint('[OFFLINE_QUEUE] Falha ao enviar QUALIDADE_AR id=${p.id}: $erro');
     return 0;
   }
 
@@ -742,7 +898,7 @@ class OfflineQueueService {
       final f = File(path);
       if (f.existsSync()) f.deleteSync();
     } catch (e) {
-      print('[OFFLINE_QUEUE] Erro ao apagar foto $path: $e');
+      debugPrint('[OFFLINE_QUEUE] Erro ao apagar foto $path: $e');
     }
   }
 
@@ -787,7 +943,13 @@ class OfflineQueueService {
       final field = config['field'] as String;
       final bool problemWhenTrue = config['problemWhenTrue'] as bool;
 
-      final bool? chkValue = payload[field] as bool?;
+      final raw = payload[field];
+      // Se já foi convertido para String em ciclo anterior, mantém e pula
+      if (raw is String) {
+        payload.remove('obs${field.substring(3)}');
+        continue;
+      }
+      final bool? chkValue = raw is bool ? raw : null;
       final String? obsValue = payload['obs${field.substring(3)}'] as String?;
 
       if (chkValue == null) {

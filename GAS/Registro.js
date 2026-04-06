@@ -33,6 +33,14 @@ function registrarManutencaoNativa(dados) {
       linkFoto = salvarFotoDrive(dados.fotoB64, dados.fuel, dados.tecnico);
     }
 
+    // Proteção servidor: bloqueia duplicata no mês sem autorização
+    if (dados.tipo === "FILTRO" || dados.tipo === "DUTO") {
+      var checagem = verificarLimpezaMes(dados.fuel, dados.tipo);
+      if (checagem.jaLimpa && !checagem.autorizado) {
+        return jsonOut({ sucesso: false, msg: "FUEL " + dados.fuel + " já foi limpo este mês. Solicite autorização para relimpeza." });
+      }
+    }
+
     var novaLinha;
 
     if (dados.tipo === "FILTRO") {
@@ -59,6 +67,11 @@ function registrarManutencaoNativa(dados) {
 
     sheet.appendRow(novaLinha);
     limparLinhaProcessamento(dados.fuel, dados.tipo);
+
+    // Se havia autorização de relimpeza, marca como usada para evitar duplicatas
+    if (dados.tipo === "FILTRO" || dados.tipo === "DUTO") {
+      marcarAutorizacaoUsada(dados.fuel, dados.tipo);
+    }
 
     return jsonOut({ sucesso: true, msg: "Sincronizado!", fuel: dados.fuel });
 

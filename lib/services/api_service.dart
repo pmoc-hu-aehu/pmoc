@@ -59,10 +59,8 @@ class ApiService {
       };
     }
 
-    return {
-      'sucesso' : false,
-      'mensagem': 'Usuário ou senha incorretos (modo offline).',
-    };
+    // Credenciais diferentes do cache — tenta online (pode ser outro usuário)
+    return _loginOnline(usuario, senha);
   }
 
   // ─── LOGIN ONLINE ─────────────────────────────────────────────────────────

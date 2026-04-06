@@ -65,27 +65,30 @@ function fazerLogin() {
 // ==========================================
 
 function configurarPermissoes(perfil) {
-  var botoes = ['btn-agendamento','btn-maquinas','btn-engenheiros',
-                'btn-tecnicos','btn-relatorio','btn-pmoc'];
-
-  botoes.forEach(function(b) {
+  // Oculta todos os botões de menu primeiro
+  var todos = ['btn-agendamento','btn-maquinas','btn-engenheiros','btn-tecnicos',
+               'btn-relatorio','btn-pmoc','btn-empresas','btn-pagamentos'];
+  todos.forEach(function(b) {
     var el = document.getElementById(b);
     if (el) el.style.display = 'none';
   });
 
   if (perfil === "ADMIN") {
-    botoes.forEach(function(b) {
+    // Admin vê tudo
+    todos.forEach(function(b) {
+      var el = document.getElementById(b);
+      if (el) el.style.display = 'block';
+    });
+  } else if (perfil === "ENGENHEIRO") {
+    // Engenheiro: relatórios, pagamentos e doc pmoc
+    ['btn-relatorio','btn-pmoc','btn-pagamentos'].forEach(function(b) {
       var el = document.getElementById(b);
       if (el) el.style.display = 'block';
     });
   } else if (perfil === "PLENO") {
+    // Pleno: só relatórios
     var r = document.getElementById('btn-relatorio');
     if (r) r.style.display = 'block';
-  } else if (perfil === "ENGENHEIRO") {
-    var r = document.getElementById('btn-relatorio');
-    var p = document.getElementById('btn-pmoc');
-    if (r) r.style.display = 'block';
-    if (p) p.style.display = 'block';
   }
 }
 
@@ -94,7 +97,8 @@ function configurarPermissoes(perfil) {
 // ==========================================
 
 function abrirModulo(moduloNome) {
-  var modulos = ['HOME','AGENDAMENTO','TECNICOS','ENGENHEIROS','MAQUINAS','RELATORIO','PMOC'];
+  var modulos = ['HOME','AGENDAMENTO','TECNICOS','ENGENHEIROS','MAQUINAS',
+                 'RELATORIO','PMOC','EMPRESAS','PAGAMENTOS'];
   modulos.forEach(function(m) {
     var el = document.getElementById('modulo-' + m);
     if (el) el.style.display = 'none';
@@ -102,6 +106,9 @@ function abrirModulo(moduloNome) {
 
   var ativo = document.getElementById('modulo-' + moduloNome);
   if (ativo) ativo.style.display = 'flex';
+
+  // Marca qual módulo está ativo para controle de impressão
+  document.body.setAttribute('data-modulo-ativo', moduloNome);
 
   document.querySelectorAll('.menu-btn').forEach(function(btn) {
     btn.classList.remove('active');
@@ -111,7 +118,10 @@ function abrirModulo(moduloNome) {
 
   if (moduloNome === 'TECNICOS')    listarTecnicos();
   if (moduloNome === 'ENGENHEIROS') listarEngenheiros();
-  if (moduloNome === 'MAQUINAS')    listarMaquinas();
+  if (moduloNome === 'MAQUINAS')    { listarMaquinas(); carregarEmpresasNoSelect('maq_empresa'); }
+  if (moduloNome === 'EMPRESAS')    inicializarEmpresas();
+  if (moduloNome === 'RELATORIO')   inicializarRelatorio();
+  if (moduloNome === 'PAGAMENTOS')  inicializarPagamentos();
 }
 
 function sair() {
@@ -175,20 +185,28 @@ function limparFormMaquina() {
   document.getElementById('maq_serie').value       = "";
   document.getElementById('maq_criticidade').value = "Baixa";
   document.getElementById('maq_capacidade').value  = "";
+  document.getElementById('maq_empresa').value     = "";
+  document.getElementById('maq_ocup_fixos').value  = "";
+  document.getElementById('maq_ocup_var').value    = "";
+  document.getElementById('maq_area').value        = "";
   document.getElementById('btn-salvar-maq').innerText = "Salvar";
   document.getElementById('msg-maquina').innerText    = "";
 }
 
 function salvarMaquina() {
   var dados = {
-    id         : document.getElementById('maq_id').value,
-    fuel       : document.getElementById('maq_fuel').value,
-    localizacao: document.getElementById('maq_localizacao').value,
-    modelo     : document.getElementById('maq_modelo').value,
-    marca      : document.getElementById('maq_marca').value,
-    serie      : document.getElementById('maq_serie').value,
-    criticidade: document.getElementById('maq_criticidade').value,
-    capacidade : document.getElementById('maq_capacidade').value
+    id          : document.getElementById('maq_id').value,
+    fuel        : document.getElementById('maq_fuel').value,
+    localizacao : document.getElementById('maq_localizacao').value,
+    modelo      : document.getElementById('maq_modelo').value,
+    marca       : document.getElementById('maq_marca').value,
+    serie       : document.getElementById('maq_serie').value,
+    criticidade : document.getElementById('maq_criticidade').value,
+    capacidade  : document.getElementById('maq_capacidade').value,
+    empresaCnpj        : document.getElementById('maq_empresa').value,
+    ocupantesFixos     : document.getElementById('maq_ocup_fixos').value,
+    ocupantesVariaveis : document.getElementById('maq_ocup_var').value,
+    areaM2             : document.getElementById('maq_area').value
   };
   var msgEl = document.getElementById('msg-maquina');
   if (!dados.fuel || !dados.localizacao) {
@@ -235,12 +253,15 @@ function renderizarTabelaMaquinas(lista) {
   var tbody = document.getElementById('tabela-maquinas');
   tbody.innerHTML = "";
   if (lista.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px;'>Nenhuma máquina encontrada.</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;'>Nenhuma máquina encontrada.</td></tr>";
     return;
   }
   lista.forEach(function(m) {
     var corCrit = m.criticidade === "Alta"  ? "var(--danger)" :
                  (m.criticidade === "Média" ? "#f59e0b" : "#10b981");
+    var empresaLabel = m.empresaCnpj
+      ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:10px;font-weight:700;">' + m.empresaCnpj + '</span>'
+      : '<span style="font-size:10px;color:#94a3b8;">—</span>';
     var tr = document.createElement('tr');
     tr.style.borderBottom = "1px solid #e2e8f0";
     tr.innerHTML =
@@ -249,8 +270,9 @@ function renderizarTabelaMaquinas(lista) {
       '<td style="padding:10px 8px;font-size:12px;">' + m.localizacao + '</td>' +
       '<td style="padding:10px 8px;font-size:12px;">' + m.serie + '</td>' +
       '<td style="padding:10px 8px;"><span style="background:' + corCrit + ';color:white;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:bold;">' + m.criticidade + '</span></td>' +
+      '<td style="padding:10px 8px;">' + empresaLabel + '</td>' +
       '<td style="padding:10px 8px;text-align:center;min-width:90px;">' +
-        '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + m.localizacao + '\',\'' + m.modelo + '\',\'' + m.marca + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + m.capacidade + '\')" style="background:#f59e0b;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">EDITAR</button>' +
+        '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + encodeURIComponent(m.localizacao) + '\',\'' + m.modelo + '\',\'' + encodeURIComponent(m.marca) + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + encodeURIComponent(m.capacidade) + '\',\'' + (m.empresaCnpj||'') + '\',\'' + (m.ocupantesFixos||'') + '\',\'' + (m.ocupantesVariaveis||'') + '\',\'' + (m.areaM2||'') + '\')" style="background:#f59e0b;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">EDITAR</button>' +
         '<button onclick="abrirAutorizarRelimpeza(\'' + m.fuel + '\')" style="background:#8b5cf6;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">AUTORIZAR</button>' +
         '<button onclick="apagarMaquina(\'' + m.id + '\')" style="background:var(--danger);color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold;">X</button>' +
       '</td>';
@@ -301,19 +323,44 @@ function abrirAutorizarRelimpeza(fuel) {
     .autorizarRelimpeza(fuel, tipo);
 }
 
-function editarMaquina(id, fuel, localizacao, modelo, marca, serie, criticidade, capacidade) {
+function editarMaquina(id, fuel, localizacao, modelo, marca, serie, criticidade, capacidade, empresaCnpj, ocupFixos, ocupVar, area) {
   document.getElementById('maq_id').value          = id;
   document.getElementById('maq_fuel').value        = fuel;
-  document.getElementById('maq_localizacao').value = localizacao;
+  document.getElementById('maq_localizacao').value = decodeURIComponent(localizacao);
   document.getElementById('maq_modelo').value      = modelo;
-  document.getElementById('maq_marca').value       = marca;
+  document.getElementById('maq_marca').value       = decodeURIComponent(marca);
   document.getElementById('maq_serie').value       = serie;
   document.getElementById('maq_criticidade').value = criticidade;
-  document.getElementById('maq_capacidade').value  = capacidade;
+  document.getElementById('maq_capacidade').value  = decodeURIComponent(capacidade);
+  document.getElementById('maq_empresa').value     = empresaCnpj || "";
+  document.getElementById('maq_ocup_fixos').value  = ocupFixos || "";
+  document.getElementById('maq_ocup_var').value    = ocupVar   || "";
+  document.getElementById('maq_area').value        = area      || "";
   document.getElementById('btn-salvar-maq').innerText = "Atualizar";
   var msgEl = document.getElementById('msg-maquina');
   msgEl.innerText   = "Modo de Edição ativado.";
   msgEl.style.color = "#f59e0b";
+}
+
+function carregarEmpresasNoSelect(idSelect) {
+  google.script.run
+    .withSuccessHandler(function(lista) {
+      var sel = document.getElementById(idSelect);
+      if (!sel) return;
+      var valorAtual = sel.value;
+      // Limpa opções antigas (mantém a primeira "Sem vínculo")
+      while (sel.options.length > 1) sel.remove(1);
+      (lista || []).forEach(function(emp) {
+        if (!emp.cnpj) return;
+        var opt = document.createElement('option');
+        opt.value = emp.cnpj;
+        opt.text  = (emp.nomeFantasia || emp.razaoSocial) + ' — ' + emp.cnpj;
+        sel.appendChild(opt);
+      });
+      if (valorAtual) sel.value = valorAtual;
+    })
+    .withFailureHandler(function(){})
+    .getListaEmpresas();
 }
 
 function apagarMaquina(id) {

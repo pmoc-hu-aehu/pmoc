@@ -22,33 +22,70 @@ body, html {
 
 #login-wrapper {
   display: flex; height: 100vh; width: 100vw;
-  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.stockcake.com/public/f/4/e/f4e96ccf-e2eb-4546-bf1e-87e58f4921a9_large/penguins-at-sunset-stockcake.jpg');
-  background-size: cover; background-position: center; position: absolute; z-index: 50;
+  background-size: cover; background-position: center top; position: absolute; z-index: 50;
 }
 
-.login-left { flex: 1.2; color: white; display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; }
-.login-title { font-size: 80px; font-weight: 900; margin: 0; letter-spacing: -3px; color: #ffffff; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-.login-subtitle { font-size: 20px; font-weight: 600; color: var(--primary); margin: 5px 0 20px 0; text-transform: uppercase; letter-spacing: 1px; }
+/* ── LOGIN — LADO ESQUERDO ── */
+.login-left {
+  flex: 1.4; color: white; display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 60px 70px; position: relative;
+}
+.login-left-content { margin-bottom: auto; padding-top: 20vh; }
+.login-title {
+  font-size: 96px; font-weight: 900; margin: 0; letter-spacing: -4px;
+  color: #ffffff; text-shadow: 0 4px 20px rgba(0,0,0,0.4); line-height: 1;
+}
+.login-subtitle {
+  font-size: 18px; font-weight: 700; color: var(--primary);
+  margin: 10px 0 20px 0; text-transform: uppercase; letter-spacing: 2px;
+}
 .login-divider { height: 4px; width: 60px; background: var(--primary); margin-bottom: 20px; border-radius: 2px; }
-.login-desc { font-size: 16px; color: #e2e8f0; line-height: 1.6; max-width: 450px; }
-.dev-credit { margin-top: 50px; font-size: 12px; color: #cbd5e1; font-weight: 800; border-left: 3px solid var(--primary); padding-left: 15px; letter-spacing: 1px; }
-.login-right { flex: 1; display: flex; justify-content: center; align-items: center; }
-.login-box { width: 100%; max-width: 380px; background: transparent; padding: 40px; border: none; color: white; }
-.login-box h2 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; color: white; }
-.login-hint { color: #cbd5e1; font-size: 14px; margin-bottom: 30px; }
-.login-box label { font-size: 12px; font-weight: 700; color: white; text-transform: uppercase; margin-bottom: 8px; display: block; letter-spacing: 1px; }
+.login-desc {
+  font-size: 15px; color: #e2e8f0; line-height: 1.8; max-width: 420px; font-weight: 400;
+}
+.login-footer {
+  font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; margin-top: 40px;
+}
+
+/* ── LOGIN — LADO DIREITO (glassmorphism) ── */
+.login-right {
+  flex: 0 0 420px; display: flex; justify-content: center; align-items: center;
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-left: 1px solid rgba(255,255,255,0.15);
+}
+.login-box {
+  width: 100%; max-width: 340px; padding: 50px 40px;
+  background: transparent; color: white;
+}
+.login-box h2 { margin: 0 0 8px; font-size: 26px; font-weight: 800; color: white; }
+.login-hint { color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 32px; }
+.login-box label {
+  font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.7);
+  text-transform: uppercase; letter-spacing: 1.2px; display: block; margin-bottom: 6px;
+}
 .login-box .input-form {
-  width: 100%; padding: 15px; border: 2px solid rgba(255,255,255,0.8); border-radius: 10px; font-size: 15px;
-  background: rgba(255,255,255,0.1); color: white; box-sizing: border-box; transition: 0.3s; outline: none;
+  width: 100%; padding: 14px 16px; border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 10px; font-size: 14px; background: rgba(255,255,255,0.1);
+  color: white; box-sizing: border-box; transition: 0.3s; outline: none; margin-bottom: 16px;
 }
-.login-box .input-form::placeholder { color: rgba(255,255,255,0.5); }
-.login-box .input-form:focus { border-color: var(--primary); background: rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(14,165,233,0.3); }
+.login-box .input-form::placeholder { color: rgba(255,255,255,0.4); }
+.login-box .input-form:focus {
+  border-color: var(--primary); background: rgba(255,255,255,0.18);
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.25);
+}
 .login-box .btn-primary {
-  background: var(--primary); color: white; border: none; padding: 16px; border-radius: 10px; font-size: 15px; font-weight: 800; width: 100%; cursor: pointer;
-  transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; box-shadow: 0 4px 15px rgba(14,165,233,0.4);
+  background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px;
+  font-size: 14px; font-weight: 800; width: 100%; cursor: pointer; transition: 0.25s;
+  text-transform: uppercase; letter-spacing: 1.5px; margin-top: 6px;
+  box-shadow: 0 4px 20px rgba(14,165,233,0.5);
 }
-.login-box .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,165,233,0.6); }
-.msg-alerta { text-align: center; font-weight: 700; color: #f87171; font-size: 13px; margin-top: 20px; }
+.login-box .btn-primary:hover {
+  background: var(--primary-hover); transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(14,165,233,0.6);
+}
+.msg-alerta { text-align: center; font-weight: 700; color: #fca5a5; font-size: 13px; margin-top: 16px; min-height: 20px; }
 
 #tela-dashboard { display: none; height: 100vh; width: 100vw; overflow: hidden; }
 

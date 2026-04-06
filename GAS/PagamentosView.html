@@ -1,0 +1,557 @@
+<div id="modulo-PAGAMENTOS" class="modulo-oculto">
+<div style="padding:20px 24px 60px; display:flex; flex-direction:column; gap:14px; background:#f8fafc; min-height:100%;">
+
+  <!-- TOPO -->
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+              background:white; padding:16px 20px; border-radius:12px; border:1px solid #e2e8f0;
+              box-shadow:0 1px 4px rgba(0,0,0,0.04);" class="no-print">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <i class="material-icons" style="color:#0284c7; font-size:26px;">payments</i>
+      <div>
+        <h2 style="margin:0; font-size:18px; font-weight:800; color:#0f172a;">Pagamentos</h2>
+        <p style="margin:3px 0 0; font-size:12px; color:#64748b;">Tabela de preços e fechamento mensal por empresa prestadora.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABAS INTERNAS -->
+  <div class="no-print" style="display:flex; gap:0; background:white; border-radius:12px; border:1px solid #e2e8f0;
+              box-shadow:0 1px 4px rgba(0,0,0,0.04); overflow:hidden;">
+    <button id="pag-tab-precos" onclick="pagAba('precos')"
+            style="flex:1; padding:13px; border:none; background:#0ea5e9; color:white;
+                   font-weight:800; font-size:13px; cursor:pointer; transition:all 0.2s;
+                   display:flex; align-items:center; justify-content:center; gap:6px;">
+      <i class="material-icons" style="font-size:16px;">price_change</i> Tabela de Preços
+    </button>
+    <button id="pag-tab-fechamento" onclick="pagAba('fechamento')"
+            style="flex:1; padding:13px; border:none; background:#f1f5f9; color:#475569;
+                   font-weight:800; font-size:13px; cursor:pointer; transition:all 0.2s;
+                   display:flex; align-items:center; justify-content:center; gap:6px;
+                   border-left:1px solid #e2e8f0;">
+      <i class="material-icons" style="font-size:16px;">receipt_long</i> Fechamento Mensal
+    </button>
+  </div>
+
+  <!-- ===== ABA: TABELA DE PREÇOS ===== -->
+  <div id="pag-painel-precos">
+    <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start;">
+
+      <!-- FORM -->
+      <div style="background:white; border-radius:12px; border:1px solid #e2e8f0;
+                  box-shadow:0 1px 4px rgba(0,0,0,0.04); padding:20px; width:300px; flex-shrink:0;">
+        <h3 style="margin:0 0 14px; font-size:14px; font-weight:800; color:#0f172a;">
+          <i class="material-icons" style="vertical-align:middle; color:#0ea5e9; font-size:17px;">add_circle</i>
+          <span id="preco-form-titulo"> Novo Preço</span>
+        </h3>
+        <input type="hidden" id="preco-id">
+
+        <div class="pag-campo">
+          <label class="pag-label">TIPO DE SERVIÇO *</label>
+          <select id="preco-tipo" class="pag-input">
+            <option value="">— Selecione —</option>
+            <option value="Filtro">Filtro</option>
+            <option value="Preventiva">Preventiva</option>
+            <option value="Corretiva">Corretiva</option>
+            <option value="Duto">Duto</option>
+            <option value="Exaustão">Exaustão</option>
+            <option value="Pressão">Pressão</option>
+            <option value="Qualidade Ar">Qualidade Ar</option>
+            <option value="Movimentação">Movimentação</option>
+          </select>
+        </div>
+
+        <div class="pag-campo">
+          <label class="pag-label">VALOR UNITÁRIO (R$) *</label>
+          <input type="number" id="preco-valor" class="pag-input" placeholder="0,00" min="0" step="0.01">
+        </div>
+
+        <div class="pag-campo">
+          <label class="pag-label">EMPRESA RESPONSÁVEL</label>
+          <div id="preco-empresa-aviso" style="display:none; padding:8px 10px; background:#fef9c3;
+               border:1px solid #fde047; border-radius:8px; font-size:11px; color:#92400e; margin-bottom:4px;">
+            <i class="material-icons" style="font-size:13px; vertical-align:middle;">warning</i>
+            Nenhuma empresa cadastrada.
+            <a href="#" onclick="abrirModulo('EMPRESAS'); return false;"
+               style="color:#0ea5e9; font-weight:700; text-decoration:none;">Cadastrar agora →</a>
+          </div>
+          <select id="preco-empresa" class="pag-input">
+            <option value="">— Nenhuma / A definir —</option>
+          </select>
+        </div>
+
+        <div class="pag-campo" style="flex-direction:row; align-items:center; gap:8px; margin-top:4px;">
+          <input type="checkbox" id="preco-ativo" checked style="width:16px; height:16px; accent-color:#0ea5e9;">
+          <label for="preco-ativo" style="font-size:12px; font-weight:600; color:#475569; cursor:pointer;">Preço ativo</label>
+        </div>
+
+        <p id="preco-msg" style="font-size:12px; font-weight:700; min-height:18px; margin:8px 0 0;"></p>
+
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button onclick="salvarPreco()" class="pag-btn pag-btn-blue" style="flex:1;">
+            <i class="material-icons">save</i> SALVAR
+          </button>
+          <button onclick="limparFormPreco()" class="pag-btn pag-btn-outline">
+            <i class="material-icons">refresh</i>
+          </button>
+        </div>
+      </div>
+
+      <!-- TABELA PREÇOS -->
+      <div style="flex:1; min-width:0; background:white; border-radius:12px; border:1px solid #e2e8f0;
+                  box-shadow:0 1px 4px rgba(0,0,0,0.04); overflow:hidden;">
+        <div style="padding:14px 20px; border-bottom:1px solid #f1f5f9;">
+          <span style="font-size:13px; font-weight:700; color:#475569;">Preços por Tipo de Serviço</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f1f5f9;">
+                <th class="pag-th">Tipo de Serviço</th>
+                <th class="pag-th">Valor Unit.</th>
+                <th class="pag-th">Empresa</th>
+                <th class="pag-th">Status</th>
+                <th class="pag-th" style="text-align:center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="preco-tabela">
+              <tr><td colspan="5" class="pag-vazio">Nenhum preço cadastrado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ABA: FECHAMENTO MENSAL ===== -->
+  <div id="pag-painel-fechamento" style="display:none;">
+
+    <!-- Filtro mês/ano -->
+    <div class="no-print" style="background:white; border-radius:12px; border:1px solid #e2e8f0;
+                box-shadow:0 1px 4px rgba(0,0,0,0.04); padding:16px 20px;">
+      <div style="display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap;">
+        <div class="pag-campo">
+          <label class="pag-label">MÊS</label>
+          <select id="fech-mes" class="pag-input" style="min-width:130px;">
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+            <option value="3">Março</option><option value="4">Abril</option>
+            <option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7">Julho</option><option value="8">Agosto</option>
+            <option value="9">Setembro</option><option value="10">Outubro</option>
+            <option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="pag-campo">
+          <label class="pag-label">ANO</label>
+          <input type="number" id="fech-ano" class="pag-input" style="width:90px;" value="2026" min="2024" max="2099">
+        </div>
+        <button onclick="gerarFechamento()" class="pag-btn pag-btn-blue">
+          <i class="material-icons">calculate</i> CALCULAR
+        </button>
+        <button onclick="imprimirFechamento()" class="pag-btn pag-btn-gray">
+          <i class="material-icons">print</i> IMPRIMIR
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div id="fech-resultado" style="display:none;">
+
+      <!-- ====== CABEÇALHO OFICIAL HU — visível na TELA e na IMPRESSÃO ====== -->
+      <div id="fech-cabecalho-hu"
+           style="background:white; border-radius:12px; border:2px solid #003366;
+                  padding:16px 20px; margin-bottom:4px;">
+        <table style="width:100%; border:none; border-collapse:collapse;">
+          <tr>
+            <td style="width:80px; vertical-align:middle; padding:0 14px 0 0;">
+              <svg width="72" height="72" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                <rect width="80" height="80" rx="4" fill="#003366"/>
+                <text x="40" y="32" font-family="Arial,sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="middle">UEL</text>
+                <line x1="10" y1="40" x2="70" y2="40" stroke="white" stroke-width="1.5"/>
+                <text x="40" y="52" font-family="Arial,sans-serif" font-size="5.5" fill="white" text-anchor="middle">UNIVERSIDADE</text>
+                <text x="40" y="60" font-family="Arial,sans-serif" font-size="5.5" fill="white" text-anchor="middle">ESTADUAL DE LONDRINA</text>
+              </svg>
+            </td>
+            <td style="vertical-align:top;">
+              <p style="margin:0; font-size:14px; font-weight:bold; color:#003366; letter-spacing:0.3px;">UNIVERSIDADE ESTADUAL DE LONDRINA</p>
+              <p style="margin:1px 0 6px; font-size:11px; color:#003366; font-weight:600;">Hospital Universitário / Centro de Ciências da Saúde</p>
+              <p style="margin:0; font-size:9px; color:#334155; line-height:1.7;">
+                <b>Campus Universitário:</b> Rodovia Celso Garcia Cid (PR 445), Km 380 &nbsp;&bull;&nbsp; Fone: (43) 3371-4000 PABX &nbsp;&bull;&nbsp; Fax: (43) 3328-4440 &nbsp;&bull;&nbsp; CEP 86051-990 &nbsp;&bull;&nbsp; www.uel.br<br>
+                <b>Hospital Universitário:</b> Av. Robert Koch, 60 &nbsp;&bull;&nbsp; Vila Operária &nbsp;&bull;&nbsp; Fone: (43) 3371-2000 PABX &nbsp;&bull;&nbsp; Fax: (43) 3337-4041 / 3337-7495 &nbsp;&bull;&nbsp; CEP 86038-440 &nbsp;&bull;&nbsp; www.hu.uel.br
+              </p>
+            </td>
+            <td style="vertical-align:top; text-align:right; width:170px; padding-left:10px;">
+              <p style="margin:0; font-size:8px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Documento</p>
+              <p style="margin:2px 0 0; font-size:11px; font-weight:800; color:#003366;">Relatório de Pagamentos</p>
+              <p style="margin:6px 0 0; font-size:8px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Período de Referência</p>
+              <p id="fech-periodo-exibir" style="margin:2px 0 0; font-size:12px; font-weight:800; color:#0f172a;"></p>
+              <p style="margin:6px 0 0; font-size:8px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Emitido em</p>
+              <p id="fech-data-emissao" style="margin:2px 0 0; font-size:10px; font-weight:700; color:#475569;"></p>
+            </td>
+          </tr>
+        </table>
+        <div style="margin-top:10px; padding-top:8px; border-top:2px solid #003366; text-align:center;">
+          <p style="margin:0; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#003366;">
+            DIVISÃO DE MANUTENÇÃO PREDIAL E EQUIPAMENTOS
+          </p>
+          <p id="fech-subtitulo" style="margin:2px 0 0; font-size:11px; color:#475569;"></p>
+        </div>
+      </div>
+      <!-- ====== FIM CABEÇALHO ====== -->
+
+      <!-- CARDS RESUMO -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+        <div class="pag-card-res" style="border-top:4px solid #0ea5e9;">
+          <span class="pag-card-num" id="fech-total-itens">0</span>
+          <span class="pag-card-lbl">Serviços Executados</span>
+        </div>
+        <div class="pag-card-res" style="border-top:4px solid #10b981;">
+          <span class="pag-card-num" id="fech-total-val" style="font-size:18px;">R$ 0,00</span>
+          <span class="pag-card-lbl">Total a Pagar</span>
+        </div>
+        <div class="pag-card-res" style="border-top:4px solid #f59e0b;">
+          <span class="pag-card-num" id="fech-qtd-empresas">0</span>
+          <span class="pag-card-lbl">Empresas</span>
+        </div>
+      </div>
+
+      <!-- DETALHAMENTO POR EMPRESA -->
+      <div id="fech-resumo-empresas" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+      <!-- RODAPÉ ASSINATURAS (visível só na impressão) -->
+      <div class="so-print" style="margin-top:40px; border-top:1px solid #999; padding-top:16px; background:white; padding:20px;">
+        <div style="display:flex; justify-content:space-between; gap:40px;">
+          <div style="text-align:center; flex:1;">
+            <div style="border-top:1px solid #000; margin-top:50px; padding-top:6px; font-size:11px; color:#000;">
+              Responsável DMPE / Engenheiro
+            </div>
+          </div>
+          <div style="text-align:center; flex:1;">
+            <div style="border-top:1px solid #000; margin-top:50px; padding-top:6px; font-size:11px; color:#000;">
+              Representante Legal da Empresa
+            </div>
+          </div>
+          <div style="text-align:center; flex:1;">
+            <div style="border-top:1px solid #000; margin-top:50px; padding-top:6px; font-size:11px; color:#000;">
+              Ordenador de Despesa / Diretoria HU
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:9px; color:#666; margin-top:20px;">
+          Documento gerado pelo Sistema PMOC &mdash; Hospital Universitário de Londrina / Universidade Estadual de Londrina
+        </p>
+      </div>
+
+    </div><!-- fim fech-resultado -->
+  </div><!-- fim pag-painel-fechamento -->
+
+</div>
+
+<!-- ESTILOS -->
+<style>
+  #modulo-PAGAMENTOS { display:none; flex-direction:column; min-height:100%; height:auto !important; }
+  .pag-campo  { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+  .pag-label  { font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.7px; }
+  .pag-input  { padding:8px 11px; border:2px solid #e2e8f0; border-radius:8px; font-size:13px;
+                font-weight:600; color:#1e293b; background:#f8fafc; outline:none; transition:border-color 0.2s; }
+  .pag-input:focus { border-color:#0ea5e9; background:white; }
+  .pag-btn    { display:inline-flex; align-items:center; gap:5px; padding:9px 16px; border:none;
+                border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .pag-btn:hover { opacity:0.85; transform:translateY(-1px); }
+  .pag-btn .material-icons { font-size:15px; }
+  .pag-btn-blue  { background:#0ea5e9; color:white; }
+  .pag-btn-gray  { background:#64748b; color:white; }
+  .pag-btn-red   { background:#ef4444; color:white; }
+  .pag-btn-outline { background:white; border:2px solid #e2e8f0; color:#475569; padding:7px 10px; }
+  .pag-btn-outline:hover { border-color:#0ea5e9; color:#0ea5e9; }
+  .pag-th     { padding:10px 12px; text-align:left; font-size:10px; font-weight:800; color:#475569;
+                text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #003366;
+                background:#f1f5f9; white-space:nowrap; }
+  .pag-td     { padding:10px 12px; border-bottom:1px solid #f1f5f9; vertical-align:middle; font-size:12px; }
+  .pag-vazio  { text-align:center; padding:50px; color:#94a3b8; font-size:13px; }
+  .pag-card-res { background:white; border-radius:10px; padding:12px 20px; border:1px solid #e2e8f0;
+                  display:flex; flex-direction:column; align-items:center; min-width:140px;
+                  box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .pag-card-num { font-size:24px; font-weight:900; color:#0f172a; line-height:1; }
+  .pag-card-lbl { font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.6px; margin-top:3px; }
+  .pag-emp-card { background:white; border-radius:12px; border:1px solid #e2e8f0;
+                  box-shadow:0 1px 4px rgba(0,0,0,0.04); overflow:hidden; }
+  .so-print { display:none; }
+
+  @media print {
+    /* Oculta tudo exceto o módulo de pagamentos */
+    body > *, .sidebar, .header-top, .btn-sair { }
+    .no-print { display:none !important; }
+    .so-print { display:block !important; }
+    /* Oculta todos os outros módulos */
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-HOME,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-AGENDAMENTO,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-TECNICOS,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-ENGENHEIROS,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-MAQUINAS,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-RELATORIO,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-PMOC,
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-EMPRESAS { display:none !important; }
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-PAGAMENTOS { display:block !important; overflow:visible !important; }
+    #pag-painel-fechamento { display:block !important; }
+    #fech-resultado       { display:block !important; }
+    #pag-painel-precos    { display:none !important; }
+    #fech-cabecalho-hu    { border:2px solid #003366 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .main-content { margin-left:0 !important; width:100% !important; padding:0 !important; }
+    body { background:white !important; }
+    .pag-emp-card { break-inside:avoid; page-break-inside:avoid; }
+    table { border-collapse:collapse !important; }
+    .pag-th, .pag-td { font-size:10px !important; padding:6px 8px !important; }
+    svg rect { fill:#003366 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+
+<!-- SCRIPTS -->
+<script>
+  var _precosDados = [];
+  var MESES_PT = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  function inicializarPagamentos() {
+    var hoje = new Date();
+    document.getElementById('fech-mes').value = hoje.getMonth() + 1;
+    document.getElementById('fech-ano').value = hoje.getFullYear();
+    carregarPrecos();
+    carregarEmpresasNoSelect();
+  }
+
+  function pagAba(aba) {
+    document.getElementById('pag-painel-precos').style.display    = aba === 'precos'    ? 'block' : 'none';
+    document.getElementById('pag-painel-fechamento').style.display = aba === 'fechamento'? 'block' : 'none';
+    document.getElementById('pag-tab-precos').style.background    = aba === 'precos'    ? '#0ea5e9' : '#f1f5f9';
+    document.getElementById('pag-tab-precos').style.color         = aba === 'precos'    ? 'white'   : '#475569';
+    document.getElementById('pag-tab-fechamento').style.background = aba === 'fechamento'? '#0ea5e9' : '#f1f5f9';
+    document.getElementById('pag-tab-fechamento').style.color      = aba === 'fechamento'? 'white'   : '#475569';
+  }
+
+  function carregarEmpresasNoSelect() {
+    google.script.run
+      .withSuccessHandler(function(lista) {
+        var sel   = document.getElementById('preco-empresa');
+        var aviso = document.getElementById('preco-empresa-aviso');
+        sel.innerHTML = '<option value="">— Nenhuma / A definir —</option>';
+        var ativas = (lista || []).filter(function(e){ return e.status === 'Ativa'; });
+        if (ativas.length === 0) {
+          aviso.style.display = 'block';
+        } else {
+          aviso.style.display = 'none';
+          ativas.forEach(function(e) {
+            var opt = document.createElement('option');
+            opt.value    = e.nomeFantasia || e.razaoSocial;
+            opt.innerText = e.nomeFantasia
+              ? e.nomeFantasia + ' – ' + e.razaoSocial
+              : e.razaoSocial;
+            sel.appendChild(opt);
+          });
+        }
+      })
+      .getListaEmpresas();
+  }
+
+  // ── TABELA DE PREÇOS ──────────────────────────────────────────────────────
+  function carregarPrecos() {
+    document.getElementById('preco-tabela').innerHTML = '<tr><td colspan="5" class="pag-vazio">Carregando...</td></tr>';
+    google.script.run
+      .withSuccessHandler(function(lista) {
+        _precosDados = lista || [];
+        renderizarPrecos(_precosDados);
+      })
+      .getTabPrecos();
+  }
+
+  function renderizarPrecos(lista) {
+    var tbody = document.getElementById('preco-tabela');
+    if (!lista || lista.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="pag-vazio">Nenhum preço cadastrado. Use o formulário ao lado.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    lista.forEach(function(p) {
+      var ativoTag = p.ativo
+        ? '<span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:800;">Ativo</span>'
+        : '<span style="background:#fee2e2;color:#dc2626;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:800;">Inativo</span>';
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="pag-td"><b>' + p.tipo + '</b></td>' +
+        '<td class="pag-td" style="font-weight:800;color:#15803d;font-size:15px;">R$&nbsp;' + p.valor.toFixed(2).replace('.',',') + '</td>' +
+        '<td class="pag-td" style="color:#475569;">' + (p.empresa || '<span style="color:#94a3b8;">A definir</span>') + '</td>' +
+        '<td class="pag-td">' + ativoTag + '</td>' +
+        '<td class="pag-td" style="text-align:center;">' +
+          '<button onclick="editarPreco(' + p.id + ')" class="pag-btn pag-btn-outline" style="padding:5px 8px;margin-right:4px;" title="Editar">' +
+            '<i class="material-icons" style="font-size:14px;">edit</i></button>' +
+          '<button onclick="confirmarExcluirPreco(' + p.id + ',\'' + p.tipo + '\')" class="pag-btn pag-btn-red" style="padding:5px 8px;" title="Excluir">' +
+            '<i class="material-icons" style="font-size:14px;">delete</i></button>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function salvarPreco() {
+    var tipo  = document.getElementById('preco-tipo').value;
+    var valor = document.getElementById('preco-valor').value;
+    if (!tipo)  { pagMsg('preco-msg','Selecione o tipo de serviço.','red'); return; }
+    if (!valor) { pagMsg('preco-msg','Informe o valor.','red'); return; }
+    pagMsg('preco-msg','Salvando...','#0ea5e9');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.sucesso) { pagMsg('preco-msg', res.msg, 'green'); carregarPrecos(); setTimeout(limparFormPreco,1200); }
+        else              pagMsg('preco-msg', res.msg, 'red');
+      })
+      .withFailureHandler(function(e){ pagMsg('preco-msg','Erro: '+e.message,'red'); })
+      .salvarPreco({ id: document.getElementById('preco-id').value,
+                     tipo: tipo, valor: valor,
+                     empresa: document.getElementById('preco-empresa').value,
+                     ativo: document.getElementById('preco-ativo').checked });
+  }
+
+  function editarPreco(id) {
+    var p = _precosDados.find(function(x){ return x.id === id; });
+    if (!p) return;
+    document.getElementById('preco-id').value      = p.id;
+    document.getElementById('preco-tipo').value    = p.tipo;
+    document.getElementById('preco-valor').value   = p.valor;
+    document.getElementById('preco-empresa').value = p.empresa || '';
+    document.getElementById('preco-ativo').checked = p.ativo;
+    document.getElementById('preco-form-titulo').innerText = ' Editar Preço';
+    pagMsg('preco-msg','','');
+  }
+
+  function limparFormPreco() {
+    document.getElementById('preco-id').value      = '';
+    document.getElementById('preco-tipo').value    = '';
+    document.getElementById('preco-valor').value   = '';
+    document.getElementById('preco-empresa').value = '';
+    document.getElementById('preco-ativo').checked = true;
+    document.getElementById('preco-form-titulo').innerText = ' Novo Preço';
+    pagMsg('preco-msg','','');
+  }
+
+  function confirmarExcluirPreco(id, tipo) {
+    if (!confirm('Excluir o preço de "' + tipo + '"?')) return;
+    google.script.run
+      .withSuccessHandler(function(res){ if (res.sucesso) carregarPrecos(); else alert('Erro: ' + res.msg); })
+      .excluirPreco(id);
+  }
+
+  // ── FECHAMENTO MENSAL ─────────────────────────────────────────────────────
+  function gerarFechamento() {
+    var mes = document.getElementById('fech-mes').value;
+    var ano = document.getElementById('fech-ano').value;
+    if (!mes || !ano) { alert('Selecione mês e ano.'); return; }
+
+    document.getElementById('fech-resultado').style.display = 'none';
+    document.getElementById('fech-resumo-empresas').innerHTML =
+      '<div style="text-align:center;padding:40px;color:#94a3b8;">' +
+      '<i class="material-icons" style="font-size:36px;display:block;margin:0 auto 8px;animation:rel-spin 1.5s linear infinite;">sync</i>' +
+      'Calculando fechamento...</div>';
+    document.getElementById('fech-resultado').style.display = 'block';
+
+    google.script.run
+      .withSuccessHandler(renderizarFechamento)
+      .withFailureHandler(function(e){
+        document.getElementById('fech-resumo-empresas').innerHTML =
+          '<div style="color:red;padding:20px;background:white;border-radius:8px;">Erro: ' + e.message + '</div>';
+      })
+      .getFechamentoMensal(mes, ano);
+  }
+
+  function renderizarFechamento(res) {
+    if (!res.sucesso) {
+      document.getElementById('fech-resumo-empresas').innerHTML =
+        '<div style="color:red;padding:20px;background:white;border-radius:8px;">Erro: ' + res.msg + '</div>';
+      return;
+    }
+    var mesNome = MESES_PT[res.mes] + ' de ' + res.ano;
+    var hoje    = new Date();
+
+    document.getElementById('fech-periodo-exibir').innerText = MESES_PT[res.mes] + '/' + res.ano;
+    document.getElementById('fech-data-emissao').innerText   =
+      hoje.toLocaleDateString('pt-BR') + ' ' + hoje.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('fech-subtitulo').innerText =
+      'Fechamento de Serviços de Manutenção Predial — ' + mesNome;
+
+    document.getElementById('fech-total-itens').innerText  = res.totalItens;
+    document.getElementById('fech-total-val').innerText    = 'R$ ' + fmtVal(res.totalGeral);
+    document.getElementById('fech-qtd-empresas').innerText = res.resumo.length;
+
+    var container = document.getElementById('fech-resumo-empresas');
+    container.innerHTML = '';
+
+    if (res.totalItens === 0) {
+      container.innerHTML =
+        '<div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:50px;text-align:center;color:#94a3b8;">' +
+        '<i class="material-icons" style="font-size:40px;display:block;margin:0 auto 10px;color:#10b981;">check_circle</i>' +
+        'Nenhum serviço registrado em ' + mesNome + '.</div>';
+      return;
+    }
+
+    res.resumo.forEach(function(emp) {
+      var linhas = emp.itens.map(function(item, idx) {
+        return '<tr style="border-bottom:1px solid #f1f5f9;">' +
+          '<td class="pag-td" style="color:#94a3b8;font-size:11px;width:30px;">' + (idx+1) + '</td>' +
+          '<td class="pag-td"><span style="background:#dbeafe;color:#1d4ed8;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:800;">' + item.tipo + '</span></td>' +
+          '<td class="pag-td" style="font-weight:800;font-family:monospace;">' + (item.fuel || '—') + '</td>' +
+          '<td class="pag-td" style="color:#475569;font-size:11px;max-width:180px;">' + (item.local || '—') + '</td>' +
+          '<td class="pag-td" style="white-space:nowrap;">' + item.data + '</td>' +
+          '<td class="pag-td" style="color:#475569;">' + (item.tecnico || '—') + '</td>' +
+          '<td class="pag-td" style="font-weight:800;color:#15803d;text-align:right;white-space:nowrap;">R$ ' + fmtVal(item.valor) + '</td>' +
+        '</tr>';
+      }).join('');
+
+      var div = document.createElement('div');
+      div.className = 'pag-emp-card';
+      div.innerHTML =
+        '<div style="padding:14px 20px;background:#0f172a;color:white;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
+          '<div>' +
+            '<div style="font-size:15px;font-weight:800;">' + emp.empresa + '</div>' +
+            '<div style="font-size:11px;opacity:0.7;margin-top:2px;">' + mesNome + ' &bull; ' + emp.itens.length + ' serviço(s)</div>' +
+          '</div>' +
+          '<div style="font-size:22px;font-weight:900;color:#4ade80;">R$ ' + fmtVal(emp.total) + '</div>' +
+        '</div>' +
+        '<div style="overflow-x:auto;">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+          '<thead><tr style="background:#f8fafc;">' +
+            '<th class="pag-th">#</th><th class="pag-th">Tipo</th>' +
+            '<th class="pag-th">FUEL / Máquina</th><th class="pag-th">Local</th>' +
+            '<th class="pag-th">Data</th><th class="pag-th">Técnico</th>' +
+            '<th class="pag-th" style="text-align:right;">Valor</th>' +
+          '</tr></thead>' +
+          '<tbody>' + linhas + '</tbody>' +
+          '<tfoot><tr style="background:#f0fdf4;">' +
+            '<td colspan="6" style="padding:10px 12px;font-size:12px;font-weight:800;text-align:right;color:#0f172a;">TOTAL — ' + emp.empresa + ':</td>' +
+            '<td style="padding:10px 12px;font-size:16px;font-weight:900;color:#15803d;text-align:right;">R$ ' + fmtVal(emp.total) + '</td>' +
+          '</tr></tfoot>' +
+        '</table></div>';
+      container.appendChild(div);
+    });
+
+    // Total geral
+    var tg = document.createElement('div');
+    tg.style.cssText = 'background:#0f172a;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;';
+    tg.innerHTML =
+      '<div style="color:#94a3b8;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">TOTAL GERAL A PAGAR — ' + mesNome.toUpperCase() + '</div>' +
+      '<div style="color:#4ade80;font-size:28px;font-weight:900;">R$ ' + fmtVal(res.totalGeral) + '</div>';
+    container.appendChild(tg);
+  }
+
+  function imprimirFechamento() {
+    if (document.getElementById('fech-resultado').style.display === 'none') {
+      alert('Gere o fechamento primeiro antes de imprimir.');
+      return;
+    }
+    window.print();
+  }
+
+  function fmtVal(v) { return (v || 0).toFixed(2).replace('.',','); }
+
+  function pagMsg(id, txt, cor) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerText = txt; el.style.color = cor;
+  }
+</script>
+</div>

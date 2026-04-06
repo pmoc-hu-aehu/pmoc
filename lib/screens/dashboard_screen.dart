@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
 import 'maquinas_screen.dart';
+import 'relatorio_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String nome;
@@ -37,27 +38,21 @@ class DashboardScreen extends StatelessWidget {
         onTap    : () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const MaquinasScreen(),
+            builder: (_) => MaquinasScreen(perfil: perfil),
           ),
         ),
       ),
       _MenuItemData(
         titulo   : 'RELATÓRIOS',
-        subtitulo: 'Histórico e exportação',
+        subtitulo: 'Contador diário',
         icon     : Icons.bar_chart_rounded,
         cor      : const Color(0xFF10b981),
-        onTap    : () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content        : const Text('Tela de Relatórios em breve'),
-              backgroundColor: const Color(0xFF1e293b),
-              behavior       : SnackBarBehavior.floating,
-              shape          : RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          );
-        },
+        onTap    : () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RelatorioScreen(tecnico: nome),
+          ),
+        ),
       ),
     ];
 
@@ -319,6 +314,8 @@ class _MenuItem extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     data.subtitulo,
+                    maxLines : 1,
+                    overflow : TextOverflow.ellipsis,
                     style: TextStyle(
                       color   : Colors.white.withValues(alpha: 0.5),
                       fontSize: 13,

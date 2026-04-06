@@ -9,8 +9,8 @@ function getRelatorio(filtros) {
   var abas = [
     { nome: "FILTROS",      tipo: "Filtro",       colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 16, colStatus: 22 },
     { nome: "PREVENTIVAS",  tipo: "Preventiva",   colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 24, colStatus: 29 },
-    { nome: "CORRETIVAS",   tipo: "Corretiva",    colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 22, colStatus: 28 },
-    { nome: "DUTOS",        tipo: "Duto",         colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 16, colStatus: 18 },
+    { nome: "CORRETIVAS",   tipo: "Corretiva",    colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto:  8, colStatus: 27 },
+    { nome: "DUTOS",        tipo: "Duto",         colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto:  8, colStatus: 17 },
     { nome: "EXAUSTAO",     tipo: "Exaustão",     colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 21, colStatus: 25 },
     { nome: "MOVIMENTACAO", tipo: "Movimentação", colFuel: 2, colTec: 1, colDataIni: 0, colDataFim: 0, colLocal: 3, colFoto: 13, colStatus: 17 },
     { nome: "PRESSAO",      tipo: "Pressão",      colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 19, colStatus: 20 },
