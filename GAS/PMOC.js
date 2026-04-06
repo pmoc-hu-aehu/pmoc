@@ -6,15 +6,25 @@
 // ─── DICIONÁRIO DE PERGUNTAS ─────────────────────────────────────────────────
 
 // Fotos por tipo — embed: foto final em base64 | links: demais como URL clicável
-var FOTOS_FILTRO     = { embed: { col: 16, label: "Após a limpeza"  },
-                         links: [{ col: 8,  label: "Foto antes" }] };
-var FOTOS_DUTO       = { embed: { col: 15, label: "Após a limpeza"  },
-                         links: [{ col: 8,  label: "Foto antes" }] };
-var FOTOS_PREVENTIVA = { embed: { col: 24, label: "Foto final"      },
-                         links: [{ col: 8,  label: "Foto início" },
-                                 { col: 23, label: "Foto processo" }] };
-var FOTOS_CORRETIVA  = { embed: { col: 21, label: "Foto final"      },
-                         links: [{ col: 8,  label: "Foto início" }] };
+var FOTOS_FILTRO      = { embed: { col: 16, label: "Após a limpeza"  },
+                          links: [{ col: 8,  label: "Foto antes" }] };
+var FOTOS_DUTO        = { embed: { col: 15, label: "Após a limpeza"  },
+                          links: [{ col: 8,  label: "Foto antes" }] };
+var FOTOS_PREVENTIVA  = { embed: { col: 24, label: "Foto final"      },
+                          links: [{ col: 8,  label: "Foto início" },
+                                  { col: 23, label: "Foto processo" }] };
+var FOTOS_CORRETIVA   = { embed: { col: 21, label: "Foto final"      },
+                          links: [{ col: 8,  label: "Foto início" }] };
+var FOTOS_EXAUSTAO    = { embed: { col: 21, label: "Foto final"      },
+                          links: [{ col: 19, label: "Foto início" },
+                                  { col: 20, label: "Foto serviço" }] };
+var FOTOS_PRESSAO     = { embed: { col: 8,  label: "Foto manômetro"  },
+                          links: [] };
+var FOTOS_QUALIDADE   = { embed: { col: 15, label: "Foto coleta"     },
+                          links: [] };
+var FOTOS_MOVIMENTACAO = { embed: null,
+                           links: [{ col: 12, label: "Foto origem" },
+                                   { col: 13, label: "Foto destino" }] };
 
 // col = índice exato da coluna na aba da planilha (0-based)
 // Colunas fixas em todas as abas: 0=DATA_INI 1=HORA_INI 2=DATA_FIM 3=HORA_FIM 4=TECNICO
@@ -98,6 +108,71 @@ var DICT_CORRETIVA = [
   { col: 25, pergunta: "Chapa funcional do responsável",                   tipo: "texto"   }
   // col 26 = LINK_ASSINATURA (ignorado)
   // col 27 = STATUS_GERAL    (ignorado)
+];
+
+var DICT_EXAUSTAO = [
+  // col 8  = tipoEquipamento (texto)
+  { col: 8,  pergunta: "Tipo de equipamento",                    tipo: "texto"   },
+  { col: 9,  pergunta: "Limpeza do rotor realizada?",            tipo: "bool"    },
+  { col: 10, pergunta: "Estado das correias",                    tipo: "texto"   },
+  { col: 11, pergunta: "Lubrificação dos mancais realizada?",    tipo: "bool"    },
+  { col: 12, pergunta: "Fixação e vibração verificadas?",        tipo: "bool"    },
+  { col: 13, pergunta: "Sensores de acionamento OK?",            tipo: "bool"    },
+  { col: 14, pergunta: "Tensão elétrica medida",                 tipo: "medicao", unidade: "V"   },
+  { col: 15, pergunta: "Corrente elétrica medida",               tipo: "medicao", unidade: "A"   },
+  { col: 16, pergunta: "Velocidade do ar",                       tipo: "medicao", unidade: "m/s" },
+  { col: 17, pergunta: "Filtros/telas limpos e íntegros?",       tipo: "bool"    },
+  { col: 18, pergunta: "Status do equipamento",                  tipo: "texto"   },
+  { col: 22, pergunta: "Responsável que acompanhou o serviço",   tipo: "texto"   },
+  { col: 23, pergunta: "Chapa funcional do responsável",         tipo: "texto"   }
+  // col 19 = FOTO_INICIO | col 20 = FOTO_SERVICO | col 21 = FOTO_FINAL | col 24 = ASSINATURA
+];
+
+var DICT_PRESSAO = [
+  // col 8  = FOTO_MANOMETRO (ignorado)
+  { col: 9,  pergunta: "Pressão diferencial medida",             tipo: "medicao", unidade: "Pa"  },
+  { col: 10, pergunta: "Tipo de sala",                           tipo: "texto"   },
+  { col: 11, pergunta: "Sala em conformidade (pressão)?",        tipo: "bool"    },
+  { col: 12, pergunta: "Vedação de portas e janelas OK?",        tipo: "bool"    },
+  { col: 13, pergunta: "Mola de porta funcionando?",             tipo: "bool"    },
+  { col: 14, pergunta: "Situação do filtro HEPA",                tipo: "texto"   },
+  { col: 15, pergunta: "Status geral da sala",                   tipo: "texto"   },
+  { col: 16, pergunta: "Observações",                            tipo: "texto"   },
+  { col: 17, pergunta: "Responsável que acompanhou o serviço",   tipo: "texto"   },
+  { col: 18, pergunta: "Chapa funcional do responsável",         tipo: "texto"   }
+  // col 19 = ASSINATURA | col 20 = STATUS
+];
+
+var DICT_QUALIDADE_AR = [
+  // cols 0-5 normais; col 6 = pontoColeta; col 7 = localizacaoTexto
+  { col: 6,  pergunta: "Ponto de coleta",                        tipo: "texto"   },
+  { col: 7,  pergunta: "Localização / descrição",                tipo: "texto"   },
+  { col: 8,  pergunta: "Tipo de coleta",                         tipo: "texto"   },
+  { col: 9,  pergunta: "CO₂ medido",                             tipo: "medicao", unidade: "ppm" },
+  { col: 10, pergunta: "Umidade relativa",                       tipo: "medicao", unidade: "%"   },
+  { col: 11, pergunta: "Temperatura",                            tipo: "medicao", unidade: "°C"  },
+  { col: 12, pergunta: "Velocidade do ar",                       tipo: "medicao", unidade: "m/s" },
+  { col: 13, pergunta: "ID da amostra microbiológica",           tipo: "texto"   },
+  { col: 14, pergunta: "Status da qualidade do ar",              tipo: "texto"   },
+  { col: 16, pergunta: "Observações",                            tipo: "texto"   },
+  { col: 17, pergunta: "Responsável que acompanhou o serviço",   tipo: "texto"   },
+  { col: 18, pergunta: "Chapa funcional do responsável",         tipo: "texto"   }
+  // col 15 = FOTO_COLETA | col 19 = ASSINATURA | col 20 = STATUS
+];
+
+// MOVIMENTAÇÃO tem estrutura diferente: col0=dataHora_str, col1=tecnico, col2=fuel
+var DICT_MOVIMENTACAO = [
+  { col: 3,  pergunta: "Setor de origem",                        tipo: "texto"   },
+  { col: 4,  pergunta: "Tipo de movimentação",                   tipo: "texto"   },
+  { col: 5,  pergunta: "Motivo",                                  tipo: "texto"   },
+  { col: 6,  pergunta: "Setor de destino",                       tipo: "texto"   },
+  { col: 7,  pergunta: "Estado do equipamento",                  tipo: "texto"   },
+  { col: 8,  pergunta: "Acessórios incluídos",                   tipo: "texto"   },
+  { col: 9,  pergunta: "Proteção para transporte realizada?",    tipo: "bool"    },
+  { col: 11, pergunta: "Observações",                            tipo: "texto"   },
+  { col: 14, pergunta: "Responsável que acompanhou",             tipo: "texto"   },
+  { col: 15, pergunta: "Chapa funcional do responsável",         tipo: "texto"   }
+  // col 12 = FOTO_ORIGEM | col 13 = FOTO_DESTINO | col 16 = ASSINATURA
 ];
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -229,6 +304,36 @@ function _filtrarPorFuel(registros, fuel) {
   return registros.filter(function(r) { return String(r[5]).trim() === f; });
 }
 
+// Movimentação tem fuel em col[2] (estrutura diferente das demais abas)
+function _filtrarMovimentacaoPorFuel(registros, fuel) {
+  var f = String(fuel).trim();
+  return registros.filter(function(r) { return String(r[2]).trim() === f; });
+}
+
+// Movimentação guarda data+hora juntos em col[0] como "dd/MM/yyyy HH:mm"
+function _buscarMovimentacoesMes(mes, ano) {
+  try {
+    var sheet = getPlanilha().getSheetByName("MOVIMENTACAO");
+    if (!sheet || sheet.getLastRow() < 2) return [];
+    var dados = sheet.getDataRange().getValues();
+    var resultado = [];
+    for (var i = 1; i < dados.length; i++) {
+      var linha = dados[i];
+      // col[0] = "dd/MM/yyyy HH:mm" — pega só a parte da data
+      var partes = String(linha[0]).split(' ')[0].split('/');
+      if (partes.length < 3) continue;
+      var d = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+      if (isNaN(d.getTime())) continue;
+      if (d.getMonth() !== mes || d.getFullYear() !== ano) continue;
+      resultado.push(linha);
+    }
+    return resultado;
+  } catch(e) {
+    Logger.log("Erro _buscarMovimentacoesMes: " + e.message);
+    return [];
+  }
+}
+
 // ─── DADOS PARA PREVIEW NA TELA ──────────────────────────────────────────────
 
 function getDadosPmocPreview(mes, ano) {
@@ -237,10 +342,14 @@ function getDadosPmocPreview(mes, ano) {
     var a = parseInt(ano);
 
     // Busca todos os registros do mês uma única vez (eficiente)
-    var todosFiltros     = _buscarRegistrosMes("FILTROS",     m, a);
-    var todosDutos       = _buscarRegistrosMes("DUTOS",       m, a);
-    var todasPreventivas = _buscarRegistrosMes("PREVENTIVAS", m, a);
-    var todasCorretivas  = _buscarRegistrosMes("CORRETIVAS",  m, a);
+    var todosFiltros     = _buscarRegistrosMes("FILTROS",      m, a);
+    var todosDutos       = _buscarRegistrosMes("DUTOS",        m, a);
+    var todasPreventivas = _buscarRegistrosMes("PREVENTIVAS",  m, a);
+    var todasCorretivas  = _buscarRegistrosMes("CORRETIVAS",   m, a);
+    var todasExaustoes   = _buscarRegistrosMes("EXAUSTAO",     m, a);
+    var todasPressoes    = _buscarRegistrosMes("PRESSAO",      m, a);
+    var todasQualidades  = _buscarRegistrosMes("QUALIDADE_AR", m, a);
+    var todasMovimenta   = _buscarMovimentacoesMes(m, a);
 
     var maquinas = getListaMaquinas();
     var resumo = maquinas.map(function(maq) {
@@ -248,6 +357,10 @@ function getDadosPmocPreview(mes, ano) {
       var dutos       = _filtrarPorFuel(todosDutos,       maq.fuel).length;
       var preventivas = _filtrarPorFuel(todasPreventivas, maq.fuel).length;
       var corretivas  = _filtrarPorFuel(todasCorretivas,  maq.fuel).length;
+      var exaustoes   = _filtrarPorFuel(todasExaustoes,   maq.fuel).length;
+      var pressoes    = _filtrarPorFuel(todasPressoes,    maq.fuel).length;
+      var qualidades  = _filtrarPorFuel(todasQualidades,  maq.fuel).length;
+      var movimenta   = _filtrarMovimentacaoPorFuel(todasMovimenta, maq.fuel).length;
       return {
         fuel        : maq.fuel,
         localizacao : maq.localizacao,
@@ -259,7 +372,11 @@ function getDadosPmocPreview(mes, ano) {
         dutos       : dutos,
         preventivas : preventivas,
         corretivas  : corretivas,
-        total       : filtros + dutos + preventivas + corretivas
+        exaustoes   : exaustoes,
+        pressoes    : pressoes,
+        qualidades  : qualidades,
+        movimenta   : movimenta,
+        total       : filtros + dutos + preventivas + corretivas + exaustoes + pressoes + qualidades + movimenta
       };
     });
 
@@ -271,10 +388,14 @@ function getDadosPmocPreview(mes, ano) {
 
 function getDicionario() {
   return {
-    filtro    : DICT_FILTRO,
-    duto      : DICT_DUTO,
-    preventiva: DICT_PREVENTIVA,
-    corretiva : DICT_CORRETIVA
+    filtro       : DICT_FILTRO,
+    duto         : DICT_DUTO,
+    preventiva   : DICT_PREVENTIVA,
+    corretiva    : DICT_CORRETIVA,
+    exaustao     : DICT_EXAUSTAO,
+    pressao      : DICT_PRESSAO,
+    qualidadeAr  : DICT_QUALIDADE_AR,
+    movimentacao : DICT_MOVIMENTACAO
   };
 }
 
@@ -311,14 +432,19 @@ function gerarPmocPdf(mes, ano, engenheiroId) {
     } catch(e3) {}
 
     // Busca todos os registros do mês
-    var todosFiltros     = _buscarRegistrosMes("FILTROS",     m, a);
-    var todosDutos       = _buscarRegistrosMes("DUTOS",       m, a);
-    var todasPreventivas = _buscarRegistrosMes("PREVENTIVAS", m, a);
-    var todasCorretivas  = _buscarRegistrosMes("CORRETIVAS",  m, a);
+    var todosFiltros     = _buscarRegistrosMes("FILTROS",      m, a);
+    var todosDutos       = _buscarRegistrosMes("DUTOS",        m, a);
+    var todasPreventivas = _buscarRegistrosMes("PREVENTIVAS",  m, a);
+    var todasCorretivas  = _buscarRegistrosMes("CORRETIVAS",   m, a);
+    var todasExaustoes   = _buscarRegistrosMes("EXAUSTAO",     m, a);
+    var todasPressoes    = _buscarRegistrosMes("PRESSAO",      m, a);
+    var todasQualidades  = _buscarRegistrosMes("QUALIDADE_AR", m, a);
+    var todasMovimenta   = _buscarMovimentacoesMes(m, a);
 
     var maquinas = getListaMaquinas();
     var html = _gerarHtmlPmoc(maquinas, m, a, nomeMes, engenheiro, mapaEmpresas,
-                              todosFiltros, todosDutos, todasPreventivas, todasCorretivas);
+                              todosFiltros, todosDutos, todasPreventivas, todasCorretivas,
+                              todasExaustoes, todasPressoes, todasQualidades, todasMovimenta);
 
     var blob = Utilities.newBlob(html, 'text/html', 'pmoc.html');
     var pdf  = blob.getAs('application/pdf');
@@ -335,16 +461,24 @@ function gerarPmocPdf(mes, ano, engenheiroId) {
 }
 
 function _gerarHtmlPmoc(maquinas, mes, ano, nomeMes, engenheiro, mapaEmpresas,
-                         todosFiltros, todosDutos, todasPreventivas, todasCorretivas) {
+                         todosFiltros, todosDutos, todasPreventivas, todasCorretivas,
+                         todasExaustoes, todasPressoes, todasQualidades, todasMovimenta) {
   var secoes = "";
   maquinas.forEach(function(maq) {
     var filtros     = _filtrarPorFuel(todosFiltros,     maq.fuel);
     var dutos       = _filtrarPorFuel(todosDutos,       maq.fuel);
     var preventivas = _filtrarPorFuel(todasPreventivas, maq.fuel);
     var corretivas  = _filtrarPorFuel(todasCorretivas,  maq.fuel);
-    if (filtros.length + dutos.length + preventivas.length + corretivas.length === 0) return;
+    var exaustoes   = _filtrarPorFuel(todasExaustoes,   maq.fuel);
+    var pressoes    = _filtrarPorFuel(todasPressoes,    maq.fuel);
+    var qualidades  = _filtrarPorFuel(todasQualidades,  maq.fuel);
+    var movimenta   = _filtrarMovimentacaoPorFuel(todasMovimenta, maq.fuel);
+    var total = filtros.length + dutos.length + preventivas.length + corretivas.length +
+                exaustoes.length + pressoes.length + qualidades.length + movimenta.length;
+    if (total === 0) return;
     var nomeEmpresa = mapaEmpresas[String(maq.empresaCnpj || "").trim()] || "";
-    secoes += _secaoMaquina(maq, filtros, dutos, preventivas, corretivas, nomeEmpresa);
+    secoes += _secaoMaquina(maq, filtros, dutos, preventivas, corretivas,
+                            exaustoes, pressoes, qualidades, movimenta, nomeEmpresa);
   });
 
   if (!secoes) secoes = '<p style="text-align:center;color:#666;padding:40px">Nenhum registro encontrado para ' + nomeMes + '/' + ano + '.</p>';
@@ -393,7 +527,8 @@ function _gerarHtmlPmoc(maquinas, mes, ano, nomeMes, engenheiro, mapaEmpresas,
     '</body></html>';
 }
 
-function _secaoMaquina(maq, filtros, dutos, preventivas, corretivas, nomeEmpresa) {
+function _secaoMaquina(maq, filtros, dutos, preventivas, corretivas,
+                        exaustoes, pressoes, qualidades, movimenta, nomeEmpresa) {
   var out = '<div class="secao-maquina">';
 
   // ── Dados do equipamento em tabela organizada ──
@@ -416,10 +551,14 @@ function _secaoMaquina(maq, filtros, dutos, preventivas, corretivas, nomeEmpresa
     '</tr>' +
     '</tbody></table>';
 
-  if (filtros.length)     out += _blocoRegistros("Limpeza de Filtros",    filtros,     DICT_FILTRO,     FOTOS_FILTRO);
-  if (dutos.length)       out += _blocoRegistros("Limpeza de Dutos",      dutos,       DICT_DUTO,       FOTOS_DUTO);
-  if (preventivas.length) out += _blocoRegistros("Manutenção Preventiva", preventivas, DICT_PREVENTIVA, FOTOS_PREVENTIVA);
-  if (corretivas.length)  out += _blocoRegistros("Manutenção Corretiva",  corretivas,  DICT_CORRETIVA,  FOTOS_CORRETIVA);
+  if (filtros.length)     out += _blocoRegistros("Limpeza de Filtros",         filtros,     DICT_FILTRO,         FOTOS_FILTRO);
+  if (dutos.length)       out += _blocoRegistros("Limpeza de Dutos",           dutos,       DICT_DUTO,           FOTOS_DUTO);
+  if (preventivas.length) out += _blocoRegistros("Manutenção Preventiva",      preventivas, DICT_PREVENTIVA,     FOTOS_PREVENTIVA);
+  if (corretivas.length)  out += _blocoRegistros("Manutenção Corretiva",       corretivas,  DICT_CORRETIVA,      FOTOS_CORRETIVA);
+  if (exaustoes.length)   out += _blocoRegistros("Sistema de Exaustão",        exaustoes,   DICT_EXAUSTAO,       FOTOS_EXAUSTAO);
+  if (pressoes.length)    out += _blocoRegistros("Verificação de Pressão",     pressoes,    DICT_PRESSAO,        FOTOS_PRESSAO);
+  if (qualidades.length)  out += _blocoRegistros("Qualidade do Ar",            qualidades,  DICT_QUALIDADE_AR,   FOTOS_QUALIDADE);
+  if (movimenta.length)   out += _blocoMovimentacao(movimenta);
 
   out += '</div>';
   return out;
@@ -485,6 +624,52 @@ function _blocoRegistros(titulo, registros, dicionario, defFotos) {
         out += '<div style="margin-bottom:8px">' + linksHtml.join('') + '</div>';
       }
     }
+  });
+  return out;
+}
+
+// Bloco especial para Movimentação (estrutura de colunas diferente das demais)
+function _blocoMovimentacao(registros) {
+  var out = '<div class="tipo-bloco">MOVIMENTAÇÃO DE EQUIPAMENTO — ' +
+    registros.length + ' registro' + (registros.length > 1 ? 's' : '') + '</div>';
+
+  registros.forEach(function(reg, idx) {
+    // col[0] = "dd/MM/yyyy HH:mm", col[1] = tecnico, col[2] = fuel
+    var dataHora = String(reg[0] || '—');
+    var partes   = dataHora.split(' ');
+    var data     = partes[0] || '—';
+    var hora     = partes[1] || '—';
+    var tecnico  = reg[1] || '—';
+
+    out += '<table class="tbl-exec"><tbody>' +
+      '<tr>' +
+        '<td class="lbl">Registro</td><td class="val"><strong>#' + (idx+1) + '</strong></td>' +
+        '<td class="lbl">Data</td><td class="val"><strong>' + data + '</strong></td>' +
+        '<td class="lbl">Hora</td><td class="val">' + hora + '</td>' +
+      '</tr><tr>' +
+        '<td class="lbl">Técnico</td><td class="val" colspan="5"><strong>' + tecnico + '</strong></td>' +
+      '</tr>' +
+      '</tbody></table>';
+
+    out += '<table><thead><tr><th>Campo</th><th style="width:200px">Informação</th></tr></thead><tbody>';
+    DICT_MOVIMENTACAO.forEach(function(item) {
+      var resposta = _formatarResposta(reg[item.col], item.tipo, item.unidade);
+      if (resposta === null) return;
+      var cls = item.tipo === "bool"
+        ? (resposta === "Sim" ? "r-sim" : "r-nao")
+        : "r-txt";
+      out += '<tr><td>' + item.pergunta + '</td><td class="' + cls + '">' + resposta + '</td></tr>';
+    });
+    out += '</tbody></table>';
+
+    // Links das fotos
+    var linksHtml = [];
+    [[12, "Foto origem"], [13, "Foto destino"]].forEach(function(f) {
+      var id = _extrairFileId(reg[f[0]]);
+      if (!id) return;
+      linksHtml.push('<a href="https://drive.google.com/file/d/' + id + '/view" style="font-size:8px;color:#0369a1;margin-right:12px">' + f[1] + ' ↗</a>');
+    });
+    if (linksHtml.length) out += '<div style="margin-bottom:8px">' + linksHtml.join('') + '</div>';
   });
   return out;
 }
