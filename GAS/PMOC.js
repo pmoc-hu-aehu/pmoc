@@ -256,13 +256,13 @@ function _formatarResposta(valor, tipo, unidade) {
 function _buscarRegistrosMes(nomeAba, mes, ano) {
   try {
     var sheet = getPlanilha().getSheetByName(nomeAba);
-    if (!sheet || sheet.getLastRow() < 2) return [];
+    if (!sheet || sheet.getLastRow() < 1) return [];
     var dados = sheet.getDataRange().getValues();
     var resultado = [];
-    for (var i = 1; i < dados.length; i++) {
+    for (var i = 0; i < dados.length; i++) {
       var linha = dados[i];
       var d = _parsearData(linha[0]);
-      if (!d) continue;
+      if (!d) continue; // pula cabeçalho (texto) ou linha inválida
       if (d.getMonth() !== mes || d.getFullYear() !== ano) continue;
       resultado.push(linha);
     }
@@ -314,10 +314,10 @@ function _filtrarMovimentacaoPorFuel(registros, fuel) {
 function _buscarMovimentacoesMes(mes, ano) {
   try {
     var sheet = getPlanilha().getSheetByName("MOVIMENTACAO");
-    if (!sheet || sheet.getLastRow() < 2) return [];
+    if (!sheet || sheet.getLastRow() < 1) return [];
     var dados = sheet.getDataRange().getValues();
     var resultado = [];
-    for (var i = 1; i < dados.length; i++) {
+    for (var i = 0; i < dados.length; i++) {
       var linha = dados[i];
       // col[0] = "dd/MM/yyyy HH:mm" — pega só a parte da data
       var partes = String(linha[0]).split(' ')[0].split('/');
