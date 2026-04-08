@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'assinatura_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -48,7 +46,6 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
 
   String?    _imagePathInicio;
   String?    _imagePathFinal;
-  Uint8List? _assinaturaByte;
 
   bool? _chkIsolamentoOk;
   bool? _chkHigienePos;
@@ -159,14 +156,6 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
     _snack('Foto ${tipo == 'inicio' ? 'inicial' : 'final'} registrada.');
   }
 
-  Future<void> _capturarAssinatura() async {
-    final bytes = await Navigator.push<Uint8List>(
-      context,
-      MaterialPageRoute(builder: (_) => const AssinaturaScreen()),
-    );
-    if (bytes != null) setState(() => _assinaturaByte = bytes);
-  }
-
   bool _validar() {
     if (_maquina == null) {
       _snack('Busque a máquina antes de continuar.', erro: true);
@@ -207,10 +196,6 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
     if (_nomeChefController.text.trim().isEmpty ||
         _chapaController.text.trim().isEmpty) {
       _snack('Preencha dados do chefe de setor.', erro: true);
-      return false;
-    }
-    if (_assinaturaByte == null) {
-      _snack('Assinatura do chefe é obrigatória.', erro: true);
       return false;
     }
     return true;
@@ -261,7 +246,6 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
         checklist      : checklist,
         fotoInicioPath : _imagePathInicio!,
         fotoFinalPath  : _imagePathFinal!,
-        assinaturaByte : _assinaturaByte!,
       );
     } catch (e) {
       if (!mounted) return;
@@ -487,12 +471,6 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
                 ]),
               ),
 
-              // Assinatura
-              _card(
-                title: 'Assinatura do Chefe (OBRIGATÓRIA)',
-                child: _assinaturaWidget(),
-              ),
-
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -523,70 +501,6 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
 
   // ─── WIDGETS HELPERS ─────────────────────────────────────────────────────
 
-  Widget _assinaturaWidget() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        width: double.infinity,
-        height: 140,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: _assinaturaByte == null
-                ? Colors.grey[400]!
-                : const Color(0xFF22c55e),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.grey[50],
-        ),
-        child: _assinaturaByte != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.memory(_assinaturaByte!, fit: BoxFit.contain),
-              )
-            : Center(
-                child: Text('Toque em "Capturar" para assinar',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14)),
-              ),
-      ),
-      const SizedBox(height: 12),
-      Row(children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _capturarAssinatura,
-            icon: const Icon(Icons.draw_outlined),
-            label: Text(_assinaturaByte == null ? 'Capturar' : 'Refazer'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF22c55e),
-              side: const BorderSide(color: Color(0xFF22c55e)),
-            ),
-          ),
-        ),
-        if (_assinaturaByte != null) ...[
-          const SizedBox(width: 8),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => setState(() => _assinaturaByte = null),
-              icon: const Icon(Icons.close),
-              label: const Text('Limpar'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.orange,
-                side: const BorderSide(color: Colors.orange),
-              ),
-            ),
-          ),
-        ],
-      ]),
-      if (_assinaturaByte != null) ...[
-        const SizedBox(height: 8),
-        Row(children: const [
-          Icon(Icons.check_circle, color: Color(0xFF22c55e), size: 16),
-          SizedBox(width: 6),
-          Text('Assinatura capturada',
-              style: TextStyle(color: Color(0xFF16a34a), fontSize: 12, fontWeight: FontWeight.w600)),
-        ]),
-      ],
-    ]);
-  }
 
   Widget _card({required String title, required Widget child}) {
     return Container(

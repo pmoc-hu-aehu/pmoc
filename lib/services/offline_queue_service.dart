@@ -106,7 +106,6 @@ class OfflineQueueService {
     required String fotoEvapLimpaPath,
     required String fotoCondSujaPath,
     required String fotoCondLimpaPath,
-    required Uint8List assinaturaByte,
   }) async {
     final docsDir   = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -115,13 +114,11 @@ class OfflineQueueService {
     final evapLimpaFinal  = '${docsDir.path}/pmoc_${timestamp}_prev_evap_limpa.jpg';
     final condSujaFinal   = '${docsDir.path}/pmoc_${timestamp}_prev_cond_suja.jpg';
     final condLimpaFinal  = '${docsDir.path}/pmoc_${timestamp}_prev_cond_limpa.jpg';
-    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_prev_assinatura.png';
 
     await File(fotoEvapSujaPath).copy(evapSujaFinal);
     await File(fotoEvapLimpaPath).copy(evapLimpaFinal);
     await File(fotoCondSujaPath).copy(condSujaFinal);
     await File(fotoCondLimpaPath).copy(condLimpaFinal);
-    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
 
     final payload = checklist.toJson()
       ..remove('linkFotoEvapSuja')
@@ -138,7 +135,6 @@ class OfflineQueueService {
         fotoLimpaPath : evapLimpaFinal,
         fotoProcessoPath: condSujaFinal,
         fotoFinalPath : condLimpaFinal,
-        assinaturaPath: assinaturaSalva,
         criadoEm      : DateTime.now(),
       ),
     );
@@ -151,18 +147,15 @@ class OfflineQueueService {
     required ChecklistCorretiva checklist,
     required String fotoInicioPath,
     required String fotoFinalPath,
-    required Uint8List assinaturaByte,
   }) async {
     final docsDir   = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
-    final inicioFinal    = '${docsDir.path}/pmoc_${timestamp}_corretiva_inicio.jpg';
-    final finalFinal     = '${docsDir.path}/pmoc_${timestamp}_corretiva_final.jpg';
-    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_corretiva_assinatura.png';
+    final inicioFinal = '${docsDir.path}/pmoc_${timestamp}_corretiva_inicio.jpg';
+    final finalFinal  = '${docsDir.path}/pmoc_${timestamp}_corretiva_final.jpg';
 
     await File(fotoInicioPath).copy(inicioFinal);
     await File(fotoFinalPath).copy(finalFinal);
-    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
 
     // Remover links do payload, pois serão enviados como base64
     final payload = checklist.toJson()
@@ -177,7 +170,6 @@ class OfflineQueueService {
         payloadJson: jsonEncode(payload),
         fotoSujaPath: inicioFinal,
         fotoLimpaPath: finalFinal,
-        assinaturaPath: assinaturaSalva,
         criadoEm: DateTime.now(),
       ),
     );
@@ -190,18 +182,15 @@ class OfflineQueueService {
     required ChecklistMovimentacao checklist,
     required String fotoOrigemPath,
     required String fotoDestinoPath,
-    required Uint8List assinaturaByte,
   }) async {
     final docsDir    = await getApplicationDocumentsDirectory();
     final timestamp  = DateTime.now().millisecondsSinceEpoch;
 
-    final origemFinal    = '${docsDir.path}/pmoc_${timestamp}_mov_origem.jpg';
-    final destinoFinal   = '${docsDir.path}/pmoc_${timestamp}_mov_destino.jpg';
-    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_mov_assinatura.png';
+    final origemFinal  = '${docsDir.path}/pmoc_${timestamp}_mov_origem.jpg';
+    final destinoFinal = '${docsDir.path}/pmoc_${timestamp}_mov_destino.jpg';
 
     await File(fotoOrigemPath).copy(origemFinal);
     await File(fotoDestinoPath).copy(destinoFinal);
-    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
 
     final payload = checklist.toJson()
       ..remove('linkFotoOrigem')
@@ -214,7 +203,6 @@ class OfflineQueueService {
         payloadJson   : jsonEncode(payload),
         fotoSujaPath  : origemFinal,
         fotoLimpaPath : destinoFinal,
-        assinaturaPath: assinaturaSalva,
         criadoEm      : DateTime.now(),
       ),
     );
@@ -226,16 +214,13 @@ class OfflineQueueService {
   static Future<void> salvarQualidadeArOffline({
     required ChecklistQualidadeAr checklist,
     required String fotoColetaPath,
-    required Uint8List assinaturaByte,
   }) async {
     final docsDir    = await getApplicationDocumentsDirectory();
     final timestamp  = DateTime.now().millisecondsSinceEpoch;
 
-    final coletaFinal    = '${docsDir.path}/pmoc_${timestamp}_qar_coleta.jpg';
-    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_qar_assinatura.png';
+    final coletaFinal = '${docsDir.path}/pmoc_${timestamp}_qar_coleta.jpg';
 
     await File(fotoColetaPath).copy(coletaFinal);
-    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
 
     final payload = checklist.toJson()
       ..remove('linkFotoColeta')
@@ -246,7 +231,6 @@ class OfflineQueueService {
         tipo          : ChecklistType.qualidadeAr.name,
         payloadJson   : jsonEncode(payload),
         fotoSujaPath  : coletaFinal,
-        assinaturaPath: assinaturaSalva,
         criadoEm      : DateTime.now(),
       ),
     );
@@ -260,18 +244,15 @@ class OfflineQueueService {
     required String fotoInicioPath,
     String? fotoServicopath,
     required String fotoFinalPath,
-    required Uint8List assinaturaByte,
   }) async {
     final docsDir   = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
-    final inicioFinal     = '${docsDir.path}/pmoc_${timestamp}_exaustao_inicio.jpg';
-    final finalFinal      = '${docsDir.path}/pmoc_${timestamp}_exaustao_final.jpg';
-    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_exaustao_assinatura.png';
+    final inicioFinal = '${docsDir.path}/pmoc_${timestamp}_exaustao_inicio.jpg';
+    final finalFinal  = '${docsDir.path}/pmoc_${timestamp}_exaustao_final.jpg';
 
     await File(fotoInicioPath).copy(inicioFinal);
     await File(fotoFinalPath).copy(finalFinal);
-    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
 
     String? servicoFinal;
     if (fotoServicopath != null) {
@@ -292,7 +273,6 @@ class OfflineQueueService {
         fotoSujaPath  : inicioFinal,
         fotoLimpaPath : servicoFinal,
         fotoFinalPath : finalFinal,
-        assinaturaPath: assinaturaSalva,
         criadoEm      : DateTime.now(),
       ),
     );
@@ -305,16 +285,13 @@ class OfflineQueueService {
     required ChecklistPressao checklist,
     required String fotoManometroPath,
     String? fotoVedacaoPath,
-    required Uint8List assinaturaByte,
   }) async {
     final docsDir    = await getApplicationDocumentsDirectory();
     final timestamp  = DateTime.now().millisecondsSinceEpoch;
 
-    final manometroFinal  = '${docsDir.path}/pmoc_${timestamp}_pressao_manometro.jpg';
-    final assinaturaSalva = '${docsDir.path}/pmoc_${timestamp}_pressao_assinatura.png';
+    final manometroFinal = '${docsDir.path}/pmoc_${timestamp}_pressao_manometro.jpg';
 
     await File(fotoManometroPath).copy(manometroFinal);
-    await File(assinaturaSalva).writeAsBytes(assinaturaByte);
 
     String? vedacaoFinal;
     if (fotoVedacaoPath != null) {
@@ -333,7 +310,6 @@ class OfflineQueueService {
         payloadJson   : jsonEncode(payload),
         fotoSujaPath  : manometroFinal,
         fotoLimpaPath : vedacaoFinal,
-        assinaturaPath: assinaturaSalva,
         criadoEm      : DateTime.now(),
       ),
     );
@@ -551,7 +527,6 @@ class OfflineQueueService {
     await anexar(p.fotoSujaPath,     'linkFotoInicio');
     await anexar(p.fotoLimpaPath,    'linkFotoProcesso');
     await anexar(p.fotoFinalPath,    'linkFotoFinal');
-    await anexar(p.assinaturaPath,   'linkAssinatura');
 
     payload['action'] = 'SALVAR_PREVENTIVA';
 
@@ -586,16 +561,6 @@ class OfflineQueueService {
       final f = File(p.fotoLimpaPath!);
       if (await f.exists()) {
         payload['linkFotoFinal'] = base64Encode(await f.readAsBytes());
-      }
-    }
-
-    // Carrega assinatura do novo campo em ChecklistPendente
-    if (p.assinaturaPath != null) {
-      final assinatura = File(p.assinaturaPath!);
-      if (await assinatura.exists()) {
-        payload['linkAssinatura'] = base64Encode(await assinatura.readAsBytes());
-      } else {
-        debugPrint('[OFFLINE_QUEUE] Assinatura não encontrada: ${p.assinaturaPath}');
       }
     }
 
@@ -666,12 +631,6 @@ class OfflineQueueService {
         payload['fotoManometroB64'] = base64Encode(await f.readAsBytes());
       }
     }
-    if (p.assinaturaPath != null) {
-      final f = File(p.assinaturaPath!);
-      if (await f.exists()) {
-        payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
-      }
-    }
     // Foto vedação não é usada pelo GAS atual — ignora
 
     payload['action'] = 'SALVAR_PRESSAO';
@@ -720,13 +679,6 @@ class OfflineQueueService {
         payload['fotoDestinoB64'] = base64Encode(await f.readAsBytes());
       }
     }
-    if (p.assinaturaPath != null) {
-      final f = File(p.assinaturaPath!);
-      if (await f.exists()) {
-        payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
-      }
-    }
-
     payload['action'] = 'SALVAR_RETIRADA_MAQUINA';
 
     final erro = await ChecklistPressaoService.enviarPayload(payload);
@@ -797,11 +749,6 @@ class OfflineQueueService {
       final f = File(p.fotoFinalPath!);
       if (await f.exists()) payload['fotoFinalB64'] = base64Encode(await f.readAsBytes());
     }
-    if (p.assinaturaPath != null) {
-      final f = File(p.assinaturaPath!);
-      if (await f.exists()) payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
-    }
-
     payload['action'] = 'SALVAR_EXAUSTAO';
 
     final erro = await ChecklistExaustaoService.enviarPayload(payload);
@@ -857,13 +804,6 @@ class OfflineQueueService {
         payload['fotoColetaB64'] = base64Encode(await f.readAsBytes());
       }
     }
-    if (p.assinaturaPath != null) {
-      final f = File(p.assinaturaPath!);
-      if (await f.exists()) {
-        payload['assinaturaB64'] = base64Encode(await f.readAsBytes());
-      }
-    }
-
     payload['action'] = 'SALVAR_QUALIDADE_AR';
 
     final erro = await ChecklistPressaoService.enviarPayload(payload);
@@ -884,7 +824,6 @@ class OfflineQueueService {
     _apagarFoto(p.fotoLimpaPath);
     _apagarFoto(p.fotoProcessoPath); // Novo campo
     _apagarFoto(p.fotoFinalPath);     // Novo campo
-    _apagarFoto(p.assinaturaPath);    // Novo campo
     // Se houver outros arquivos (e.g., metadados antigos), apagar aqui também
     // Mas a ideia é que com a mudança, não haverá mais arquivos de metadados separados.
     // Exemplo para apagar metadados antigos (se ainda existirem):

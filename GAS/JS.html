@@ -179,7 +179,8 @@ var maquinasGlobais = [];
 function limparFormMaquina() {
   document.getElementById('maq_id').value          = "";
   document.getElementById('maq_fuel').value        = "";
-  document.getElementById('maq_localizacao').value = "";
+  document.getElementById('maq_setor').value       = "";
+  document.getElementById('maq_local_esp').value   = "";
   document.getElementById('maq_modelo').value      = "Split";
   document.getElementById('maq_marca').value       = "";
   document.getElementById('maq_serie').value       = "";
@@ -197,7 +198,11 @@ function salvarMaquina() {
   var dados = {
     id          : document.getElementById('maq_id').value,
     fuel        : document.getElementById('maq_fuel').value,
-    localizacao : document.getElementById('maq_localizacao').value,
+    localizacao : (function() {
+      var setor = document.getElementById('maq_setor').value.trim();
+      var localEsp = document.getElementById('maq_local_esp').value.trim();
+      return localEsp ? setor + '/' + localEsp : setor;
+    })(),
     modelo      : document.getElementById('maq_modelo').value,
     marca       : document.getElementById('maq_marca').value,
     serie       : document.getElementById('maq_serie').value,
@@ -326,7 +331,7 @@ function abrirAutorizarRelimpeza(fuel) {
 function editarMaquina(id, fuel, localizacao, modelo, marca, serie, criticidade, capacidade, empresaCnpj, ocupFixos, ocupVar, area) {
   document.getElementById('maq_id').value          = id;
   document.getElementById('maq_fuel').value        = fuel;
-  document.getElementById('maq_localizacao').value = decodeURIComponent(localizacao);
+  carregarSelectSetor(decodeURIComponent(localizacao));
   document.getElementById('maq_modelo').value      = modelo;
   document.getElementById('maq_marca').value       = decodeURIComponent(marca);
   document.getElementById('maq_serie').value       = serie;

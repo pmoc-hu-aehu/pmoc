@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +8,6 @@ import '../models/maquina.dart';
 import '../models/checklist_movimentacao.dart';
 import '../services/database_service.dart';
 import '../services/offline_queue_service.dart';
-import 'assinatura_screen.dart';
 import 'barcode_scanner_screen.dart';
 
 const _kGreen  = Color(0xFF22c55e);
@@ -68,7 +66,6 @@ class _MovimentacaoChecklistScreenState
   // ── Validação & assinatura ────────────────────────────────────────────────
   final _nomeChefCtrl = TextEditingController();
   final _chapaCtrl    = TextEditingController();
-  Uint8List? _assinaturaByte;
 
   bool _enviando = false;
 
@@ -237,14 +234,6 @@ class _MovimentacaoChecklistScreenState
 
   // ── Assinatura ────────────────────────────────────────────────────────────
 
-  Future<void> _capturarAssinatura() async {
-    final bytes = await Navigator.push<Uint8List>(
-      context,
-      MaterialPageRoute(builder: (_) => const AssinaturaScreen()),
-    );
-    if (bytes != null) setState(() => _assinaturaByte = bytes);
-  }
-
   // ── Validação ─────────────────────────────────────────────────────────────
 
   bool _validar() {
@@ -279,9 +268,6 @@ class _MovimentacaoChecklistScreenState
     if (_chapaCtrl.text.trim().isEmpty) {
       _snack('Informe a chapa funcional.', erro: true); return false;
     }
-    if (_assinaturaByte == null) {
-      _snack('Capture a assinatura do responsável (obrigatório).', erro: true); return false;
-    }
     return true;
   }
 
@@ -312,7 +298,6 @@ class _MovimentacaoChecklistScreenState
       checklist        : checklist,
       fotoOrigemPath   : _fotoOrigemPath!,
       fotoDestinoPath  : _fotoDestinoPath!,
-      assinaturaByte   : _assinaturaByte!,
     );
 
     if (!mounted) return;
@@ -715,82 +700,6 @@ class _MovimentacaoChecklistScreenState
                       style: const TextStyle(color: Colors.black87),
                       decoration: _inputDeco('Ex.: 12345'),
                     ),
-                  ],
-                ),
-              ),
-
-              // ── ASSINATURA ────────────────────────────────────────
-              _buildCard(
-                title: 'Assinatura Digital (OBRIGATÓRIA)',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: _assinaturaByte == null ? Colors.grey[400]! : _kGreen,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey[50],
-                      ),
-                      child: _assinaturaByte != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.memory(_assinaturaByte!, fit: BoxFit.contain),
-                            )
-                          : Center(
-                              child: Text(
-                                'Toque em "Capturar" para assinar',
-                                style: TextStyle(color: Colors.grey[400], fontSize: 14),
-                              ),
-                            ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _assinaturaByte == null ? _capturarAssinatura : null,
-                            icon : const Icon(Icons.draw_outlined),
-                            label: const Text('Capturar'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: _kGreen,
-                              side: const BorderSide(color: _kGreen),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _assinaturaByte != null
-                                ? () => setState(() => _assinaturaByte = null)
-                                : null,
-                            icon : const Icon(Icons.refresh),
-                            label: const Text('Refazer'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: _kOrange,
-                              side: const BorderSide(color: _kOrange),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_assinaturaByte != null) ...[
-                      const SizedBox(height: 8),
-                      const Row(
-                        children: [
-                          Icon(Icons.check_circle, color: _kGreen, size: 16),
-                          SizedBox(width: 6),
-                          Text(
-                            'Assinatura capturada',
-                            style: TextStyle(color: _kGreen, fontSize: 12, fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ),

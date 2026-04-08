@@ -82,3 +82,132 @@ function getSetorMaquina(local) {
   if (l.indexOf("HU/")  === 0) return "HU";
   return "HU";
 }
+
+// ─── SETORES ─────────────────────────────────────────────────────────────────
+
+// Extrai o setor de uma localizacao completa: "HU/CME/SECRETARIA" → "HU/CME"
+function _extrairSetor(localizacao) {
+  var s = String(localizacao || "").trim();
+  var partes = s.split('/');
+  // setor = primeiras 2 partes (ex: HU + CME), resto é local específico
+  if (partes.length >= 2) return (partes[0] + '/' + partes[1]).trim();
+  return s; // sem barra: usa o valor inteiro como setor
+}
+
+function _getAbaSetores() {
+  var ss = getPlanilha();
+  var sheet = ss.getSheetByName("SETORES");
+  if (!sheet) {
+    sheet = ss.insertSheet("SETORES");
+    sheet.appendRow(["NOME"]);
+    var maqSheet = ss.getSheetByName("MAQUINAS");
+    if (maqSheet && maqSheet.getLastRow() > 1) {
+      var dados = maqSheet.getRange(2, 2, maqSheet.getLastRow()-1, 1).getValues();
+      var vistos = {};
+      dados.forEach(function(r) {
+        var setor = _extrairSetor(r[0]);
+        if (setor && !vistos[setor]) { vistos[setor] = true; sheet.appendRow([setor]); }
+      });
+    }
+  }
+  return sheet;
+}
+
+// Corrige aba SETORES existente que tenha valores com local específico embutido
+function corrigirSetores() {
+  var ss = getPlanilha();
+  var sheet = ss.getSheetByName("SETORES");
+  if (!sheet || sheet.getLastRow() < 2) return;
+  var dados = sheet.getRange(2, 1, sheet.getLastRow()-1, 1).getValues();
+  var vistos = {};
+  // reconstrói a aba com valores corrigidos
+  var corretos = [];
+  dados.forEach(function(r) {
+    var setor = _extrairSetor(r[0]);
+    if (setor && !vistos[setor]) { vistos[setor] = true; corretos.push([setor]); }
+  });
+  // limpa e reescreve
+  if (sheet.getLastRow() > 1) sheet.deleteRows(2, sheet.getLastRow()-1);
+  if (corretos.length > 0) sheet.getRange(2, 1, corretos.length, 1).setValues(corretos);
+}
+
+function getListaSetores() {
+  try {
+    var sheet = _getAbaSetores();
+    if (sheet.getLastRow() < 2) return [];
+    // corrige automaticamente se ainda houver valores com local específico embutido
+    var dados = sheet.getRange(2, 1, sheet.getLastRow()-1, 1).getValues();
+    var temErro = dados.some(function(r){ return String(r[0]).split('/').length > 2; });
+    if (temErro) corrigirSetores();
+    // relê após possível correção
+    sheet = _getAbaSetores();
+    if (sheet.getLastRow() < 2) return [];
+    return sheet.getRange(2, 1, sheet.getLastRow()-1, 1).getValues()
+      .map(function(r){ return String(r[0]).trim(); })
+      .filter(Boolean)
+      .sort();
+  } catch(e) { return []; }
+}
+
+function salvarSetor(nome, nomeAntigo) {
+  try {
+    nome = String(nome || "").trim();
+    if (!nome) return { sucesso: false, msg: "Nome inválido." };
+    var sheet = _getAbaSetores();
+    var dados = sheet.getLastRow() > 1
+      ? sheet.getRange(2, 1, sheet.getLastRow()-1, 1).getValues()
+      : [];
+
+    // edição: nomeAntigo definido
+    if (nomeAntigo) {
+      nomeAntigo = String(nomeAntigo).trim();
+      for (var i = 0; i < dados.length; i++) {
+        if (String(dados[i][0]).trim() === nomeAntigo) {
+          sheet.getRange(i+2, 1).setValue(nome);
+          // atualiza MAQUINAS
+          _renomearSetorMaquinas(nomeAntigo, nome);
+          return { sucesso: true, msg: "Setor renomeado!" };
+        }
+      }
+      return { sucesso: false, msg: "Setor não encontrado." };
+    }
+
+    // novo — verifica duplicata
+    for (var j = 0; j < dados.length; j++) {
+      if (String(dados[j][0]).trim().toLowerCase() === nome.toLowerCase()) {
+        return { sucesso: false, msg: "Já existe setor com este nome." };
+      }
+    }
+    sheet.appendRow([nome]);
+    return { sucesso: true, msg: "Setor adicionado!" };
+  } catch(e) { return { sucesso: false, msg: e.message }; }
+}
+
+function excluirSetor(nome) {
+  try {
+    nome = String(nome || "").trim();
+    var sheet = _getAbaSetores();
+    if (sheet.getLastRow() < 2) return { sucesso: false, msg: "Setor não encontrado." };
+    var dados = sheet.getRange(2, 1, sheet.getLastRow()-1, 1).getValues();
+    for (var i = 0; i < dados.length; i++) {
+      if (String(dados[i][0]).trim() === nome) {
+        sheet.deleteRow(i+2);
+        return { sucesso: true, msg: "Setor excluído!" };
+      }
+    }
+    return { sucesso: false, msg: "Setor não encontrado." };
+  } catch(e) { return { sucesso: false, msg: e.message }; }
+}
+
+function _renomearSetorMaquinas(antigo, novo) {
+  try {
+    var sheet = getPlanilha().getSheetByName("MAQUINAS");
+    if (!sheet || sheet.getLastRow() < 2) return;
+    var dados = sheet.getRange(2, 2, sheet.getLastRow()-1, 1).getValues();
+    dados.forEach(function(r, i) {
+      if (String(r[0]).trim() === antigo) {
+        sheet.getRange(i+2, 2).setValue(novo);
+      }
+    });
+  } catch(e) {}
+}

@@ -11,8 +11,16 @@
       <label>FUEL (ÚNICO)</label>
       <input type="number" id="maq_fuel" class="input-form" placeholder="Ex: 12345">
       
-      <label>Localização / Setor</label>
-      <input type="text" id="maq_localizacao" class="input-form" placeholder="Ex: UTI Adulto - Leito 02">
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        Setor
+        <button type="button" onclick="abrirModalSetores()" style="font-size:10px;background:none;border:none;color:#0ea5e9;cursor:pointer;font-weight:700;padding:0;">✏️ Gerenciar</button>
+      </label>
+      <select id="maq_setor" class="input-form">
+        <option value="">— Selecione o setor —</option>
+      </select>
+
+      <label>Local Específico <span style="font-weight:400;color:#94a3b8;font-size:10px;">(opcional — ex: SALA 4, LEITO 03)</span></label>
+      <input type="text" id="maq_local_esp" class="input-form" placeholder="Ex: SALA 4">
       
       <label>Modelo (Tipo de Ar)</label>
       <select id="maq_modelo" class="input-form">
@@ -92,3 +100,128 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL GERENCIAR SETORES -->
+<div id="modal-setores" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:420px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Gerenciar Setores</h3>
+      <button onclick="fecharModalSetores()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="setor-input" placeholder="Ex: HU/UTI 1  ou  HU/CC" class="input-form" style="flex:1;">
+      <input type="hidden" id="setor-editando">
+      <button onclick="salvarSetorModal()" class="btn-primary" style="white-space:nowrap;padding:0 14px;">Salvar</button>
+    </div>
+    <p id="msg-setor" style="margin:0;font-size:12px;font-weight:700;min-height:16px;text-align:center;"></p>
+    <div id="lista-setores-modal" style="overflow-y:auto;flex:1;border:1px solid #e2e8f0;border-radius:8px;"></div>
+  </div>
+</div>
+
+<script>
+  // valorAtual = localizacao completa ex "HU/CC/SALA 4"
+  function carregarSelectSetor(valorAtual) {
+    google.script.run
+      .withSuccessHandler(function(lista) {
+        var sel = document.getElementById('maq_setor');
+        // extrai setor e local específico do valor completo
+        var setorVal = '', localEsp = '';
+        if (valorAtual) {
+          var parts = valorAtual.split('/');
+          // setor = tudo menos a última parte (se houver mais de 1 parte)
+          if (parts.length > 1) {
+            localEsp = parts[parts.length - 1].trim();
+            setorVal = parts.slice(0, parts.length - 1).join('/').trim();
+          } else {
+            setorVal = valorAtual.trim();
+          }
+        } else {
+          setorVal = sel.value;
+        }
+        sel.innerHTML = '<option value="">— Selecione o setor —</option>';
+        (lista || []).forEach(function(s) {
+          var o = document.createElement('option');
+          o.value = s; o.text = s;
+          if (s === setorVal) o.selected = true;
+          sel.appendChild(o);
+        });
+        if (localEsp !== '') document.getElementById('maq_local_esp').value = localEsp;
+      })
+      .getListaSetores();
+  }
+
+  function abrirModalSetores() {
+    document.getElementById('modal-setores').style.display = 'flex';
+    document.getElementById('setor-input').value = '';
+    document.getElementById('setor-editando').value = '';
+    document.getElementById('msg-setor').textContent = '';
+    _carregarListaSetoresModal();
+  }
+
+  function fecharModalSetores() {
+    document.getElementById('modal-setores').style.display = 'none';
+    carregarSelectSetor();
+  }
+
+  function _carregarListaSetoresModal() {
+    google.script.run
+      .withSuccessHandler(function(lista) {
+        var div = document.getElementById('lista-setores-modal');
+        if (!lista || lista.length === 0) {
+          div.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:16px;font-size:13px;">Nenhum setor cadastrado.</p>';
+          return;
+        }
+        div.innerHTML = lista.map(function(s) {
+          var es = s.replace(/'/g, "\\'");
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #f1f5f9;">' +
+            '<span style="font-size:13px;font-weight:600;color:#1e293b;">' + s + '</span>' +
+            '<div style="display:flex;gap:8px;">' +
+            '<button onclick="editarSetor(\'' + es + '\')" style="background:none;border:none;color:#0ea5e9;cursor:pointer;font-size:12px;font-weight:700;">Editar</button>' +
+            '<button onclick="excluirSetorModal(\'' + es + '\')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:12px;font-weight:700;">Excluir</button>' +
+            '</div></div>';
+        }).join('');
+      })
+      .getListaSetores();
+  }
+
+  function editarSetor(nome) {
+    document.getElementById('setor-input').value = nome;
+    document.getElementById('setor-editando').value = nome;
+    document.getElementById('setor-input').focus();
+    document.getElementById('msg-setor').textContent = 'Editando: ' + nome;
+    document.getElementById('msg-setor').style.color = '#0ea5e9';
+  }
+
+  function salvarSetorModal() {
+    var nome = document.getElementById('setor-input').value.trim();
+    var editando = document.getElementById('setor-editando').value.trim();
+    var msg = document.getElementById('msg-setor');
+    if (!nome) { msg.textContent = 'Digite um nome.'; msg.style.color = '#dc2626'; return; }
+    msg.textContent = 'Salvando...'; msg.style.color = '#64748b';
+    google.script.run
+      .withSuccessHandler(function(r) {
+        msg.textContent = r.msg;
+        msg.style.color = r.sucesso ? '#16a34a' : '#dc2626';
+        if (r.sucesso) {
+          document.getElementById('setor-input').value = '';
+          document.getElementById('setor-editando').value = '';
+          _carregarListaSetoresModal();
+        }
+      })
+      .salvarSetor(nome, editando || null);
+  }
+
+  function excluirSetorModal(nome) {
+    if (!confirm('Excluir setor "' + nome + '"?')) return;
+    google.script.run
+      .withSuccessHandler(function(r) {
+        document.getElementById('msg-setor').textContent = r.msg;
+        document.getElementById('msg-setor').style.color = r.sucesso ? '#16a34a' : '#dc2626';
+        _carregarListaSetoresModal();
+      })
+      .excluirSetor(nome);
+  }
+
+  // Chama ao iniciar o módulo Máquinas
+  carregarSelectSetor('');
+</script>
