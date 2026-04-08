@@ -336,10 +336,11 @@ function _buscarMovimentacoesMes(mes, ano) {
 
 // ─── DADOS PARA PREVIEW NA TELA ──────────────────────────────────────────────
 
-function getDadosPmocPreview(mes, ano) {
+function getDadosPmocPreview(mes, ano, setores) {
   try {
     var m = parseInt(mes) - 1;
     var a = parseInt(ano);
+    var setoresArr = Array.isArray(setores) ? setores : (setores ? [setores] : []);
 
     // Busca todos os registros do mês uma única vez (eficiente)
     var todosFiltros     = _buscarRegistrosMes("FILTROS",      m, a);
@@ -352,6 +353,12 @@ function getDadosPmocPreview(mes, ano) {
     var todasMovimenta   = _buscarMovimentacoesMes(m, a);
 
     var maquinas = getListaMaquinas();
+    if (setoresArr.length > 0) {
+      maquinas = maquinas.filter(function(maq) {
+        var loc = String(maq.localizacao || "").trim().toUpperCase();
+        return setoresArr.some(function(s){ return loc.startsWith(s.toUpperCase()); });
+      });
+    }
     var resumo = maquinas.map(function(maq) {
       var filtros     = _filtrarPorFuel(todosFiltros,     maq.fuel).length;
       var dutos       = _filtrarPorFuel(todosDutos,       maq.fuel).length;
@@ -403,7 +410,7 @@ function getDicionario() {
 
 // ─── GERAÇÃO DO PMOC ─────────────────────────────────────────────────────────
 
-function gerarPmocPdf(mes, ano, engenheiroId) {
+function gerarPmocPdf(mes, ano, engenheiroId, setores) {
   try {
     var m = parseInt(mes) - 1;
     var a = parseInt(ano);
@@ -443,14 +450,22 @@ function gerarPmocPdf(mes, ano, engenheiroId) {
     var todasQualidades  = _buscarRegistrosMes("QUALIDADE_AR", m, a);
     var todasMovimenta   = _buscarMovimentacoesMes(m, a);
 
+    var setoresArr = Array.isArray(setores) ? setores : (setores ? [setores] : []);
     var maquinas = getListaMaquinas();
+    if (setoresArr.length > 0) {
+      maquinas = maquinas.filter(function(maq) {
+        var loc = String(maq.localizacao || "").trim().toUpperCase();
+        return setoresArr.some(function(s){ return loc.startsWith(s.toUpperCase()); });
+      });
+    }
     var html = _gerarHtmlPmoc(maquinas, m, a, nomeMes, engenheiro, mapaEmpresas,
                               todosFiltros, todosDutos, todasPreventivas, todasCorretivas,
                               todasExaustoes, todasPressoes, todasQualidades, todasMovimenta);
 
     var blob = Utilities.newBlob(html, 'text/html', 'pmoc.html');
     var pdf  = blob.getAs('application/pdf');
-    pdf.setName("PMOC_" + nomeMes + "_" + a + ".pdf");
+    var nomeSetor = setoresArr.length === 1 ? setoresArr[0].replace(/\s+/g,'_') + "_" : "";
+    pdf.setName("PMOC_" + nomeSetor + nomeMes + "_" + a + ".pdf");
 
     var pasta   = DriveApp.getFolderById(ID_PASTA_RAIZ);
     var arquivo = pasta.createFile(pdf);

@@ -1,6 +1,10 @@
 <div id="modulo-PMOC" class="modulo-oculto">
 
   <style>
+    .rchip { padding:6px 12px; border-radius:20px; border:2px solid; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+    .rchip-on  { background:#2e7d32; border-color:#2e7d32; color:white; }
+    .rchip-off { background:white;   border-color:#e2e8f0; color:#64748b; }
+
     .pmoc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
     .pmoc-header h2 { font-size:22px; font-weight:800; color:var(--text-main); margin:0; }
     .pmoc-header p  { color:var(--text-muted); margin:4px 0 0; font-size:13px; }
@@ -106,6 +110,22 @@
     </button>
   </div>
 
+  <!-- SETOR COLAPSÁVEL -->
+  <div style="background:#fff;border-radius:12px;padding:14px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:24px;">
+    <button onclick="pmocTogglePainel()" id="pmoc-btn-setor"
+      style="display:flex;align-items:center;gap:6px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:#475569;cursor:pointer;width:100%;text-align:left;transition:.2s;">
+      🏥 SETOR
+      <span id="pmoc-setor-badge" style="background:#2e7d32;color:white;border-radius:10px;padding:1px 8px;font-size:10px;display:none;"></span>
+      <span id="pmoc-setor-arrow" style="margin-left:auto;font-size:14px;">▼</span>
+    </button>
+    <div id="pmoc-painel-setores" style="display:none;margin-top:10px;">
+      <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Múltipla escolha</div>
+      <div id="pmoc-chips-setor" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="rchip rchip-on" id="pmoc-chip-todos" onclick="pmocToggleSetor(this,'')">🏥 Todos</button>
+      </div>
+    </div>
+  </div>
+
   <!-- STATS -->
   <div id="pmoc-stats" class="pmoc-stats" style="display:none">
     <div class="stat-box"><div class="val" id="st-maq">0</div><div class="lab">Máquinas</div></div>
@@ -168,6 +188,20 @@
         .withFailureHandler(function(){})
         .getListaEngenheiros();
 
+      // Carrega chips de setor
+      google.script.run
+        .withSuccessHandler(function(lista) {
+          var container = document.getElementById('pmoc-chips-setor');
+          (lista || []).forEach(function(s) {
+            var btn = document.createElement('button');
+            btn.className = 'rchip rchip-off';
+            btn.textContent = s;
+            btn.onclick = function() { pmocToggleSetor(btn, s); };
+            container.appendChild(btn);
+          });
+        })
+        .getListaSetores();
+
       // Carrega dicionário
       google.script.run
         .withSuccessHandler(function(dict) {
@@ -197,6 +231,42 @@
       document.getElementById('dict-' + tipo).classList.add('on');
     }
 
+    // ── Chips setor multi-select ───────────────────────────
+    var _pmocSetores = [];
+
+    function pmocTogglePainel() {
+      var painel = document.getElementById('pmoc-painel-setores');
+      var arrow  = document.getElementById('pmoc-setor-arrow');
+      var aberto = painel.style.display !== 'none';
+      painel.style.display = aberto ? 'none' : 'block';
+      arrow.textContent    = aberto ? '▼' : '▲';
+    }
+
+    function _pmocAtualizarBadge() {
+      var badge = document.getElementById('pmoc-setor-badge');
+      badge.style.display = _pmocSetores.length === 0 ? 'none' : 'inline';
+      if (_pmocSetores.length > 0) badge.textContent = _pmocSetores.length + ' selecionado' + (_pmocSetores.length > 1 ? 's' : '');
+    }
+
+    function pmocToggleSetor(btn, setor) {
+      if (setor === '') {
+        _pmocSetores = [];
+        document.querySelectorAll('#pmoc-chips-setor .rchip').forEach(function(c){ c.className = 'rchip rchip-off'; });
+        document.getElementById('pmoc-chip-todos').className = 'rchip rchip-on';
+        _pmocAtualizarBadge();
+        // fechar painel ao escolher "Todos"
+        document.getElementById('pmoc-painel-setores').style.display = 'none';
+        document.getElementById('pmoc-setor-arrow').textContent = '▼';
+        return;
+      }
+      document.getElementById('pmoc-chip-todos').className = 'rchip rchip-off';
+      var idx = _pmocSetores.indexOf(setor);
+      if (idx >= 0) { _pmocSetores.splice(idx, 1); btn.className = 'rchip rchip-off'; }
+      else          { _pmocSetores.push(setor);     btn.className = 'rchip rchip-on';  }
+      if (_pmocSetores.length === 0) document.getElementById('pmoc-chip-todos').className = 'rchip rchip-on';
+      _pmocAtualizarBadge();
+    }
+
     // Preview
     function pmocCarregar() {
       var mes = document.getElementById('pmoc-mes').value;
@@ -216,7 +286,7 @@
         .withFailureHandler(function(e) {
           grid.innerHTML = '<p style="color:#dc2626;padding:10px">Falha: ' + e.message + '</p>';
         })
-        .getDadosPmocPreview(mes, ano);
+        .getDadosPmocPreview(mes, ano, _pmocSetores);
     }
 
     var MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -286,7 +356,7 @@
           statusEl.textContent = '❌ ' + e.message;
           statusEl.style.color = '#dc2626';
         })
-        .gerarPmocPdf(mes, ano, eng);
+        .gerarPmocPdf(mes, ano, eng, _pmocSetores);
     }
   </script>
 </div>

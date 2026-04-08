@@ -33,22 +33,30 @@
         overflow: visible !important;
       }
 
-      /* Manter a Sidebar fixa enquanto o conteúdo rola ao lado */
+      /* Sidebar fixa — não rola nunca */
       .sidebar {
         display: flex;
         flex-direction: column;
         width: 260px;
         height: 100vh;
-        position: sticky; /* Ela fica presa enquanto você rola o resto */
+        position: fixed;
         top: 0;
-        background-color: #0f172a;
+        left: 0;
+        background-color: #66bb6a;
         flex-shrink: 0;
+        overflow: hidden;
+        z-index: 100;
       }
-      /* ------------------------------------ */
+
+      /* empurra o conteúdo principal para não ficar atrás da sidebar */
+      #tela-dashboard {
+        padding-left: 260px;
+        box-sizing: border-box;
+      }
 
       .sidebar-menu {
         flex-grow: 1;
-        overflow-y: auto;
+        overflow: hidden;
         padding-top: 10px;
       }
 
@@ -56,7 +64,7 @@
         width: 100%;
         background: none;
         border: none;
-        color: #0ea5e9;
+        color: #1a3a1a;
         font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
@@ -68,10 +76,10 @@
         justify-content: space-between;
         align-items: center;
         transition: background 0.2s;
-        border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+        border-bottom: 1px solid rgba(111, 207, 115, 0.15);
       }
 
-      .menu-category:hover { background: rgba(14, 165, 233, 0.05); }
+      .menu-category:hover { background: rgba(111, 207, 115, 0.07); }
 
       .menu-category::after {
         content: '▼';
@@ -99,7 +107,7 @@
       .btn-sair {
         margin-top: auto;
         border-radius: 0;
-        background: #1e293b;
+        background: #43a047;
         border-top: 1px solid rgba(255,255,255,0.1);
       }
 
@@ -158,7 +166,7 @@
     <div id="tela-dashboard" style="display: none;">
       <div class="sidebar">
         <div class="sidebar-header">
-          <h2>PMOC <span style="color: #0ea5e9;">Pro</span></h2>
+          <h2>PMOC <span style="color: #6fcf73;">Pro</span></h2>
           <p>Gestão Inteligente</p>
         </div>
         

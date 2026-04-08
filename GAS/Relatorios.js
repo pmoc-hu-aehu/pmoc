@@ -21,9 +21,10 @@ function getRelatorio(filtros) {
   var dataFim   = filtros.dataFim   ? new Date(filtros.dataFim)   : null;
   if (dataFim) dataFim.setHours(23, 59, 59);
 
-  var fuelFiltro = filtros.fuel     ? filtros.fuel.toString().trim().toUpperCase()     : "";
-  var tecFiltro  = filtros.tecnico  ? filtros.tecnico.toString().trim().toUpperCase()  : "";
-  var tipoFiltro = filtros.tipo     ? filtros.tipo.toString().trim()                   : "";
+  var fuelFiltro  = filtros.fuel     ? filtros.fuel.toString().trim().toUpperCase()     : "";
+  var tecFiltro   = filtros.tecnico  ? filtros.tecnico.toString().trim().toUpperCase()  : "";
+  var tipoFiltro  = filtros.tipo     ? filtros.tipo.toString().trim()                   : "";
+  var setoresFiltro = (filtros.setores && filtros.setores.length > 0) ? filtros.setores : [];
 
   var resultado = [];
 
@@ -47,14 +48,15 @@ function getRelatorio(filtros) {
       if (!fuel || !dataIniRow || isNaN(dataIniRow.getTime())) continue;
       if (dataIni && dataIniRow < dataIni) continue;
       if (dataFim && dataIniRow > dataFim) continue;
-      if (fuelFiltro && !fuel.toUpperCase().includes(fuelFiltro)) continue;
-      if (tecFiltro  && !tec.toUpperCase().includes(tecFiltro))   continue;
+      if (fuelFiltro  && !fuel.toUpperCase().includes(fuelFiltro))            continue;
+      if (tecFiltro   && !tec.toUpperCase().includes(tecFiltro))             continue;
+      if (setoresFiltro.length > 0 && !setoresFiltro.some(function(s){ return local.toUpperCase().startsWith(s.toUpperCase()); })) continue;
 
       var horaIni = "";
       var horaFim = "";
       var dataFmt = "";
-      try { horaIni = Utilities.formatDate(dataIniRow, "GMT-3", "HH:mm"); } catch(e) {}
-      try { if (dataFimRow && !isNaN(dataFimRow.getTime())) horaFim = Utilities.formatDate(dataFimRow, "GMT-3", "HH:mm"); } catch(e) {}
+      try { horaIni = Utilities.formatDate(dataIniRow, "GMT-3", "HH:mm"); if (horaIni === "00:00") horaIni = ""; } catch(e) {}
+      try { if (dataFimRow && !isNaN(dataFimRow.getTime())) { horaFim = Utilities.formatDate(dataFimRow, "GMT-3", "HH:mm"); if (horaFim === "00:00") horaFim = ""; } } catch(e) {}
       try { dataFmt = Utilities.formatDate(dataIniRow, "GMT-3", "dd/MM/yyyy"); } catch(e) {}
 
       resultado.push({

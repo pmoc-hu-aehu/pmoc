@@ -73,6 +73,26 @@
           </select>
         </div>
 
+      </div>
+
+      <!-- LINHA 3: setores colapsável -->
+      <div style="margin-top:12px;">
+        <button onclick="togglePainelSetores()" id="btn-abrir-setores"
+          style="display:flex;align-items:center;gap:6px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:#475569;cursor:pointer;transition:.2s;">
+          <i class="material-icons" style="font-size:16px;">place</i>
+          SETOR <span id="rel-setor-badge" style="background:#2e7d32;color:white;border-radius:10px;padding:1px 8px;font-size:10px;display:none;"></span>
+          <i class="material-icons" id="rel-setor-arrow" style="font-size:14px;margin-left:4px;transition:.2s;">expand_more</i>
+        </button>
+        <div id="rel-painel-setores" style="display:none;margin-top:8px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+          <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Múltipla escolha</div>
+          <div id="rel-chips-setor" style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="rchip rchip-on" onclick="toggleSetor(this,'')" id="chip-setor-todos">🏥 Todos</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:none">
+
         <!-- ATALHOS DE PERÍODO -->
         <div class="rel-grupo">
           <label class="rel-label">ATALHOS</label>
@@ -329,8 +349,48 @@
 </style>
 
 <script>
-  var _relTipoAtivo = 'TODOS';
-  var _relDados     = [];
+  var _relTipoAtivo   = 'TODOS';
+  var _relSetoresAtivos = []; // vazio = todos
+  var _relDados       = [];
+
+  // ── Painel setores — abrir/fechar ─────────────────────
+  function togglePainelSetores() {
+    var painel = document.getElementById('rel-painel-setores');
+    var arrow  = document.getElementById('rel-setor-arrow');
+    var aberto = painel.style.display !== 'none';
+    painel.style.display = aberto ? 'none' : 'block';
+    arrow.textContent    = aberto ? 'expand_more' : 'expand_less';
+  }
+
+  function _atualizarBadgeSetor() {
+    var badge = document.getElementById('rel-setor-badge');
+    if (_relSetoresAtivos.length === 0) {
+      badge.style.display = 'none';
+    } else {
+      badge.style.display = 'inline';
+      badge.textContent   = _relSetoresAtivos.length + ' selecionado' + (_relSetoresAtivos.length > 1 ? 's' : '');
+    }
+  }
+
+  // ── Chips de setor (multi-select) ─────────────────────
+  function toggleSetor(btn, setor) {
+    if (setor === '') {
+      _relSetoresAtivos = [];
+      document.querySelectorAll('#rel-chips-setor .rchip').forEach(function(c){ c.className = 'rchip rchip-off'; });
+      document.getElementById('chip-setor-todos').className = 'rchip rchip-on';
+      _atualizarBadgeSetor();
+      // fechar painel ao escolher "Todos"
+      document.getElementById('rel-painel-setores').style.display = 'none';
+      document.getElementById('rel-setor-arrow').textContent = 'expand_more';
+      return;
+    }
+    document.getElementById('chip-setor-todos').className = 'rchip rchip-off';
+    var idx = _relSetoresAtivos.indexOf(setor);
+    if (idx >= 0) { _relSetoresAtivos.splice(idx, 1); btn.className = 'rchip rchip-off'; }
+    else          { _relSetoresAtivos.push(setor);     btn.className = 'rchip rchip-on';  }
+    if (_relSetoresAtivos.length === 0) document.getElementById('chip-setor-todos').className = 'rchip rchip-on';
+    _atualizarBadgeSetor();
+  }
 
   // ── Inicializa select de técnicos ao abrir o módulo ──
   function inicializarRelatorio() {
@@ -346,6 +406,19 @@
         });
       })
       .getListaTecnicosRelatorio();
+
+    google.script.run
+      .withSuccessHandler(function(lista) {
+        var container = document.getElementById('rel-chips-setor');
+        (lista || []).forEach(function(s) {
+          var btn = document.createElement('button');
+          btn.className = 'rchip rchip-off';
+          btn.textContent = s;
+          btn.onclick = function() { toggleSetor(btn, s); };
+          container.appendChild(btn);
+        });
+      })
+      .getListaSetores();
 
     // Data padrão: mês atual
     setPeriodoMes();
@@ -397,7 +470,8 @@
       dataFim : document.getElementById('rel-data-fim').value,
       fuel    : document.getElementById('rel-fuel').value.trim(),
       tecnico : document.getElementById('rel-tecnico').value,
-      tipo    : _relTipoAtivo
+      tipo    : _relTipoAtivo,
+      setores : _relSetoresAtivos
     };
 
     google.script.run
@@ -450,6 +524,7 @@
       'Tipo: <b>' + _relTipoAtivo + '</b> | ' +
       'FUEL: <b>' + (filtros.fuel || 'Todos') + '</b> | ' +
       'Técnico: <b>' + (filtros.tecnico || 'Todos') + '</b> | ' +
+      'Setor: <b>' + (filtros.setor || 'Todos') + '</b> | ' +
       'Total: <b>' + dados.length + '</b> registros | ' +
       'Emitido em: <b>' + new Date().toLocaleDateString('pt-BR') + '</b>';
 
@@ -504,6 +579,9 @@
   function limparRelatorio() {
     document.getElementById('rel-fuel').value    = '';
     document.getElementById('rel-tecnico').value = '';
+    _relSetoresAtivos = [];
+    document.querySelectorAll('#rel-chips-setor .rchip').forEach(function(c){ c.className = 'rchip rchip-off'; });
+    document.getElementById('chip-setor-todos').className = 'rchip rchip-on';
     document.getElementById('rel-cards').style.display = 'none';
     document.getElementById('rel-cab-print').style.display = 'none';
     toggleTipo(document.querySelector('.rchip'), 'TODOS');
