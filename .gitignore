@@ -48,3 +48,10 @@ app.*.map.json
 /macos/
 /linux/
 /web/
+
+# Node
+node_modules/
+*.cjs
+*.mjs
+PMOC_Checklists_Licitacao.txt
+PMOC_Checklists_Licitacao.xlsx
