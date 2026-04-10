@@ -174,4 +174,19 @@ tr:hover td { background-color: var(--primary-light); color: var(--text-main); }
 @keyframes hud-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .hud-loader { display: inline-block; animation: hud-blink 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; color: var(--primary); font-family: 'Courier New', Courier, monospace; font-size: 14px; letter-spacing: 2px; font-weight: 900; }
 
-</style>
+/* ── PRINT GLOBAL ── */
+@media print {
+  .sidebar, .header-top, .btn-sair, #login-wrapper,
+  .clock-container { display:none !important; }
+  #tela-dashboard { display:block !important; height:auto !important; width:100% !important; overflow:visible !important; }
+  .main-content { margin-left:0 !important; width:100% !important; padding:0 !important; height:auto !important; overflow:visible !important; }
+  .modulos-container { padding:0 !important; overflow:visible !important; height:auto !important; }
+  body, html { overflow:visible !important; height:auto !important; background:white !important; }
+  /* Reset global table styling for print */
+  table { border:none !important; box-shadow:none !important; }
+  th { background:transparent !important; color:#475569 !important; border:none !important; border-bottom:2px solid #003366 !important; }
+  td { border:none !important; border-bottom:1px solid #e2e8f0 !important; }
+  tr:hover td { background-color:transparent !important; }
+}
+
+</style>

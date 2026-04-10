@@ -122,7 +122,7 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('BASE.EQUIPAMENTOS',
+        title: const Text('EQUIPAMENTOS',
             style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Courier', letterSpacing: 2)),
       ),
       floatingActionButton: _podeEditar
@@ -178,7 +178,7 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
                                     fontFamily: 'Courier',
                                     fontWeight: FontWeight.bold)),
                             SizedBox(height: 2),
-                            Text('ATUALIZAÇÃO DA BASE LOCAL DE EQUIPAMENTOS',
+                            Text('ATUALIZAÇÃO DA BASE LOCAL',
                                 style: TextStyle(
                                     color: Colors.white54, fontSize: 10, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
                           ],
@@ -189,81 +189,76 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
 
                   const SizedBox(height: 12),
 
-                  // Linha 2: chips de info + botão (lado a lado só se couber, senão empilha)
-                  Row(
+                  // Linha 2: chips de info (lado a lado ou em wrap)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
                     children: [
-                      // ── CHIPS ──────────────────────────────────────
-                      Expanded(
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 6,
-                          children: [
-                            _InfoChip(
-                              icon: Icons.precision_manufacturing_outlined,
-                              label: '$_total máquinas',
-                              cor: const Color(0xFF0ea5e9),
-                            ),
-                            _InfoChip(
-                              icon: Icons.schedule_rounded,
-                              label: _ultimaSync,
-                              cor: const Color(0xFF10b981),
-                            ),
-                          ],
-                        ),
+                      _InfoChip(
+                        icon: Icons.precision_manufacturing_outlined,
+                        label: '$_total MÁQUINAS',
+                        cor: const Color(0xFF0ea5e9),
                       ),
-
-                      const SizedBox(width: 10),
-
-                      // ── BOTÃO SINCRONIZAR / OFFLINE ────────────────
-                      _online
-                          ? ElevatedButton(
-                              onPressed: _sincronizando ? null : _sincronizar,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFCCFF00),
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 10),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.zero),
-                                elevation: 0,
-                              ),
-                              child: _sincronizando
-                                  ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                          color: Colors.black, strokeWidth: 2),
-                                    )
-                                  : const Text('SINCRONIZAR',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontFamily: 'Courier',
-                                          fontWeight: FontWeight.w900)),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF090A0F),
-                                border: Border.all(
-                                    color: Colors.redAccent, width: 2),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.wifi_off_rounded,
-                                      color: Colors.redAccent, size: 14),
-                                  SizedBox(width: 6),
-                                  Text('OFFLINE',
-                                      style: TextStyle(
-                                          color: Colors.redAccent,
-                                          fontSize: 11,
-                                          fontFamily: 'Courier',
-                                          fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ),
+                      _InfoChip(
+                        icon: Icons.schedule_rounded,
+                        label: _ultimaSync,
+                        cor: const Color(0xFF10b981),
+                      ),
                     ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Linha 3: BOTÃO SINCRONIZAR / OFFLINE ocupando 100%
+                  SizedBox(
+                    width: double.infinity,
+                    child: _online
+                        ? ElevatedButton(
+                            onPressed: _sincronizando ? null : _sincronizar,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFCCFF00),
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                              elevation: 0,
+                            ),
+                            child: _sincronizando
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                        color: Colors.black, strokeWidth: 2),
+                                  )
+                                : const Text('SINCRONIZAR',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'Courier',
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 2)),
+                          )
+                        : Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF090A0F),
+                              border: Border.all(color: Colors.redAccent, width: 2),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.wifi_off_rounded,
+                                    color: Colors.redAccent, size: 16),
+                                SizedBox(width: 8),
+                                Text('OFFLINE',
+                                    style: TextStyle(
+                                        color: Colors.redAccent,
+                                        fontSize: 13,
+                                        fontFamily: 'Courier',
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2)),
+                              ],
+                            ),
+                          ),
                   ),
                 ],
               ),

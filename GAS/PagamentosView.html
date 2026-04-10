@@ -278,10 +278,17 @@
   .so-print { display:none; }
 
   @media print {
-    /* Oculta tudo exceto o módulo de pagamentos */
-    body > *, .sidebar, .header-top, .btn-sair { }
-    .no-print { display:none !important; }
+    /* ── RESET GERAL PARA IMPRESSÃO ── */
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+    body { background:white !important; margin:0 !important; padding:0 !important; font-size:11px !important; }
+    html, body { overflow:visible !important; height:auto !important; }
+
+    /* Oculta elementos de navegação */
+    .no-print, .sidebar, .header-top, .btn-sair,
+    #tela-dashboard > .sidebar,
+    .modulos-container > *:not(.modulo-oculto) { display:none !important; }
     .so-print { display:block !important; }
+
     /* Oculta todos os outros módulos */
     body[data-modulo-ativo="PAGAMENTOS"] #modulo-HOME,
     body[data-modulo-ativo="PAGAMENTOS"] #modulo-AGENDAMENTO,
@@ -291,17 +298,157 @@
     body[data-modulo-ativo="PAGAMENTOS"] #modulo-RELATORIO,
     body[data-modulo-ativo="PAGAMENTOS"] #modulo-PMOC,
     body[data-modulo-ativo="PAGAMENTOS"] #modulo-EMPRESAS { display:none !important; }
-    body[data-modulo-ativo="PAGAMENTOS"] #modulo-PAGAMENTOS { display:block !important; overflow:visible !important; }
+
+    /* Exibe módulo de pagamentos */
+    body[data-modulo-ativo="PAGAMENTOS"] #modulo-PAGAMENTOS {
+      display:block !important; overflow:visible !important;
+    }
     #pag-painel-fechamento { display:block !important; }
     #fech-resultado       { display:block !important; }
     #pag-painel-precos    { display:none !important; }
-    #fech-cabecalho-hu    { border:2px solid #003366 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .main-content { margin-left:0 !important; width:100% !important; padding:0 !important; }
-    body { background:white !important; }
-    .pag-emp-card { break-inside:avoid; page-break-inside:avoid; }
-    table { border-collapse:collapse !important; }
-    .pag-th, .pag-td { font-size:10px !important; padding:6px 8px !important; }
-    svg rect { fill:#003366 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+    /* Layout principal sem sidebar */
+    .main-content, .modulos-container, #tela-dashboard {
+      margin:0 !important; margin-left:0 !important;
+      width:100% !important; padding:0 !important;
+      overflow:visible !important; height:auto !important;
+      display:block !important;
+    }
+    #modulo-PAGAMENTOS > div {
+      padding:10px 16px 30px !important; background:white !important;
+    }
+
+    /* ── CABEÇALHO UEL — COMPACTO HORIZONTAL ── */
+    #fech-cabecalho-hu {
+      border:2px solid #003366 !important;
+      border-radius:0 !important;
+      padding:10px 14px !important;
+      margin-bottom:0 !important;
+      page-break-after:avoid !important;
+    }
+    #fech-cabecalho-hu table { border:none !important; background:transparent !important; }
+    #fech-cabecalho-hu table tr { background:transparent !important; }
+    #fech-cabecalho-hu table td { border:none !important; padding:4px 8px !important; }
+    #fech-cabecalho-hu table tr:hover td { background:transparent !important; }
+
+    /* Logo SVG */
+    #fech-cabecalho-hu svg {
+      width:52px !important; height:52px !important;
+    }
+    #fech-cabecalho-hu svg rect { fill:#003366 !important; }
+
+    /* Info text — keep compact */
+    #fech-cabecalho-hu td p { margin:1px 0 !important; }
+
+    /* Divisão de manutenção — linha separadora */
+    #fech-cabecalho-hu > div {
+      margin-top:6px !important;
+      padding-top:5px !important;
+      border-top:2px solid #003366 !important;
+    }
+
+    /* ── CARDS DE RESUMO — EM LINHA ── */
+    .pag-card-res {
+      flex:1 !important;
+      border:2px solid #003366 !important;
+      border-radius:0 !important;
+      padding:8px 10px !important;
+      min-width:0 !important;
+      box-shadow:none !important;
+      page-break-inside:avoid !important;
+    }
+    .pag-card-num { font-size:18px !important; color:#003366 !important; }
+    .pag-card-lbl { font-size:8px !important; }
+
+    /* Wrapper dos cards em flex row */
+    #fech-resultado > div:nth-child(2) {
+      display:flex !important;
+      flex-direction:row !important;
+      gap:6px !important;
+      margin-bottom:6px !important;
+    }
+
+    /* ── EMPRESA CARD ── */
+    .pag-emp-card {
+      break-inside:avoid !important;
+      page-break-inside:avoid !important;
+      border:1px solid #cbd5e1 !important;
+      border-radius:0 !important;
+      box-shadow:none !important;
+      overflow:visible !important;
+      margin-bottom:8px !important;
+    }
+
+    /* Empresa header bar */
+    .pag-emp-card > div:first-child {
+      background:#0f172a !important;
+      color:white !important;
+      padding:8px 14px !important;
+    }
+    .pag-emp-card > div:first-child div:first-child div:first-child {
+      font-size:12px !important;
+    }
+    .pag-emp-card > div:first-child div:last-child {
+      font-size:16px !important;
+      color:#4ade80 !important;
+    }
+
+    /* ── TABELAS ── */
+    table { border-collapse:collapse !important; border:none !important; background:white !important; }
+    .pag-th {
+      font-size:8px !important;
+      padding:5px 6px !important;
+      background:#f1f5f9 !important;
+      color:#475569 !important;
+      border-bottom:2px solid #003366 !important;
+      border-top:none !important;
+      border-left:none !important;
+      border-right:none !important;
+    }
+    .pag-td {
+      font-size:10px !important;
+      padding:4px 6px !important;
+      border-bottom:1px solid #e2e8f0 !important;
+      border-top:none !important;
+      border-left:none !important;
+      border-right:none !important;
+    }
+    /* Remove hover effect on print */
+    tr:hover td { background-color:transparent !important; }
+
+    /* Tipo badge */
+    .pag-td span[style*="background:#dbeafe"] {
+      background:#dbeafe !important;
+      color:#1d4ed8 !important;
+      font-size:8px !important;
+      padding:1px 4px !important;
+    }
+
+    /* Total row */
+    tfoot tr { background:#f0fdf4 !important; }
+    tfoot td { font-size:10px !important; padding:6px 8px !important; border:none !important; }
+
+    /* ── TOTAL GERAL BAR ── */
+    #fech-resumo-empresas > div:last-child {
+      background:#0f172a !important;
+      color:white !important;
+      border-radius:0 !important;
+      padding:10px 16px !important;
+      margin-top:4px !important;
+      page-break-inside:avoid !important;
+    }
+
+    /* ── RODAPÉ ASSINATURAS ── */
+    .so-print {
+      page-break-inside:avoid !important;
+      margin-top:30px !important;
+    }
+
+    /* ── PAGE SETTINGS ── */
+    @page {
+      size:A4 landscape;
+      margin:12mm 10mm;
+    }
   }
 </style>
 

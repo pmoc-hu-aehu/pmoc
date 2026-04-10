@@ -63,7 +63,7 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
         elevation      : 0,
         shape: const Border(bottom: BorderSide(color: Color(0xFF333333), width: 1.5)),
         title          : const Text(
-          'MÉTRICAS.SYS',
+          'RELATÓRIO',
           style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Courier', letterSpacing: 2),
         ),
       ),
@@ -151,9 +151,14 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
           Container(height: 1, color: Colors.white.withValues(alpha: 0.06)),
           const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('SYS_DATE // $data', style: const TextStyle(color: Color(0xFFCCFF00), fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text('DATA // $data', 
+                  style: const TextStyle(color: Color(0xFFCCFF00), fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
               Text('ZERA AS 00:00', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 10, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
             ],
           ),

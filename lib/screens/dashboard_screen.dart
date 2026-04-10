@@ -158,7 +158,7 @@ class DashboardScreen extends StatelessWidget {
                       
                       Center(
                         child: Text(
-                          'DMPE — HU LONDRINA © 2025\nSYS_VERSION 1.0.4',
+                          'DMPE — HU LONDRINA © 2026\nSYS_VERSION 1.0.1',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.15),
