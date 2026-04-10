@@ -44,6 +44,14 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
 
   String? _coordenadasGps;
 
+  final List<Map<String, dynamic>> _epis = [
+    {'label': 'Luvas',              'icon': Icons.back_hand_outlined},
+    {'label': 'Óculos',             'icon': Icons.visibility_outlined},
+    {'label': 'Máscara PFF2',       'icon': Icons.masks_outlined},
+    {'label': 'Protetor auricular', 'icon': Icons.hearing_outlined},
+  ];
+  final Set<String> _episSelecionados = {};
+
   String?    _imagePathInicio;
   String?    _imagePathFinal;
 
@@ -176,7 +184,7 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
       _snack('Responda todas as perguntas Sim/Não.', erro: true);
       return false;
     }
-    if (_chkIsolamentoOk == true &&
+    if (_chkIsolamentoOk == false &&
         _metrosController.text.trim().isEmpty) {
       _snack('Informe os metros de isolamento instalados.', erro: true);
       return false;
@@ -219,7 +227,7 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
       pecasTrocadas          : _pecasController.text.trim(),
       nfRequisicao           : _nfController.text.trim(),
       chkIsolamentoOk        : _chkIsolamentoOk!,
-      metrosIsolamentoTrocados: _chkIsolamentoOk == true
+      metrosIsolamentoTrocados: _chkIsolamentoOk == false
           ? double.tryParse(_metrosController.text)
           : null,
       chkHigienePos          : _chkHigienePos!,
@@ -273,15 +281,16 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F4F5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFf97316),
-        elevation: 4,
+        backgroundColor: const Color(0xFFFFFFFF),
+        elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
         title: const Text(
-          'Checklist — Corretiva',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          'CHECKLIST.CORRETIVA',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1.5),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -306,21 +315,26 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      IconButton(
-                        tooltip: 'Ler código de barras',
-                        onPressed: _abrirScanner,
-                        icon: const Icon(Icons.qr_code_scanner),
-                        color: const Color(0xFFf97316),
+                      Container(
+                        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black, width: 2), bottom: BorderSide(color: Colors.black, width: 2), right: BorderSide(color: Colors.black, width: 2))),
+                        child: IconButton(
+                          tooltip: 'Ler código de barras',
+                          onPressed: _abrirScanner,
+                          icon: const Icon(Icons.qr_code_scanner),
+                          color: Colors.black,
+                          style: IconButton.styleFrom(backgroundColor: const Color(0xFFE4E4E7), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+                        ),
                       ),
-                      IconButton.filled(
-                        onPressed: _carregandoMaquina ? null : _buscarMaquina,
-                        icon: _carregandoMaquina
-                            ? const SizedBox(
-                                width: 18, height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Icon(Icons.search),
-                        style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFFf97316)),
+                      Container(
+                        decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2)),
+                        child: IconButton(
+                          onPressed: _carregandoMaquina ? null : _buscarMaquina,
+                          icon: _carregandoMaquina
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black))
+                              : const Icon(Icons.search),
+                          color: Colors.black,
+                          style: IconButton.styleFrom(backgroundColor: const Color(0xFFCCFF00), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+                        ),
                       ),
                     ]),
                     if (_maquina != null) ...[
@@ -344,10 +358,45 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
                       IconButton(
                         onPressed: _obterLocalizacao,
                         icon: const Icon(Icons.my_location, size: 22),
-                        color: const Color(0xFFf97316),
+                        color: Colors.black,
                       ),
                     ]),
                   ],
+                ),
+              ),
+
+              // EPIs
+              _card(
+                title: 'EPIs Utilizados',
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: _epis.map((epi) {
+                    final label       = epi['label'] as String;
+                    final icon        = epi['icon'] as IconData;
+                    final selecionado = _episSelecionados.contains(label);
+                    return GestureDetector(
+                      onTap: () => setState(() {
+                        if (selecionado) {
+                          _episSelecionados.remove(label);
+                        } else {
+                          _episSelecionados.add(label);
+                        }
+                      }),
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: selecionado ? const Color(0xFFCCFF00) : Colors.white,
+                          border: Border.all(color: Colors.black, width: 2),
+                        ),
+                        child: Center(
+                          child: Icon(icon, size: 32, color: Colors.black),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
 
@@ -391,9 +440,9 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
               _card(
                 title: 'Isolamento Térmico',
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  _yesNo('Houve substituição de isolamento?', _chkIsolamentoOk,
+                  _yesNo('O isolamento térmico está em bom estado?', _chkIsolamentoOk,
                       (v) => setState(() => _chkIsolamentoOk = v)),
-                  if (_chkIsolamentoOk == true) ...[
+                  if (_chkIsolamentoOk == false) ...[
                     const SizedBox(height: 8),
                     _label('Metros instalados'),
                     const SizedBox(height: 4),
@@ -476,19 +525,20 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _enviando ? null : _enviar,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFf97316),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                   style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFCCFF00),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Colors.black, width: 2),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    elevation: 0,
                   ),
                   child: _enviando
                       ? const SizedBox(
                           width: 22, height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black))
                       : const Text('FINALIZAR CHECKLIST',
-                          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.7)),
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 2)),
                 ),
               ),
               const SizedBox(height: 24),
@@ -505,20 +555,26 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
   Widget _card({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
+        border: Border.all(color: Colors.black, width: 2),
+        boxShadow: const [BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4))],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: const TextStyle(color: Colors.black87, fontSize: 15, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: Colors.black,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+            ),
+          ),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -526,24 +582,27 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
   }
 
   Widget _fotoWidget(String? path, VoidCallback onTap) {
-    return Column(children: [
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       if (path != null)
         Container(
-          height: 160, width: double.infinity,
+          height: 180, width: double.infinity,
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.black, width: 2),
             image: DecorationImage(image: FileImage(File(path)), fit: BoxFit.cover),
           ),
         ),
-      OutlinedButton.icon(
+      ElevatedButton.icon(
         onPressed: onTap,
-        icon: const Icon(Icons.camera_alt_outlined, size: 18),
-        label: Text(path == null ? 'Tirar foto' : 'Refazer foto'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFFf97316),
-          side: const BorderSide(color: Color(0xFFf97316)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        icon: const Icon(Icons.camera_alt_rounded, size: 18),
+        label: Text(path == null ? 'CAPTURAR IMAGEM' : 'REFAZER FOTO', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFE4E4E7),
+          foregroundColor: Colors.black,
+          side: const BorderSide(color: Colors.black, width: 2),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 12),
         ),
       ),
     ]);
@@ -551,30 +610,28 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
 
   Widget _yesNo(String pergunta, bool? valor, ValueChanged<bool?> onChange) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(pergunta, style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600)),
-      const SizedBox(height: 4),
+      Text(pergunta.toUpperCase(), style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900)),
+      const SizedBox(height: 8),
       Row(children: [
         Expanded(
-          child: ChoiceChip(
-            label: const Text('Sim'),
-            selected: valor == true,
-            onSelected: (_) => onChange(true),
-            selectedColor: const Color(0xFF22c55e),
-            labelStyle: TextStyle(color: valor == true ? Colors.white : Colors.grey[700]),
-            backgroundColor: Colors.grey[100],
-            side: BorderSide(color: valor == true ? const Color(0xFF22c55e) : Colors.grey[400]!),
+          child: GestureDetector(
+            onTap: () => onChange(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(color: valor == true ? const Color(0xFF22C55E) : Colors.white, border: Border.all(color: Colors.black, width: 2)),
+              child: const Center(child: Text('SIM', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1))),
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: ChoiceChip(
-            label: const Text('Não'),
-            selected: valor == false,
-            onSelected: (_) => onChange(false),
-            selectedColor: const Color(0xFFef4444),
-            labelStyle: TextStyle(color: valor == false ? Colors.white : Colors.grey[700]),
-            backgroundColor: Colors.grey[100],
-            side: BorderSide(color: valor == false ? const Color(0xFFef4444) : Colors.grey[400]!),
+          child: GestureDetector(
+            onTap: () => onChange(false),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(color: valor == false ? const Color(0xFFEF4444) : Colors.white, border: Border.all(color: Colors.black, width: 2)),
+              child: const Center(child: Text('NÃO', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1))),
+            ),
           ),
         ),
       ]),
@@ -612,23 +669,22 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
     );
   }
 
-  Widget _label(String text) => Text(text,
-      style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600));
+  Widget _label(String text) => Text(text.toUpperCase(),
+      style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1));
 
   Widget _infoRow(String label, String value) {
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('$label: ', style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600)),
-      Expanded(child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13))),
+      Text('${label.toUpperCase()}: ', style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w900)),
+      Expanded(child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.bold))),
     ]);
   }
 
   Widget _maquinaResumo(Maquina m) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFf97316).withOpacity(0.07),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFf97316).withOpacity(0.3)),
+        color: const Color(0xFFCCFF00),
+        border: Border.all(color: Colors.black, width: 2),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         _infoRow('FUEL', m.fuel),
@@ -641,19 +697,13 @@ class _CorretivaChecklistScreenState extends State<CorretivaChecklistScreen> {
 
   InputDecoration _inputDec(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+        hintStyle: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold),
         filled: true,
-        fillColor: Colors.grey[50],
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!)),
-        enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!)),
-        focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFf97316))),
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+        focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Color(0xFF0055FF), width: 3)),
+        border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
       );
 }
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
@@ -6,7 +7,7 @@ import 'home_screen.dart';
 import 'maquinas_screen.dart';
 import 'relatorio_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   final String nome;
   final String perfil;
 
@@ -17,8 +18,45 @@ class DashboardScreen extends StatelessWidget {
   });
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  static const _kTimeout = Duration(hours: 1);
+  Timer? _idleTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _resetTimer();
+  }
+
+  @override
+  void dispose() {
+    _idleTimer?.cancel();
+    super.dispose();
+  }
+
+  void _resetTimer() {
+    _idleTimer?.cancel();
+    _idleTimer = Timer(_kTimeout, _deslogar);
+  }
+
+  void _deslogar() {
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _resetTimer(),
+      onPointerMove: (_) => _resetTimer(),
+      child: Scaffold(
       backgroundColor: const Color(0xFF090A0F), // Deep tech black
       body: SafeArea(
         child: Stack(
@@ -77,7 +115,7 @@ class DashboardScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 20),
                             Text(
-                              nome.toUpperCase(),
+                              widget.nome.toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 32,
@@ -90,7 +128,7 @@ class DashboardScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'ID_ROLE // ${perfil.toUpperCase()}',
+                              'ID_ROLE // ${widget.perfil.toUpperCase()}',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.5),
                                 fontSize: 13,
@@ -128,7 +166,7 @@ class DashboardScreen extends StatelessWidget {
                         icon: Icons.checklist_rounded,
                         accentColor: const Color(0xFF0055FF), // Tech blue
                         height: 180, // Dominant vertical presence
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen(nome: nome, perfil: perfil))),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen(nome: widget.nome, perfil: widget.perfil))),
                       ),
                       const SizedBox(height: 16),
                       
@@ -140,7 +178,7 @@ class DashboardScreen extends StatelessWidget {
                         icon: Icons.precision_manufacturing_outlined,
                         accentColor: const Color(0xFFCCFF00), // Acid green
                         height: 140,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MaquinasScreen(perfil: perfil))),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MaquinasScreen(perfil: widget.perfil))),
                       ),
                       const SizedBox(height: 16),
                       
@@ -151,7 +189,7 @@ class DashboardScreen extends StatelessWidget {
                         icon: Icons.bar_chart_rounded,
                         accentColor: const Color(0xFFFF4500), // Signal orange
                         height: 140,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RelatorioScreen(tecnico: nome))),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RelatorioScreen(tecnico: widget.nome))),
                       ),
                       
                       const SizedBox(height: 50),
@@ -177,6 +215,7 @@ class DashboardScreen extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

@@ -13,7 +13,6 @@ import 'barcode_scanner_screen.dart';
 const _kGreen  = Color(0xFF22c55e);
 const _kRed    = Color(0xFFef4444);
 const _kOrange = Color(0xFFf97316);
-const _kAppBar = Color(0xFF7c3aed); // cor do card MOVIMENTAÇÃO no home
 
 class MovimentacaoChecklistScreen extends StatefulWidget {
   final String tecnico;
@@ -319,15 +318,16 @@ class _MovimentacaoChecklistScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F4F5),
       appBar: AppBar(
-        backgroundColor: _kAppBar,
-        elevation: 4,
+        backgroundColor: const Color(0xFFFFFFFF),
+        elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
         title: const Text(
-          'Checklist – Movimentação',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+          'CHECKLIST.MOVIMENTAÇÃO',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1.5),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -354,22 +354,27 @@ class _MovimentacaoChecklistScreenState
                           ),
                         ),
                         const SizedBox(width: 6),
-                        IconButton(
-                          tooltip: 'Ler código de barras',
-                          onPressed: _abrirScanner,
-                          icon: const Icon(Icons.qr_code_scanner),
-                          color: _kAppBar,
+                        Container(
+                          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black, width: 2), bottom: BorderSide(color: Colors.black, width: 2), right: BorderSide(color: Colors.black, width: 2))),
+                          child: IconButton(
+                            tooltip: 'Ler código de barras',
+                            onPressed: _abrirScanner,
+                            icon: const Icon(Icons.qr_code_scanner),
+                            color: Colors.black,
+                            style: IconButton.styleFrom(backgroundColor: const Color(0xFFE4E4E7), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+                          ),
                         ),
                         const SizedBox(width: 4),
-                        IconButton.filled(
-                          onPressed: _carregandoMaquina ? null : _buscarMaquina,
-                          icon: _carregandoMaquina
-                              ? const SizedBox(
-                                  width: 18, height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                )
-                              : const Icon(Icons.search),
-                          style: IconButton.styleFrom(backgroundColor: _kAppBar),
+                        Container(
+                          decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2)),
+                          child: IconButton(
+                            onPressed: _carregandoMaquina ? null : _buscarMaquina,
+                            icon: _carregandoMaquina
+                                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black))
+                                : const Icon(Icons.search),
+                            color: Colors.black,
+                            style: IconButton.styleFrom(backgroundColor: const Color(0xFFCCFF00), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+                          ),
                         ),
                       ],
                     ),
@@ -391,17 +396,16 @@ class _MovimentacaoChecklistScreenState
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.red[50],
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: _kRed),
+                            border: Border.all(color: Colors.black, width: 2),
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.block, color: _kRed, size: 20),
+                              Icon(Icons.block, color: Colors.black, size: 20),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'Máquina não encontrada. Solicite o cadastro ao técnico pleno ou administrador.',
-                                  style: TextStyle(color: _kRed, fontSize: 13),
+                                  style: TextStyle(color: Colors.black, fontSize: 13),
                                 ),
                               ),
                             ],
@@ -712,19 +716,21 @@ class _MovimentacaoChecklistScreenState
                 child: ElevatedButton(
                   onPressed: _enviando ? null : _enviar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _kGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: const Color(0xFFCCFF00),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Colors.black, width: 2),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    elevation: 0,
                   ),
                   child: _enviando
                       ? const SizedBox(
                           width: 22, height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black),
                         )
                       : const Text(
                           'FINALIZAR CHECKLIST',
-                          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.7),
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 2),
                         ),
                 ),
               ),
@@ -742,25 +748,28 @@ class _MovimentacaoChecklistScreenState
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
+        border: Border.all(color: Colors.black, width: 2),
+        boxShadow: const [
+          BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4)),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title,
-            style: const TextStyle(color: Colors.black87, fontSize: 15, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: Colors.black,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+            ),
+          ),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -769,25 +778,29 @@ class _MovimentacaoChecklistScreenState
 
   Widget _fotoWidget({String? path, required VoidCallback onTap, required String label}) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (path != null)
           Container(
-            height: 160,
+            height: 180,
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.black, width: 2),
               image: DecorationImage(image: FileImage(File(path)), fit: BoxFit.cover),
             ),
           ),
-        OutlinedButton.icon(
+        ElevatedButton.icon(
           onPressed: onTap,
-          icon : const Icon(Icons.camera_alt_outlined, size: 18),
-          label: Text(path != null ? 'Retomar foto' : label),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF0ea5e9),
-            side: const BorderSide(color: Color(0xFF0ea5e9)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          icon: const Icon(Icons.camera_alt_rounded, size: 18),
+          label: Text(path == null ? 'CAPTURAR IMAGEM' : 'REFAZER FOTO', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4E4E7),
+            foregroundColor: Colors.black,
+            side: const BorderSide(color: Colors.black, width: 2),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ],
@@ -796,36 +809,46 @@ class _MovimentacaoChecklistScreenState
 
   Widget _yesNo(String pergunta, bool? valor, ValueChanged<bool?> onChanged) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(pergunta,
-            style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
+          Text(
+            pergunta.toUpperCase(),
+            style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Sim'),
-                  selected: valor == true,
-                  onSelected: (_) => onChanged(true),
-                  selectedColor: _kGreen,
-                  labelStyle: TextStyle(color: valor == true ? Colors.white : Colors.grey[700]),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(color: valor == true ? _kGreen : Colors.grey[400]!),
+                child: GestureDetector(
+                  onTap: () => onChanged(true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == true ? const Color(0xFF22C55E) : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: const Center(
+                      child: Text('SIM', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Não'),
-                  selected: valor == false,
-                  onSelected: (_) => onChanged(false),
-                  selectedColor: _kRed,
-                  labelStyle: TextStyle(color: valor == false ? Colors.white : Colors.grey[700]),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(color: valor == false ? _kRed : Colors.grey[400]!),
+                child: GestureDetector(
+                  onTap: () => onChanged(false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == false ? const Color(0xFFEF4444) : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: const Center(
+                      child: Text('NÃO', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -843,39 +866,51 @@ class _MovimentacaoChecklistScreenState
   }) {
     return Wrap(
       spacing: 8,
-      runSpacing: 6,
+      runSpacing: 8,
       children: opcoes.map((op) {
         final sel = selecionado == op;
-        final cor = cores[op] ?? Colors.grey;
-        return ChoiceChip(
-          label: Text(op),
-          selected: sel,
-          onSelected: (_) => onChange(op),
-          selectedColor: cor,
-          labelStyle: TextStyle(color: sel ? Colors.white : Colors.grey[700], fontSize: 13),
-          backgroundColor: Colors.grey[100],
-          side: BorderSide(color: sel ? cor : Colors.grey[300]!),
+        final cor = cores[op] ?? Colors.black;
+        return GestureDetector(
+          onTap: () => onChange(op),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: sel ? cor : Colors.white,
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            child: Text(
+              op.toUpperCase(),
+              style: TextStyle(
+                color: sel ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
         );
       }).toList(),
     );
   }
 
   Widget _label(String text) {
-    return Text(text,
-      style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600));
+    return Text(
+      text.toUpperCase(),
+      style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
+    );
   }
 
   InputDecoration _inputDeco(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
+      hintStyle: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold),
       filled: true,
-      fillColor: Colors.grey[100],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      fillColor: Colors.white,
+      enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Color(0xFF0055FF), width: 3)),
+      errorBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.redAccent, width: 2)),
+      focusedErrorBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.redAccent, width: 3)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
   }
 }
@@ -892,29 +927,20 @@ class _MaquinaResumoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFf3e8ff),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kAppBar, width: 1.5),
+        color: Colors.white,
+        border: Border.all(color: Colors.black, width: 2),
+        boxShadow: const [BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _kAppBar,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'FUEL: ${maquina.fuel}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-              ),
-              const Spacer(),
-              const Icon(Icons.ac_unit, color: _kAppBar, size: 20),
-            ],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            color: Colors.black,
+            child: Text(
+              'FUEL: ${maquina.fuel}',
+              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1),
+            ),
           ),
           const SizedBox(height: 10),
           _row('Modelo', maquina.modelo),
@@ -932,8 +958,8 @@ class _MaquinaResumoCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$label: ',
-            style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('${label.toUpperCase()}: ',
+            style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w900)),
           Expanded(
             child: Text(value.isEmpty ? '—' : value,
               style: const TextStyle(color: Colors.black87, fontSize: 13)),

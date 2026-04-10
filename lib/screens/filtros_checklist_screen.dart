@@ -441,15 +441,16 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F4F5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0ea5e9),
-        elevation: 4,
+        backgroundColor: const Color(0xFFFFFFFF),
+        elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
         title: const Text(
-          'Checklist - Filtros',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          'CHECKLIST.FILTROS',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1.5),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -477,28 +478,37 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                         ),
                         const SizedBox(width: 6),
                         // Botão scanner
-                        IconButton(
-                          tooltip: 'Ler código de barras',
-                          onPressed: _abrirScanner,
-                          icon: const Icon(Icons.qr_code_scanner),
-                          color: const Color(0xFF0ea5e9),
+                        Container(
+                          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black, width: 2), bottom: BorderSide(color: Colors.black, width: 2), right: BorderSide(color: Colors.black, width: 2))),
+                          child: IconButton(
+                            tooltip: 'Ler código de barras',
+                            onPressed: _abrirScanner,
+                            icon: const Icon(Icons.qr_code_scanner),
+                            color: Colors.black,
+                            style: IconButton.styleFrom(backgroundColor: const Color(0xFFE4E4E7), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+                          ),
                         ),
                         const SizedBox(width: 4),
                         // Botão buscar (manual)
-                        IconButton.filled(
-                          onPressed: _carregandoMaquina ? null : _buscarMaquina,
-                          icon: _carregandoMaquina
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.search),
-                          style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFF0ea5e9),
+                        Container(
+                          decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2)),
+                          child: IconButton(
+                            onPressed: _carregandoMaquina ? null : _buscarMaquina,
+                            icon: _carregandoMaquina
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      color: Colors.black,
+                                    ),
+                                  )
+                                : const Icon(Icons.search),
+                            color: Colors.black,
+                            style: IconButton.styleFrom(
+                              backgroundColor: const Color(0xFFCCFF00),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            ),
                           ),
                         ),
                       ],
@@ -555,8 +565,10 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
               // ── EPIs — só ícones, linha única ──
               _buildCard(
                 title: 'EPIs Utilizados',
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
                   children: _epis.map((epi) {
                     final label       = epi['label'] as String;
                     final icon        = epi['icon'] as IconData;
@@ -572,39 +584,20 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                           }
                         });
                       },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
+                      child: Container(
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
                           color: selecionado
-                              ? const Color(0xFF22c55e).withOpacity(0.15)
-                              : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: selecionado
-                                ? const Color(0xFF22c55e)
-                                : Colors.grey[300]!,
-                            width: selecionado ? 2.0 : 1.0,
-                          ),
-                          boxShadow: selecionado
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(0xFF22c55e)
-                                        .withOpacity(0.25),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  )
-                                ]
-                              : [],
+                              ? const Color(0xFFCCFF00)
+                              : Colors.white,
+                          border: Border.all(color: Colors.black, width: 2),
                         ),
                         child: Center(
                           child: Icon(
                             icon,
                             size: 32,
-                            color: selecionado
-                                ? const Color(0xFF16a34a)
-                                : Colors.grey[400],
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -758,27 +751,28 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
                 child: ElevatedButton(
                   onPressed: _enviando ? null : _enviar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF22c55e),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    backgroundColor: const Color(0xFFCCFF00),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Colors.black, width: 2),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    elevation: 0,
                   ),
                   child: _enviando
                       ? const SizedBox(
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                            strokeWidth: 3,
+                            color: Colors.black,
                           ),
                         )
                       : const Text(
                           'FINALIZAR CHECKLIST',
                           style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.7,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                            letterSpacing: 2,
                           ),
                         ),
                 ),
@@ -797,31 +791,33 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
+        border: Border.all(color: Colors.black, width: 2),
+        boxShadow: const [
+          BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4)),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: Colors.black,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -830,30 +826,32 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
 
   Widget _fotoWidget(String? path, VoidCallback onTap) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (path != null)
           Container(
-            height: 160,
+            height: 180,
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.black, width: 2),
               image: DecorationImage(
                 image: FileImage(File(path)),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-        OutlinedButton.icon(
+        ElevatedButton.icon(
           onPressed: onTap,
-          icon: const Icon(Icons.camera_alt_outlined, size: 18),
-          label: const Text('Tirar foto'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF0ea5e9),
-            side: const BorderSide(color: Color(0xFF0ea5e9)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+          icon: const Icon(Icons.camera_alt_rounded, size: 18),
+          label: Text(path == null ? 'CAPTURAR IMAGEM' : 'REFAZER FOTO', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4E4E7),
+            foregroundColor: Colors.black,
+            side: const BorderSide(color: Colors.black, width: 2),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ],
@@ -867,65 +865,61 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
     TextEditingController obsController,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            pergunta,
+            pergunta.toUpperCase(),
             style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Sim'),
-                  selected: valor == true,
-                  onSelected: (_) => onChanged(true),
-                  selectedColor: const Color(0xFF22c55e),
-                  labelStyle: TextStyle(
-                    color: valor == true ? Colors.white : Colors.grey[700],
-                  ),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(
-                    color: valor == true
-                        ? const Color(0xFF22c55e)
-                        : Colors.grey[400]!,
+                child: GestureDetector(
+                  onTap: () => onChanged(true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == true ? const Color(0xFF22C55E) : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: Center(
+                      child: Text('SIM', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Não'),
-                  selected: valor == false,
-                  onSelected: (_) => onChanged(false),
-                  selectedColor: const Color(0xFFef4444),
-                  labelStyle: TextStyle(
-                    color: valor == false ? Colors.white : Colors.grey[700],
-                  ),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(
-                    color: valor == false
-                        ? const Color(0xFFef4444)
-                        : Colors.grey[400]!,
+                child: GestureDetector(
+                  onTap: () => onChanged(false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == false ? const Color(0xFFEF4444) : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: Center(
+                      child: Text('NÃO', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
                   ),
                 ),
               ),
             ],
           ),
           if (valor == false) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             TextField(
               controller: obsController,
               maxLines: 2,
               textInputAction: TextInputAction.done,
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: Colors.black),
               decoration: _inputDecoration('Explique o motivo do "Não"'),
             ),
           ],
@@ -939,11 +933,11 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '$label: ',
+          '${label.toUpperCase()}: ',
           style: const TextStyle(
-            color: Colors.black54,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+            color: Colors.black,
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
           ),
         ),
         Expanded(
@@ -952,6 +946,7 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
             style: const TextStyle(
               color: Colors.black87,
               fontSize: 13,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -961,11 +956,12 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
 
   Widget _label(String text) {
     return Text(
-      text,
+      text.toUpperCase(),
       style: const TextStyle(
-        color: Colors.black54,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
+        color: Colors.black,
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 1,
       ),
     );
   }
@@ -973,20 +969,14 @@ class _FiltrosChecklistScreenState extends State<FiltrosChecklistScreen> {
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(
-        color: Colors.grey[500],
-        fontSize: 13,
-      ),
+      hintStyle: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold),
       filled: true,
-      fillColor: Colors.grey[100],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 10,
-      ),
+      fillColor: Colors.white,
+      enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Color(0xFF0055FF), width: 3)),
+      errorBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.redAccent, width: 2)),
+      focusedErrorBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.redAccent, width: 3)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
   }
 }
@@ -1004,11 +994,10 @@ class _MaquinaResumoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFe0f2fe),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFCCFF00),
         border: Border.all(
-          color: const Color(0xFF0ea5e9),
-          width: 1.5,
+          color: Colors.black,
+          width: 2,
         ),
       ),
       child: Column(
@@ -1021,23 +1010,22 @@ class _MaquinaResumoCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0ea5e9),
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.black,
                 ),
                 child: Text(
                   'FUEL: ${maquina.fuel}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
                   ),
                 ),
               ),
               const Spacer(),
               const Icon(
                 Icons.ac_unit,
-                color: Color(0xFF0ea5e9),
+                color: Colors.black,
                 size: 24,
               ),
             ],
@@ -1048,14 +1036,14 @@ class _MaquinaResumoCard extends StatelessWidget {
           // Linha verde "Máquina encontrada"
           Row(
             children: const [
-              Icon(Icons.check_circle, color: Color(0xFF22c55e), size: 16),
+              Icon(Icons.check_box, color: Colors.black, size: 16),
               SizedBox(width: 6),
               Text(
-                'Máquina encontrada',
+                'MÁQUINA ENCONTRADA',
                 style: TextStyle(
-                  color: Color(0xFF16a34a),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ],

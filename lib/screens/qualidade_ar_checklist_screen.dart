@@ -10,7 +10,6 @@ import '../services/offline_queue_service.dart';
 
 const _kGreen  = Color(0xFF22c55e);
 const _kOrange = Color(0xFFf97316);
-const _kAppBar = Color(0xFF14b8a6); // cor do card QUALIDADE AR no home
 
 class QualidadeArChecklistScreen extends StatefulWidget {
   final String tecnico;
@@ -233,15 +232,16 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F4F5),
       appBar: AppBar(
-        backgroundColor: _kAppBar,
-        elevation: 4,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
         title: const Text(
-          'Checklist – Qualidade do Ar',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+          'CHECKLIST.QUALIDADE DO AR',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1.5),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -302,7 +302,7 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
                         IconButton(
                           onPressed: _obterLocalizacao,
                           icon: const Icon(Icons.my_location, size: 22),
-                          color: const Color(0xFF0ea5e9),
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -386,29 +386,27 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
                     const SizedBox(height: 12),
                     _label('Data da Próxima Análise'),
                     const SizedBox(height: 6),
-                    InkWell(
+                    GestureDetector(
                       onTap: _selecionarDataProxima,
-                      borderRadius: BorderRadius.circular(10),
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black, width: 2),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF0ea5e9)),
+                            const Icon(Icons.calendar_today_outlined, size: 18, color: Colors.black),
                             const SizedBox(width: 8),
                             Text(
                               _dataProximaAnalise != null
                                   ? _formatarData(_dataProximaAnalise!)
-                                  : 'Selecionar data',
+                                  : 'SELECIONAR DATA',
                               style: TextStyle(
-                                color: _dataProximaAnalise != null
-                                    ? Colors.black87
-                                    : Colors.grey[500],
-                                fontSize: 14,
+                                color: _dataProximaAnalise != null ? Colors.black87 : Colors.grey[600],
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -485,19 +483,21 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
                 child: ElevatedButton(
                   onPressed: _enviando ? null : _enviar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _kGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: const Color(0xFFCCFF00),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    side: const BorderSide(color: Colors.black, width: 2),
                   ),
                   child: _enviando
                       ? const SizedBox(
                           width: 22, height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black),
                         )
                       : const Text(
                           'FINALIZAR CHECKLIST',
-                          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.7),
+                          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
                         ),
                 ),
               ),
@@ -515,25 +515,31 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 2)),
+        boxShadow: [BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4))],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title,
-            style: const TextStyle(color: Colors.black87, fontSize: 15, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: Colors.black,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -542,25 +548,30 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
 
   Widget _fotoWidget({String? path, required VoidCallback onTap, required String label}) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (path != null)
           Container(
-            height: 160,
+            height: 180,
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.black, width: 2),
               image: DecorationImage(image: FileImage(File(path)), fit: BoxFit.cover),
             ),
           ),
-        OutlinedButton.icon(
+        ElevatedButton.icon(
           onPressed: onTap,
-          icon : const Icon(Icons.camera_alt_outlined, size: 18),
-          label: Text(path != null ? 'Retomar foto' : label),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF0ea5e9),
-            side: const BorderSide(color: Color(0xFF0ea5e9)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          icon: const Icon(Icons.camera_alt_rounded, size: 18),
+          label: Text(path == null ? label.toUpperCase() : 'REFAZER FOTO',
+              style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4E4E7),
+            foregroundColor: Colors.black,
+            side: const BorderSide(color: Colors.black, width: 2),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ],
@@ -591,21 +602,23 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
   }) {
     return Wrap(
       spacing: 8,
-      runSpacing: 6,
+      runSpacing: 8,
       children: opcoes.map((op) {
         final sel = selecionado == op;
         final cor = cores[op] ?? Colors.grey;
-        return ChoiceChip(
-          label: Text(op),
-          selected: sel,
-          onSelected: (_) => onChange(op),
-          selectedColor: cor,
-          labelStyle: TextStyle(
-            color: sel ? Colors.white : Colors.grey[700],
-            fontSize: 13,
+        return GestureDetector(
+          onTap: () => onChange(op),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: sel ? cor : Colors.white,
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            child: Text(
+              op.toUpperCase(),
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.5),
+            ),
           ),
-          backgroundColor: Colors.grey[100],
-          side: BorderSide(color: sel ? cor : Colors.grey[300]!),
         );
       }).toList(),
     );
@@ -630,31 +643,33 @@ class _QualidadeArChecklistScreenState extends State<QualidadeArChecklistScreen>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('$label: ',
-          style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600)),
+        Text(
+          '${label.toUpperCase()}: ',
+          style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w900),
+        ),
         Expanded(
-          child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13)),
+          child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.bold)),
         ),
       ],
     );
   }
 
   Widget _label(String text) {
-    return Text(text,
-      style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600));
+    return Text(
+      text.toUpperCase(),
+      style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
+    );
   }
 
   InputDecoration _inputDeco(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
+      hintStyle: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold),
       filled: true,
-      fillColor: Colors.grey[100],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      fillColor: Colors.white,
+      enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Color(0xFF0055FF), width: 3)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
   }
 }

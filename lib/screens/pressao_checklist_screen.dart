@@ -12,7 +12,6 @@ import '../services/offline_queue_service.dart';
 const _kGreen  = Color(0xFF22c55e);
 const _kRed    = Color(0xFFef4444);
 const _kOrange = Color(0xFFf97316);
-const _kAppBar = Color(0xFFfacc15);
 
 class PressaoChecklistScreen extends StatefulWidget {
   final String tecnico;
@@ -257,15 +256,16 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F4F5),
       appBar: AppBar(
-        backgroundColor: _kAppBar,
-        elevation: 4,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
         title: const Text(
-          'Checklist – Pressão (Áreas Críticas)',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15),
+          'CHECKLIST.PRESSÃO',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1.5),
         ),
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -349,7 +349,7 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
                         IconButton(
                           onPressed: _obterLocalizacao,
                           icon: const Icon(Icons.my_location, size: 22),
-                          color: const Color(0xFF0ea5e9),
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -360,10 +360,13 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
                         child: ElevatedButton.icon(
                           onPressed: openAppSettings,
                           icon: const Icon(Icons.settings),
-                          label: const Text('Abrir configurações de permissão'),
+                          label: const Text('ABRIR CONFIGURAÇÕES'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            side: const BorderSide(color: Colors.black, width: 2),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            elevation: 0,
                           ),
                         ),
                       ),
@@ -508,13 +511,14 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
                         _snack('Status recalculado: $_statusSala', sucesso: true);
                       },
                       icon : const Icon(Icons.refresh, size: 16),
-                      label: const Text('Recalcular automático'),
+                      label: const Text('RECALCULAR', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0ea5e9),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        textStyle: const TextStyle(fontSize: 13),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.black, width: 2),
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       ),
                     ),
                   ],
@@ -570,19 +574,21 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
                 child: ElevatedButton(
                   onPressed: _enviando ? null : _enviar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _kGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: const Color(0xFFCCFF00),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    side: const BorderSide(color: Colors.black, width: 2),
                   ),
                   child: _enviando
                       ? const SizedBox(
                           width: 22, height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black),
                         )
                       : const Text(
                           'FINALIZAR CHECKLIST',
-                          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.7),
+                          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
                         ),
                 ),
               ),
@@ -600,31 +606,31 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 2)),
+        boxShadow: [BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4))],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: Colors.black,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -633,28 +639,30 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
 
   Widget _fotoWidget({String? path, required VoidCallback onTap, required String label}) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (path != null)
           Container(
-            height: 160,
+            height: 180,
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              image: DecorationImage(
-                image: FileImage(File(path)),
-                fit: BoxFit.cover,
-              ),
+              border: Border.all(color: Colors.black, width: 2),
+              image: DecorationImage(image: FileImage(File(path)), fit: BoxFit.cover),
             ),
           ),
-        OutlinedButton.icon(
+        ElevatedButton.icon(
           onPressed: onTap,
-          icon : const Icon(Icons.camera_alt_outlined, size: 18),
-          label: Text(path != null ? 'Retomar foto' : label),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF0ea5e9),
-            side: const BorderSide(color: Color(0xFF0ea5e9)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          icon: const Icon(Icons.camera_alt_rounded, size: 18),
+          label: Text(path == null ? label.toUpperCase() : 'REFAZER FOTO',
+              style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4E4E7),
+            foregroundColor: Colors.black,
+            side: const BorderSide(color: Colors.black, width: 2),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ],
@@ -663,38 +671,46 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
 
   Widget _yesNo(String pergunta, bool? valor, ValueChanged<bool?> onChanged) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            pergunta,
-            style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600),
+            pergunta.toUpperCase(),
+            style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Sim'),
-                  selected: valor == true,
-                  onSelected: (_) => onChanged(true),
-                  selectedColor: _kGreen,
-                  labelStyle: TextStyle(color: valor == true ? Colors.white : Colors.grey[700]),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(color: valor == true ? _kGreen : Colors.grey[400]!),
+                child: GestureDetector(
+                  onTap: () => onChanged(true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == true ? const Color(0xFF22C55E) : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: const Center(
+                      child: Text('SIM', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Não'),
-                  selected: valor == false,
-                  onSelected: (_) => onChanged(false),
-                  selectedColor: _kRed,
-                  labelStyle: TextStyle(color: valor == false ? Colors.white : Colors.grey[700]),
-                  backgroundColor: Colors.grey[100],
-                  side: BorderSide(color: valor == false ? _kRed : Colors.grey[400]!),
+                child: GestureDetector(
+                  onTap: () => onChanged(false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == false ? const Color(0xFFEF4444) : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: const Center(
+                      child: Text('NÃO', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -712,21 +728,23 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
   }) {
     return Wrap(
       spacing: 8,
-      runSpacing: 6,
+      runSpacing: 8,
       children: opcoes.map((op) {
         final sel = selecionado == op;
         final cor = cores[op] ?? Colors.grey;
-        return ChoiceChip(
-          label: Text(op),
-          selected: sel,
-          onSelected: (_) => onChange(op),
-          selectedColor: cor,
-          labelStyle: TextStyle(
-            color: sel ? Colors.white : Colors.grey[700],
-            fontSize: 13,
+        return GestureDetector(
+          onTap: () => onChange(op),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: sel ? cor : Colors.white,
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            child: Text(
+              op.toUpperCase(),
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.5),
+            ),
           ),
-          backgroundColor: Colors.grey[100],
-          side: BorderSide(color: sel ? cor : Colors.grey[300]!),
         );
       }).toList(),
     );
@@ -739,9 +757,7 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
   }) {
     return DropdownButtonFormField<String>(
       initialValue: value,
-      items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-          .toList(),
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       onChanged: onChange,
       decoration: _inputDeco(''),
       style: const TextStyle(color: Colors.black87, fontSize: 14),
@@ -754,11 +770,11 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '$label: ',
-          style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600),
+          '${label.toUpperCase()}: ',
+          style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w900),
         ),
         Expanded(
-          child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13)),
+          child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -766,22 +782,20 @@ class _PressaoChecklistScreenState extends State<PressaoChecklistScreen> {
 
   Widget _label(String text) {
     return Text(
-      text,
-      style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600),
+      text.toUpperCase(),
+      style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
     );
   }
 
   InputDecoration _inputDeco(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
+      hintStyle: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold),
       filled: true,
-      fillColor: Colors.grey[100],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      fillColor: Colors.white,
+      enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Color(0xFF0055FF), width: 3)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
   }
 }

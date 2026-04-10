@@ -13,10 +13,6 @@ import 'barcode_scanner_screen.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 // Cores
 // ─────────────────────────────────────────────────────────────────────────────
-const _kBlue   = Color(0xFF2563eb);
-const _kGreen  = Color(0xFF22c55e);
-const _kRed    = Color(0xFFef4444);
-const _kOrange = Color(0xFFf97316);
 
 class PreventivaChecklistScreen extends StatefulWidget {
   final String tecnico;
@@ -467,21 +463,22 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F4F5),
       appBar: AppBar(
-        backgroundColor: _kBlue,
-        elevation: 4,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
         title: Text(
           _maquina != null
-              ? 'Preventiva — FUEL ${_maquina!.fuel}'
-              : 'Checklist Preventiva',
+              ? 'PREVENTIVA — FUEL ${_maquina!.fuel}'
+              : 'CHECKLIST.PREVENTIVA',
           style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
+            color: Colors.black,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.5,
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -507,22 +504,27 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
                           ),
                         ),
                         const SizedBox(width: 6),
-                        IconButton(
-                          tooltip: 'Ler código de barras',
-                          onPressed: _abrirScanner,
-                          icon: const Icon(Icons.qr_code_scanner),
-                          color: _kBlue,
+                        Container(
+                          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black, width: 2), bottom: BorderSide(color: Colors.black, width: 2), right: BorderSide(color: Colors.black, width: 2))),
+                          child: IconButton(
+                            tooltip: 'Ler código de barras',
+                            onPressed: _abrirScanner,
+                            icon: const Icon(Icons.qr_code_scanner),
+                            color: Colors.black,
+                            style: IconButton.styleFrom(backgroundColor: const Color(0xFFE4E4E7), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+                          ),
                         ),
                         const SizedBox(width: 4),
-                        IconButton.filled(
-                          onPressed: _carregandoMaquina ? null : _buscarMaquina,
-                          icon: _carregandoMaquina
-                              ? const SizedBox(
-                                  width: 18, height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white))
-                              : const Icon(Icons.search),
-                          style: IconButton.styleFrom(backgroundColor: _kBlue),
+                        Container(
+                          decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2)),
+                          child: IconButton(
+                            onPressed: _carregandoMaquina ? null : _buscarMaquina,
+                            icon: _carregandoMaquina
+                                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black))
+                                : const Icon(Icons.search),
+                            color: Colors.black,
+                            style: IconButton.styleFrom(backgroundColor: const Color(0xFFCCFF00), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+                          ),
                         ),
                       ],
                     ),
@@ -548,7 +550,7 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
                         IconButton(
                           onPressed: _obterLocalizacao,
                           icon: const Icon(Icons.my_location, size: 22),
-                          color: _kBlue,
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -559,8 +561,10 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
               // ── EPIs ──
               _buildCard(
                 title: 'EPIs Utilizados',
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
                   children: _epis.map((epi) {
                     final label      = epi['label'] as String;
                     final icon       = epi['icon'] as IconData;
@@ -569,20 +573,15 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
                       onTap: () => setState(() {
                         sel ? _episSelecionados.remove(label) : _episSelecionados.add(label);
                       }),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: 64, height: 64,
+                      child: Container(
+                        width: 64,
+                        height: 64,
                         decoration: BoxDecoration(
-                          color: sel ? _kBlue.withOpacity(0.12) : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: sel ? _kBlue : Colors.grey[300]!,
-                            width: sel ? 2.0 : 1.0,
-                          ),
+                          color: sel ? const Color(0xFFCCFF00) : Colors.white,
+                          border: Border.all(color: Colors.black, width: 2),
                         ),
                         child: Center(
-                          child: Icon(icon, size: 32,
-                              color: sel ? _kBlue : Colors.grey[400]),
+                          child: Icon(icon, size: 32, color: Colors.black),
                         ),
                       ),
                     );
@@ -659,21 +658,20 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
                   child: ElevatedButton(
                     onPressed: _enviando ? null : _finalizar,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _kGreen,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: const Color(0xFFCCFF00),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                      side: const BorderSide(color: Colors.black, width: 2),
                     ),
                     child: _enviando
                         ? const SizedBox(
                             width: 22, height: 22,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
+                            child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black))
                         : const Text(
                             'FINALIZAR CHECKLIST',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700, letterSpacing: 0.7),
+                            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
                           ),
                   ),
                 ),
@@ -742,13 +740,14 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
             child: ElevatedButton.icon(
               onPressed: _salvarEvap,
               icon: const Icon(Icons.check_circle_outline),
-              label: const Text('SALVAR EVAPORADORA'),
+              label: const Text('SALVAR EVAPORADORA', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kBlue,
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFFCCFF00),
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+                side: const BorderSide(color: Colors.black, width: 2),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
             ),
           ),
@@ -834,13 +833,14 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
             child: ElevatedButton.icon(
               onPressed: _salvarCond,
               icon: const Icon(Icons.check_circle_outline),
-              label: const Text('SALVAR CONDENSADORA'),
+              label: const Text('SALVAR CONDENSADORA', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kOrange,
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFFCCFF00),
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+                side: const BorderSide(color: Colors.black, width: 2),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
             ),
           ),
@@ -861,46 +861,35 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
             ? () => _snack('Salve a evaporadora primeiro.', erro: true)
             : () => setState(() => _tabController.index = index),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: bloqueada
                 ? Colors.grey[200]
                 : ativo
-                    ? (index == 0 ? _kBlue : _kOrange)
-                    : Colors.grey[100],
-            borderRadius: BorderRadius.circular(10),
+                    ? const Color(0xFFCCFF00)
+                    : Colors.white,
             border: Border.all(
-              color: bloqueada
-                  ? Colors.grey[300]!
-                  : ativo
-                      ? (index == 0 ? _kBlue : _kOrange)
-                      : Colors.grey[300]!,
+              color: bloqueada ? Colors.grey[400]! : Colors.black,
+              width: 2,
             ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                salvo ? Icons.check_circle : icon,
+                salvo ? Icons.check_box : icon,
                 size: 18,
-                color: bloqueada
-                    ? Colors.grey[400]
-                    : ativo
-                        ? Colors.white
-                        : (index == 0 ? _kBlue : _kOrange),
+                color: bloqueada ? Colors.grey[400] : Colors.black,
               ),
               const SizedBox(width: 6),
               Text(
-                label,
+                label.toUpperCase(),
                 style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  color: bloqueada
-                      ? Colors.grey[400]
-                      : ativo
-                          ? Colors.white
-                          : (index == 0 ? _kBlue : _kOrange),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 11,
+                  letterSpacing: 0.5,
+                  color: bloqueada ? Colors.grey[400] : Colors.black,
                 ),
               ),
             ],
@@ -913,28 +902,31 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 2)),
+        boxShadow: [BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4))],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: Colors.black,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.toUpperCase(),
               style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700)),
-          const SizedBox(height: 10),
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -943,26 +935,30 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
 
   Widget _fotoWidget(String? path, VoidCallback onTap) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (path != null)
           Container(
-            height: 160,
+            height: 180,
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              image: DecorationImage(
-                  image: FileImage(File(path)), fit: BoxFit.cover),
+              border: Border.all(color: Colors.black, width: 2),
+              image: DecorationImage(image: FileImage(File(path)), fit: BoxFit.cover),
             ),
           ),
-        OutlinedButton.icon(
+        ElevatedButton.icon(
           onPressed: onTap,
-          icon: const Icon(Icons.camera_alt_outlined, size: 18),
-          label: Text(path == null ? 'Tirar foto' : 'Trocar foto'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: _kBlue,
-            side: const BorderSide(color: _kBlue),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          icon: const Icon(Icons.camera_alt_rounded, size: 18),
+          label: Text(path == null ? 'CAPTURAR IMAGEM' : 'REFAZER FOTO',
+              style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4E4E7),
+            foregroundColor: Colors.black,
+            side: const BorderSide(color: Colors.black, width: 2),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ],
@@ -981,57 +977,62 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
         (problemaQuandoNao && valor == false) ||
         (!problemaQuandoSim && !problemaQuandoNao && valor == false);
 
-    final corSim  = problemaQuandoSim ? _kRed   : _kGreen;
-    final corNao  = problemaQuandoNao ? _kRed   : _kGreen;
-    final grey400 = Colors.grey[400]!;
-    final grey700 = Colors.grey[700]!;
-    final grey100 = Colors.grey[100]!;
-
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(pergunta,
-              style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
+          Text(
+            pergunta.toUpperCase(),
+            style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Sim'),
-                  selected: valor == true,
-                  onSelected: (_) => onChanged(true),
-                  selectedColor: corSim,
-                  labelStyle: TextStyle(color: valor == true ? Colors.white : grey700),
-                  backgroundColor: grey100,
-                  side: BorderSide(color: valor == true ? corSim : grey400),
+                child: GestureDetector(
+                  onTap: () => onChanged(true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == true
+                          ? (problemaQuandoSim ? const Color(0xFFEF4444) : const Color(0xFF22C55E))
+                          : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: const Center(
+                      child: Text('SIM', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: ChoiceChip(
-                  label: const Text('Não'),
-                  selected: valor == false,
-                  onSelected: (_) => onChanged(false),
-                  selectedColor: corNao,
-                  labelStyle: TextStyle(color: valor == false ? Colors.white : grey700),
-                  backgroundColor: grey100,
-                  side: BorderSide(color: valor == false ? corNao : grey400),
+                child: GestureDetector(
+                  onTap: () => onChanged(false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: valor == false
+                          ? (problemaQuandoNao ? const Color(0xFFEF4444) : const Color(0xFF22C55E))
+                          : Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: const Center(
+                      child: Text('NÃO', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
           if (mostrarObs) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             TextField(
               controller: obsCtrl,
               maxLines: 2,
               textInputAction: TextInputAction.done,
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: Colors.black),
               decoration: _inputDeco('Explique o motivo'),
             ),
           ],
@@ -1053,21 +1054,17 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: _kGreen.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _kGreen),
+      padding: const EdgeInsets.all(10),
+      decoration: const BoxDecoration(
+        color: Color(0xFFCCFF00),
+        border: Border.fromBorderSide(BorderSide(color: Colors.black, width: 2)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.check_circle, color: _kGreen, size: 16),
+          const Icon(Icons.check_box, color: Colors.black, size: 16),
           const SizedBox(width: 8),
-          Text(msg,
-              style: const TextStyle(
-                  color: Color(0xFF16a34a),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600)),
+          Text(msg.toUpperCase(),
+              style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
         ],
       ),
     );
@@ -1077,34 +1074,33 @@ class _PreventivaChecklistScreenState extends State<PreventivaChecklistScreen>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('$label: ',
-            style: const TextStyle(
-                color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600)),
+        Text(
+          '${label.toUpperCase()}: ',
+          style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w900),
+        ),
         Expanded(
-          child: Text(value,
-              style: const TextStyle(color: Colors.black87, fontSize: 13)),
+          child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.bold)),
         ),
       ],
     );
   }
 
   Widget _label(String text) {
-    return Text(text,
-        style: const TextStyle(
-            color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600));
+    return Text(
+      text.toUpperCase(),
+      style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
+    );
   }
 
   InputDecoration _inputDeco(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
+      hintStyle: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold),
       filled: true,
-      fillColor: Colors.grey[100],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      fillColor: Colors.white,
+      enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Color(0xFF0055FF), width: 3)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
   }
 }
@@ -1123,9 +1119,8 @@ class _MaquinaCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFe0f2fe),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF0ea5e9), width: 1.5),
+        color: const Color(0xFFCCFF00),
+        border: Border.all(color: Colors.black, width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1134,49 +1129,38 @@ class _MaquinaCard extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                    color: _kBlue, borderRadius: BorderRadius.circular(20)),
+                color: Colors.black,
                 child: Text('FUEL: ${maquina.fuel}',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700)),
+                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
               ),
               const Spacer(),
-              const Icon(Icons.ac_unit, color: _kBlue, size: 24),
+              const Icon(Icons.ac_unit, color: Colors.black, size: 24),
             ],
           ),
+          const SizedBox(height: 12),
+          const Row(children: [
+            Icon(Icons.check_box, color: Colors.black, size: 16),
+            SizedBox(width: 6),
+            Text('MÁQUINA ENCONTRADA', style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.w900)),
+          ]),
           const SizedBox(height: 10),
-          Text(maquina.modelo,
-              style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800)),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.business, size: 14, color: Colors.black45),
-              const SizedBox(width: 4),
-              Text(maquina.marca,
-                  style: const TextStyle(color: Colors.black87, fontSize: 13)),
-              const SizedBox(width: 12),
-              const Icon(Icons.bolt, size: 14, color: Colors.black45),
-              const SizedBox(width: 4),
-              Text(maquina.capacidade,
-                  style: const TextStyle(color: Colors.black87, fontSize: 13)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined, size: 14, color: Colors.black45),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(maquina.localizacao,
-                    style: const TextStyle(color: Colors.black87, fontSize: 13)),
-              ),
-            ],
-          ),
+          Text(maquina.modelo, style: const TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          Row(children: [
+            const Icon(Icons.business, size: 15, color: Colors.black45),
+            const SizedBox(width: 5),
+            Text(maquina.marca, style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
+            const SizedBox(width: 14),
+            const Icon(Icons.bolt, size: 15, color: Colors.black45),
+            const SizedBox(width: 5),
+            Text(maquina.capacidade, style: const TextStyle(color: Colors.black87, fontSize: 14)),
+          ]),
+          const SizedBox(height: 8),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.location_on_outlined, size: 15, color: Colors.black45),
+            const SizedBox(width: 5),
+            Expanded(child: Text(maquina.localizacao, style: const TextStyle(color: Colors.black87, fontSize: 13))),
+          ]),
         ],
       ),
     );
