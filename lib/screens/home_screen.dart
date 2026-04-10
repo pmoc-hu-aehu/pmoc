@@ -205,11 +205,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF020617),
+        backgroundColor: const Color(0xFF13151E),
         elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Color(0xFF333333), width: 1.5)),
         title: const Text(
-          'PMOC DO HU LONDRINA',
-          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+          'CHECKLISTS.SYS',
+          style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Courier', letterSpacing: 2),
         ),
         actions: [
           if (_pendentes > 0)
@@ -257,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      backgroundColor: const Color(0xFF0f172a),
+      backgroundColor: const Color(0xFF090A0F),
       body: SafeArea(
         child: Column(
           children: [
@@ -265,28 +266,25 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF020617), Color(0xFF0f172a)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: Color(0xFF090A0F),
+                border: Border(bottom: BorderSide(color: Color(0xFF333333), width: 1.5)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Olá, ${widget.nome}',
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                    'OPR >> ${widget.nome.toUpperCase()}',
+                    style: const TextStyle(color: Color(0xFFCCFF00), fontSize: 16, fontFamily: 'Courier', fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Perfil: ${widget.perfil}',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
+                    'ACESSO: ${widget.perfil.toUpperCase()}',
+                    style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, fontFamily: 'Courier'),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Text(
-                    'Selecione o tipo de checklist',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
+                    'SELECIONE O TIPO DE CHECKLIST:',
+                    style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -301,8 +299,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: cards.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
                     childAspectRatio: 1.1,
                   ),
                   itemBuilder: (context, index) => _ChecklistCard(data: cards[index]),
@@ -327,8 +325,8 @@ class _BadgePendentes extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.orange,
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFFF4500), // Signal orange
+        border: Border.all(color: Colors.black, width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -336,8 +334,8 @@ class _BadgePendentes extends StatelessWidget {
           const Icon(Icons.cloud_upload_outlined, size: 14, color: Colors.white),
           const SizedBox(width: 4),
           Text(
-            '$total pendente${total > 1 ? 's' : ''}',
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+            '${total} PENDENTE${total > 1 ? 'S' : ''}',
+            style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.w900),
           ),
         ],
       ),
@@ -369,47 +367,38 @@ class _ChecklistCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: data.onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.zero,
       child: Ink(
         decoration: BoxDecoration(
-          color: data.cor,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: data.cor.withValues(alpha: 0.45),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          color: const Color(0xFF13151E),
+          border: Border.all(color: data.cor.withOpacity(0.5), width: 2),
         ),
         child: Stack(
           children: [
             Positioned(
-              right: -8,
-              bottom: -8,
-              child: Icon(data.icon, size: 64, color: Colors.white.withValues(alpha: 0.24)),
+              right: -10,
+              bottom: -10,
+              child: Icon(data.icon, size: 80, color: data.cor.withOpacity(0.08)),
             ),
             Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(data.icon, size: 26, color: Colors.white),
+                  Icon(data.icon, size: 28, color: data.cor),
                   const Spacer(),
                   Text(
                     data.titulo,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
+                      fontSize: 14,
+                      fontFamily: 'Courier',
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Checklist',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
-                  ),
+                  const SizedBox(height: 2),
+                  Container(height: 2, width: 24, color: data.cor),
                 ],
               ),
             ),

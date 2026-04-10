@@ -57,13 +57,14 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0f172a),
+      backgroundColor: const Color(0xFF090A0F),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF020617),
+        backgroundColor: const Color(0xFF13151E),
         elevation      : 0,
+        shape: const Border(bottom: BorderSide(color: Color(0xFF333333), width: 1.5)),
         title          : const Text(
-          'RELATÓRIOS',
-          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+          'MÉTRICAS.SYS',
+          style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Courier', letterSpacing: 2),
         ),
       ),
       body: SafeArea(
@@ -110,11 +111,11 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
       width  : double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
       decoration: BoxDecoration(
-        color       : const Color(0xFF1e293b),
-        borderRadius: BorderRadius.circular(20),
-        border      : Border.all(color: _corPrimaria.withValues(alpha: 0.35), width: 1.2),
+        color       : const Color(0xFF13151E),
+        borderRadius: BorderRadius.zero,
+        border      : Border.all(color: _corPrimaria.withOpacity(0.5), width: 2),
         boxShadow: [
-          BoxShadow(color: _corPrimaria.withValues(alpha: 0.12), blurRadius: 20, offset: const Offset(0, 8)),
+          BoxShadow(color: _corPrimaria.withOpacity(0.2), blurRadius: 0, offset: const Offset(4, 4)),
         ],
       ),
       child: Column(
@@ -125,8 +126,8 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
               Container(
                 padding   : const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color       : _corPrimaria.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(14),
+                  color       : const Color(0xFF090A0F),
+                  border      : Border.all(color: _corPrimaria.withOpacity(0.5), width: 1.5),
                 ),
                 child: const Icon(Icons.build_circle_outlined, color: _corPrimaria, size: 32),
               ),
@@ -134,12 +135,12 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Manutenções hoje', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  const Text('MANUTENÇÕES: HOJE', style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
                   Text(
                     '${_lista.length}',
                     style: const TextStyle(
                       color: Colors.white, fontSize: 56,
-                      fontWeight: FontWeight.w800, height: 1.0,
+                      fontWeight: FontWeight.w900, height: 1.0, fontFamily: 'Courier'
                     ),
                   ),
                 ],
@@ -152,8 +153,8 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(data, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13)),
-              Text('Zera à meia-noite', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 12)),
+              Text('SYS_DATE // $data', style: const TextStyle(color: Color(0xFFCCFF00), fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
+              Text('ZERA AS 00:00', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 10, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
             ],
           ),
         ],
@@ -193,10 +194,10 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color       : const Color(0xFF1e293b),
-        borderRadius: BorderRadius.circular(14),
+        color       : const Color(0xFF13151E),
+        borderRadius: BorderRadius.zero,
         border      : Border.all(
-          color: count > 0 ? cor.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.06),
+          color: count > 0 ? cor.withOpacity(0.5) : Colors.white.withOpacity(0.06),
           width: count > 0 ? 1.5 : 1,
         ),
       ),
@@ -205,10 +206,10 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
           Container(
             padding   : const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              color       : cor.withValues(alpha: count > 0 ? 0.18 : 0.08),
-              borderRadius: BorderRadius.circular(10),
+              color       : const Color(0xFF090A0F),
+              border      : Border.all(color: count > 0 ? cor.withOpacity(0.5) : Colors.white.withOpacity(0.1), width: 1),
             ),
-            child: Icon(icon, color: count > 0 ? cor : cor.withValues(alpha: 0.4), size: 22),
+            child: Icon(icon, color: count > 0 ? cor : cor.withOpacity(0.4), size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -220,8 +221,10 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color   : count > 0 ? Colors.white70 : Colors.white.withValues(alpha: 0.3),
-                    fontSize: 13,
+                    color   : count > 0 ? Colors.white70 : Colors.white.withOpacity(0.3),
+                    fontSize: 11,
+                    fontFamily: 'Courier',
+                    fontWeight: FontWeight.bold,
                     height  : 1.2,
                   ),
                 ),
@@ -231,9 +234,10 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
           Text(
             '$count',
             style: TextStyle(
-              color     : count > 0 ? Colors.white : Colors.white.withValues(alpha: 0.3),
+              color     : count > 0 ? Colors.white : Colors.white.withOpacity(0.3),
               fontSize  : 22,
-              fontWeight: FontWeight.w800,
+              fontFamily: 'Courier',
+              fontWeight: FontWeight.w900,
               height    : 1.0,
             ),
           ),
@@ -259,9 +263,9 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
       margin : const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color       : const Color(0xFF1e293b),
-        borderRadius: BorderRadius.circular(14),
-        border      : Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        color       : const Color(0xFF13151E),
+        borderRadius: BorderRadius.zero,
+        border      : Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Row(
         children: [
@@ -269,8 +273,8 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
             width : 38,
             height: 38,
             decoration: BoxDecoration(
-              color       : cor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              color       : const Color(0xFF090A0F),
+              border      : Border.all(color: cor.withOpacity(0.3), width: 1),
             ),
             child: Icon(icon, color: cor, size: 20),
           ),
@@ -279,13 +283,13 @@ class _RelatorioScreenState extends State<RelatorioScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(fuel, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12)),
+                Text(fuel, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(label, style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
               ],
             ),
           ),
-          Text(hora, style: TextStyle(color: cor.withValues(alpha: 0.9), fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(hora, style: TextStyle(color: cor.withOpacity(0.9), fontSize: 13, fontFamily: 'Courier', fontWeight: FontWeight.w900)),
         ],
       ),
     );

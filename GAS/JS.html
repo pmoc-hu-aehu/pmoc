@@ -243,7 +243,7 @@ function salvarMaquina() {
 
 function listarMaquinas() {
   document.getElementById('tabela-maquinas').innerHTML =
-    "<tr><td colspan='6' style='text-align:center;padding:20px;'>Carregando máquinas...</td></tr>";
+    "<tr><td colspan='7' style='text-align:center;padding:40px; border:none;'><span class='hud-loader'>[ /// ESTABELECENDO CONEXÃO: MÁQUINAS /// ]</span></td></tr>";
 
   google.script.run
     .withSuccessHandler(function(lista) {
@@ -434,7 +434,7 @@ function salvarTecnico() {
 
 function listarTecnicos() {
   document.getElementById('tabela-tecnicos').innerHTML =
-    "<tr><td colspan='5' style='text-align:center;padding:20px;'>Carregando técnicos...</td></tr>";
+    "<tr><td colspan='5' style='text-align:center;padding:40px; border:none;'><span class='hud-loader'>[ /// ACESSANDO MATRIZ: TÉCNICOS /// ]</span></td></tr>";
 
   google.script.run
     .withSuccessHandler(function(lista) {
@@ -544,7 +544,7 @@ function salvarEngenheiro() {
 
 function listarEngenheiros() {
   document.getElementById('tabela-engenheiros').innerHTML =
-    "<tr><td colspan='5' style='text-align:center;padding:20px;'>Carregando engenheiros...</td></tr>";
+    "<tr><td colspan='5' style='text-align:center;padding:40px; border:none;'><span class='hud-loader'>[ /// DECODIFICANDO REGISTROS: ENGENHEIROS /// ]</span></td></tr>";
 
   google.script.run
     .withSuccessHandler(function(lista) {

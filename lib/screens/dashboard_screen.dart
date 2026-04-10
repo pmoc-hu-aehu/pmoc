@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
@@ -17,218 +18,253 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final menus = [
-      _MenuItemData(
-        titulo  : 'CHECKLISTS',
-        subtitulo: 'Registros de manutenção',
-        icon    : Icons.checklist_rounded,
-        cor     : const Color(0xFF2563eb),
-        onTap   : () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => HomeScreen(nome: nome, perfil: perfil),
-          ),
-        ),
-      ),
-      _MenuItemData(
-        titulo   : 'MÁQUINAS',
-        subtitulo: 'Cadastro de equipamentos',
-        icon     : Icons.precision_manufacturing_outlined,
-        cor      : const Color(0xFF0ea5e9),
-        onTap    : () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MaquinasScreen(perfil: perfil),
-          ),
-        ),
-      ),
-      _MenuItemData(
-        titulo   : 'RELATÓRIOS',
-        subtitulo: 'Contador diário',
-        icon     : Icons.bar_chart_rounded,
-        cor      : const Color(0xFF10b981),
-        onTap    : () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => RelatorioScreen(tecnico: nome),
-          ),
-        ),
-      ),
-    ];
-
     return Scaffold(
-      backgroundColor: const Color(0xFF0f172a),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF020617),
-        elevation      : 0,
-        title          : const Text(
-          'PMOC DO HU LONDRINA',
-          style: TextStyle(
-            fontWeight   : FontWeight.w700,
-            letterSpacing: 1.2,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon   : const Icon(Icons.logout, color: Colors.white70),
-            tooltip: 'Sair',
-            onPressed: () async {
-              final confirmar = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  backgroundColor: const Color(0xFF1e293b),
-                  shape          : RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  title: const Text(
-                    'Sair',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  content: const Text(
-                    'Deseja realmente sair?',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child    : const Text(
-                        'Cancelar',
-                        style: TextStyle(color: Colors.white54),
-                      ),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1d4ed8),
-                        shape          : RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child    : const Text('Sair'),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirmar == true) {
-                await ApiService.logout();
-                if (!context.mounted) return;
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const LoginScreen(),
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
+      backgroundColor: const Color(0xFF090A0F), // Deep tech black
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-
-            // ── CABEÇALHO ────────────────────────────────────────────────
-            Container(
-              width  : double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF020617),
-                    Color(0xFF0f172a),
-                  ],
-                  begin: Alignment.topLeft,
-                  end  : Alignment.bottomRight,
+            // Massive Typographic Background (Anti-Safe Harbor)
+            Positioned(
+              top: -30,
+              left: -15,
+              child: Text(
+                'PMOC',
+                style: TextStyle(
+                  fontSize: 160,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white.withOpacity(0.04),
+                  letterSpacing: -8,
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            ),
+            
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── HEADER (Sharp & Tech) ────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 40, 24, 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width : 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          color : const Color(0xFF1d4ed8).withValues(alpha: 0.25),
-                          shape : BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFF3b82f6),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.person_outline,
-                          color: Color(0xFF3b82f6),
-                          size : 24,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Status Indicator
+                            Row(
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFCCFF00), // Acid Green
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'SYS.ONLINE',
+                                  style: TextStyle(
+                                    color: Color(0xFFCCFF00),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Courier',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              nome.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1,
+                                height: 1.1,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'ID_ROLE // ${perfil.toUpperCase()}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontSize: 13,
+                                fontFamily: 'Courier', 
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Olá, $nome',
-                            style: const TextStyle(
-                              color     : Colors.white,
-                              fontSize  : 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Perfil: $perfil',
-                            style: TextStyle(
-                              color   : Colors.white.withValues(alpha: 0.5),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
+                      IconButton(
+                        icon: const Icon(Icons.power_settings_new),
+                        color: const Color(0xFFFF4500), // Signal Orange
+                        iconSize: 28,
+                        tooltip: 'Encerrar Sessão',
+                        onPressed: () => _handleLogout(context),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    height: 1,
-                    color : Colors.white.withValues(alpha: 0.06),
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // ── ACTION CARDS (Asymmetric hierarchy) ─────────────────
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                       // Primary Action (Taller card)
+                      _buildActionCard(
+                        context: context,
+                        title: 'CHECKLISTS',
+                        subtitle: 'EXECUÇÃO DE MANUTENÇÃO',
+                        icon: Icons.checklist_rounded,
+                        accentColor: const Color(0xFF0055FF), // Tech blue
+                        height: 180, // Dominant vertical presence
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen(nome: nome, perfil: perfil))),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Secondary Actions
+                      _buildActionCard(
+                        context: context,
+                        title: 'MÁQUINAS',
+                        subtitle: 'BASE DE EQUIPAMENTOS',
+                        icon: Icons.precision_manufacturing_outlined,
+                        accentColor: const Color(0xFFCCFF00), // Acid green
+                        height: 140,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MaquinasScreen(perfil: perfil))),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      _buildActionCard(
+                        context: context,
+                        title: 'RELATÓRIOS',
+                        subtitle: 'MÉTRICAS E CONTADORES',
+                        icon: Icons.bar_chart_rounded,
+                        accentColor: const Color(0xFFFF4500), // Signal orange
+                        height: 140,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RelatorioScreen(tecnico: nome))),
+                      ),
+                      
+                      const SizedBox(height: 50),
+                      
+                      Center(
+                        child: Text(
+                          'DMPE — HU LONDRINA © 2025\nSYS_VERSION 1.0.4',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.15),
+                            fontSize: 10,
+                            fontFamily: 'Courier',
+                            letterSpacing: 1.5,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color accentColor,
+    required double height,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: const Color(0xFF13151E),
+          border: Border.all(color: accentColor.withOpacity(0.4), width: 1.5), 
+          borderRadius: BorderRadius.circular(4), // Tech Brutalist geometry (very hard edge)
+        ),
+        child: Stack(
+          children: [
+            // Background Ghost Icon
+            Positioned(
+              right: -20,
+              bottom: -20,
+              child: Icon(
+                icon,
+                size: 130,
+                color: accentColor.withOpacity(0.04),
+              ),
+            ),
+            // Accent Strip
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                width: 4,
+                color: accentColor,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    icon,
+                    color: accentColor,
+                    size: 36,
+                  ),
+                  const Spacer(),
                   Text(
-                    'O que deseja fazer?',
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color   : Colors.white.withValues(alpha: 0.7),
-                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 12,
+                      fontFamily: 'Courier',
+                      letterSpacing: 1,
                     ),
                   ),
                 ],
               ),
             ),
-
-            // ── MENU PRINCIPAL ───────────────────────────────────────────
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: menus.map((item) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child  : _MenuItem(data: item),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-
-            // ── RODAPÉ ───────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child  : Text(
-                'DMPE — HU Londrina © 2025',
-                style: TextStyle(
-                  color   : Colors.white.withValues(alpha: 0.18),
-                  fontSize: 11,
-                ),
+            
+            // Interaction Chevon
+            Positioned(
+              right: 20,
+              top: 20,
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: accentColor.withOpacity(0.5),
+                size: 16,
               ),
             ),
           ],
@@ -236,102 +272,66 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-// ── ITEM DE MENU ─────────────────────────────────────────────────────────────
-
-class _MenuItemData {
-  final String      titulo;
-  final String      subtitulo;
-  final IconData    icon;
-  final Color       cor;
-  final VoidCallback onTap;
-
-  _MenuItemData({
-    required this.titulo,
-    required this.subtitulo,
-    required this.icon,
-    required this.cor,
-    required this.onTap,
-  });
-}
-
-class _MenuItem extends StatelessWidget {
-  final _MenuItemData data;
-  const _MenuItem({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap        : data.onTap,
-      borderRadius : BorderRadius.circular(18),
-      child: Ink(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-        decoration: BoxDecoration(
-          color       : const Color(0xFF1e293b),
-          borderRadius: BorderRadius.circular(18),
-          border      : Border.all(
-            color: data.cor.withValues(alpha: 0.35),
-            width: 1.2,
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF090A0F),
+        surfaceTintColor: Colors.transparent, // Prevents Material 3 default color shifts
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(color: Color(0xFFFF4500), width: 1.5),
+          borderRadius: BorderRadius.circular(4), // Brutalist edges
+        ),
+        title: const Text(
+          'SYS.LOGOUT',
+          style: TextStyle(
+            color: Color(0xFFFF4500), 
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.5,
           ),
-          boxShadow: [
-            BoxShadow(
-              color     : data.cor.withValues(alpha: 0.12),
-              blurRadius: 16,
-              offset    : const Offset(0, 6),
-            ),
-          ],
         ),
-        child: Row(
-          children: [
-            Container(
-              width : 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color       : data.cor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                data.icon,
-                color: data.cor,
-                size : 28,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    data.titulo,
-                    style: const TextStyle(
-                      color     : Colors.white,
-                      fontSize  : 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    data.subtitulo,
-                    maxLines : 1,
-                    overflow : TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color   : Colors.white.withValues(alpha: 0.5),
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: data.cor.withValues(alpha: 0.7),
-              size : 28,
-            ),
-          ],
+        content: const Text(
+          'Deseja encerrar a sessão atual e retornar à tela de autenticação?',
+          style: TextStyle(
+            color: Colors.white70, 
+            height: 1.4,
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'CANCELAR',
+              style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, letterSpacing: 1),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF4500),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'CONFIRMAR', 
+              style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1),
+            ),
+          ),
+        ],
       ),
     );
+
+    if (confirmar == true) {
+      await ApiService.logout();
+      if (!context.mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginScreen(),
+        ),
+      );
+    }
   }
 }

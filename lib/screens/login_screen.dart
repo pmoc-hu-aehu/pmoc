@@ -53,304 +53,336 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } else {
-      setState(() => _erro = resultado['mensagem'] ?? 'Erro ao fazer login.');
+      setState(() => _erro = resultado['mensagem'] ?? 'ERRO INESPERADO. TENTE NOVAMENTE.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end  : Alignment.bottomCenter,
-            colors: [
-              Color(0xFF020617),
-              Color(0xFF0f172a),
-              Color(0xFF1e293b),
-            ],
+      backgroundColor: const Color(0xFF090A0F), // Deep tech black
+      body: Stack(
+        children: [
+          // Watermark Anti-Safe Harbor
+          Positioned(
+            top: -20,
+            left: -15,
+            child: Text(
+              'AUTH',
+              style: TextStyle(
+                fontSize: 180,
+                fontWeight: FontWeight.w900,
+                color: Colors.white.withOpacity(0.04),
+                letterSpacing: -10,
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+          
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
 
-                  // ── BANNER PRIMEIRO LOGIN ──────────────────────
-                  if (_primeiroLogin)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1d4ed8).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFF3b82f6),
-                          width: 1.2,
+                    // ── BANNER PRIMEIRO LOGIN (TECH STYLE) ──────────────────────
+                    if (_primeiroLogin)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 32),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0055FF).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: const Color(0xFF0055FF),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.sync_rounded,
+                              color: Color(0xFF0055FF),
+                              size: 24,
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(
+                              child: Text(
+                                'PRIMEIRA CONEXÃO DO DIA\nLOGIN ONLINE OBRIGATÓRIO.',
+                                style: TextStyle(
+                                  color     : Color(0xFF0055FF),
+                                  fontSize  : 12,
+                                  fontFamily: 'Courier',
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.wifi_outlined,
-                            color: Color(0xFF3b82f6),
-                            size: 22,
+
+                    // ── ÍCONE BRUTALIST ──────────────────────────────────────
+                    Container(
+                      width : 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color : const Color(0xFFCCFF00).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: const Color(0xFFCCFF00),
+                          width: 2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.engineering_rounded,
+                        size : 40,
+                        color: Color(0xFFCCFF00),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ── TÍTULO ─────────────────────────────────────
+                    const Text(
+                      'PMOC',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color      : Colors.white,
+                        fontSize   : 48,
+                        fontWeight : FontWeight.w900,
+                        letterSpacing: 4,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      'SYS.MANUTENÇÃO E CONTROLE',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color    : Colors.white.withOpacity(0.5),
+                        fontSize : 12,
+                        fontFamily: 'Courier',
+                        letterSpacing: 2,
+                      ),
+                    ),
+
+                    const SizedBox(height: 48),
+
+                    // ── CARD DE LOGIN (HARD EDGES) ──────────────────────────────
+                    Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color        : const Color(0xFF13151E),
+                        borderRadius : BorderRadius.circular(4),
+                        border       : Border.all(
+                          color: Colors.white.withOpacity(0.15),
+                          width: 1.5,
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black,
+                            blurRadius: 0,
+                            offset: Offset(4, 4), // Hard drop shadow
                           ),
-                          const SizedBox(width: 10),
-                          const Expanded(
-                            child: Text(
-                              'Primeira conexão do dia — login online obrigatório.',
-                              style: TextStyle(
-                                color     : Color(0xFF93c5fd),
-                                fontSize  : 13,
-                                fontWeight: FontWeight.w600,
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+
+                          // ── CAMPO USUÁRIO ────────────────────────
+                          TextField(
+                            controller: _usuarioController,
+                            style     : const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            decoration: InputDecoration(
+                              labelText : 'MATRÍCULA / USUÁRIO',
+                              labelStyle: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontFamily: 'Courier',
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
                               ),
+                              prefixIcon: const Icon(
+                                Icons.badge_outlined,
+                                color: Colors.white54,
+                              ),
+                              filled     : true,
+                              fillColor  : const Color(0xFF090A0F),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(0), // Sharp
+                                borderSide  : BorderSide(
+                                  color: Colors.white.withOpacity(0.1),
+                                  width: 1,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(0),
+                                borderSide  : const BorderSide(
+                                  color: Color(0xFFCCFF00),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // ── CAMPO SENHA ──────────────────────────
+                          TextField(
+                            controller : _senhaController,
+                            obscureText: !_senhaVisivel,
+                            style      : const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            decoration : InputDecoration(
+                              labelText : 'SENHA DE ACESSO',
+                              labelStyle: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontFamily: 'Courier',
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.password_rounded,
+                                color: Colors.white54,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _senhaVisivel
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: Colors.white38,
+                                ),
+                                onPressed: () => setState(
+                                  () => _senhaVisivel = !_senhaVisivel,
+                                ),
+                              ),
+                              filled    : true,
+                              fillColor : const Color(0xFF090A0F),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(0),
+                                borderSide  : BorderSide(
+                                  color: Colors.white.withOpacity(0.1),
+                                  width: 1,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(0),
+                                borderSide  : const BorderSide(
+                                  color: Color(0xFFCCFF00),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            onSubmitted: (_) => _fazerLogin(),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // ── MENSAGEM DE ERRO ─────────────────────
+                          if (_erro != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical  : 12,
+                                horizontal: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color : const Color(0xFFFF4500).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(0),
+                                border: Border.all(
+                                  color: const Color(0xFFFF4500),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Color(0xFFFF4500),
+                                    size : 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _erro!.toUpperCase(),
+                                      style: const TextStyle(
+                                        color   : Color(0xFFFF4500),
+                                        fontSize: 12,
+                                        fontFamily: 'Courier',
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          const SizedBox(height: 32),
+
+                          // ── BOTÃO ENTRAR ─────────────────────────
+                          SizedBox(
+                            width : double.infinity,
+                            height: 56,
+                            child : ElevatedButton(
+                              onPressed: _loading ? null : _fazerLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFCCFF00), // Acid green
+                                foregroundColor: Colors.black, // Dark text on bright button
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.zero,
+                                ),
+                                elevation: 0,
+                                disabledBackgroundColor: const Color(0xFFCCFF00).withOpacity(0.5),
+                              ),
+                              child: _loading
+                                  ? const SizedBox(
+                                      width : 22,
+                                      height: 22,
+                                      child : CircularProgressIndicator(
+                                        color      : Colors.black,
+                                        strokeWidth: 3,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'AUTENTICAR',
+                                      style: TextStyle(
+                                        fontSize     : 16,
+                                        fontWeight   : FontWeight.w900,
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                  // ── ÍCONE ──────────────────────────────────────
-                  Container(
-                    width : 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color : const Color(0xFF1d4ed8).withOpacity(0.2),
-                      shape : BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF3b82f6),
-                        width: 2,
+                    const SizedBox(height: 48),
+
+                    // ── RODAPÉ ─────────────────────────────────────
+                    Text(
+                      'DMPE — HU LONDRINA © 2025\nSYS_VERSION 1.0.4',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color   : Colors.white.withOpacity(0.15),
+                        fontSize: 10,
+                        fontFamily: 'Courier',
+                        letterSpacing: 1.5,
+                        height: 1.6,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.local_hospital_rounded,
-                      size : 48,
-                      color: Color(0xFF3b82f6),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // ── TÍTULO ─────────────────────────────────────
-                  const Text(
-                    'PMOC DO HU LONDRINA',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color      : Colors.white,
-                      fontSize   : 22,
-                      fontWeight : FontWeight.w800,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    'Manutenção, Operação e Controle',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color    : Colors.white.withOpacity(0.45),
-                      fontSize : 13,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // ── CARD DE LOGIN ──────────────────────────────
-                  Container(
-                    padding: const EdgeInsets.all(28),
-                    decoration: BoxDecoration(
-                      color        : const Color(0xFF0f172a),
-                      borderRadius : BorderRadius.circular(20),
-                      border       : Border.all(
-                        color: const Color(0xFF1e3a5f),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color : Colors.black.withOpacity(0.4),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-
-                        // ── CAMPO USUÁRIO ────────────────────────
-                        TextField(
-                          controller: _usuarioController,
-                          style     : const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText : 'Usuário',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.35),
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.person_outline,
-                              color: Color(0xFF3b82f6),
-                            ),
-                            filled     : true,
-                            fillColor  : const Color(0xFF1e293b),
-                            border     : OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide  : BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide  : const BorderSide(
-                                color: Color(0xFF3b82f6),
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // ── CAMPO SENHA ──────────────────────────
-                        TextField(
-                          controller : _senhaController,
-                          obscureText: !_senhaVisivel,
-                          style      : const TextStyle(color: Colors.white),
-                          decoration : InputDecoration(
-                            hintText : 'Senha',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.35),
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.lock_outline,
-                              color: Color(0xFF3b82f6),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _senhaVisivel
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: Colors.white38,
-                              ),
-                              onPressed: () => setState(
-                                () => _senhaVisivel = !_senhaVisivel,
-                              ),
-                            ),
-                            filled    : true,
-                            fillColor : const Color(0xFF1e293b),
-                            border    : OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide  : BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide  : const BorderSide(
-                                color: Color(0xFF3b82f6),
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                          onSubmitted: (_) => _fazerLogin(),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // ── MENSAGEM DE ERRO ─────────────────────
-                        if (_erro != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              vertical  : 10,
-                              horizontal: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color : Colors.red.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: Colors.red.withOpacity(0.4),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.redAccent,
-                                  size : 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _erro!,
-                                    style: const TextStyle(
-                                      color   : Colors.redAccent,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        const SizedBox(height: 20),
-
-                        // ── BOTÃO ENTRAR ─────────────────────────
-                        SizedBox(
-                          width : double.infinity,
-                          height: 52,
-                          child : ElevatedButton(
-                            onPressed: _loading ? null : _fazerLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1d4ed8),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: _loading
-                                ? const SizedBox(
-                                    width : 22,
-                                    height: 22,
-                                    child : CircularProgressIndicator(
-                                      color      : Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : const Text(
-                                    'ENTRAR',
-                                    style: TextStyle(
-                                      fontSize     : 15,
-                                      fontWeight   : FontWeight.w700,
-                                      letterSpacing: 1.5,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // ── RODAPÉ ─────────────────────────────────────
-                  Text(
-                    'DMPE — HU Londrina © 2025',
-                    style: TextStyle(
-                      color   : Colors.white.withOpacity(0.2),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -113,25 +113,27 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0f172a),
+      backgroundColor: const Color(0xFF090A0F),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF020617),
+        backgroundColor: const Color(0xFF13151E),
         elevation: 0,
+        shape: const Border(bottom: BorderSide(color: Color(0xFF333333), width: 1.5)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('MÁQUINAS',
-            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+        title: const Text('BASE.EQUIPAMENTOS',
+            style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Courier', letterSpacing: 2)),
       ),
       floatingActionButton: _podeEditar
           ? FloatingActionButton.extended(
               onPressed: () => _abrirForm(),
-              backgroundColor: const Color(0xFF0ea5e9),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFFCCFF00),
+              foregroundColor: Colors.black,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               icon: const Icon(Icons.add_rounded),
               label: const Text('ADICIONAR',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                  style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Courier', fontSize: 13, letterSpacing: 1)),
             )
           : null,
       body: SafeArea(
@@ -143,10 +145,11 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
               margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1e293b),
-                borderRadius: BorderRadius.circular(16),
+                color: const Color(0xFF13151E),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
-                    color: const Color(0xFF0ea5e9).withValues(alpha: 0.3)),
+                    color: const Color(0xFF0055FF), width: 1.5),
+                boxShadow: const [BoxShadow(color: Colors.black, blurRadius: 0, offset: Offset(4, 4))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,26 +160,27 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0ea5e9).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
+                          color: const Color(0xFF090A0F),
+                          border: Border.all(color: const Color(0xFF0055FF), width: 1.5),
                         ),
                         child: const Icon(Icons.sync_rounded,
-                            color: Color(0xFF0ea5e9), size: 22),
+                            color: Color(0xFF0055FF), size: 22),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Sincronizar Máquinas',
+                            Text('SYNC.STATUS',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w700)),
+                                    fontFamily: 'Courier',
+                                    fontWeight: FontWeight.bold)),
                             SizedBox(height: 2),
-                            Text('Atualiza a base local com a planilha',
+                            Text('ATUALIZAÇÃO DA BASE LOCAL DE EQUIPAMENTOS',
                                 style: TextStyle(
-                                    color: Colors.white38, fontSize: 11)),
+                                    color: Colors.white54, fontSize: 10, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -215,12 +219,12 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
                           ? ElevatedButton(
                               onPressed: _sincronizando ? null : _sincronizar,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0ea5e9),
-                                foregroundColor: Colors.white,
+                                backgroundColor: const Color(0xFFCCFF00),
+                                foregroundColor: Colors.black,
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 14, vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero),
                                 elevation: 0,
                               ),
                               child: _sincronizando
@@ -228,21 +232,21 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
                                       width: 16,
                                       height: 16,
                                       child: CircularProgressIndicator(
-                                          color: Colors.white, strokeWidth: 2),
+                                          color: Colors.black, strokeWidth: 2),
                                     )
                                   : const Text('SINCRONIZAR',
                                       style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700)),
+                                          fontSize: 12,
+                                          fontFamily: 'Courier',
+                                          fontWeight: FontWeight.w900)),
                             )
                           : Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                color: Colors.red.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xFF090A0F),
                                 border: Border.all(
-                                    color: Colors.red.withValues(alpha: 0.3)),
+                                    color: Colors.redAccent, width: 2),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -254,7 +258,8 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
                                       style: TextStyle(
                                           color: Colors.redAccent,
                                           fontSize: 11,
-                                          fontWeight: FontWeight.w700)),
+                                          fontFamily: 'Courier',
+                                          fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
@@ -273,20 +278,22 @@ class _MaquinasScreenState extends State<MaquinasScreen> {
                   onChanged: (v) => setState(() => _busca = v),
                   decoration: InputDecoration(
                     hintText:
-                        'Buscar por FUEL, modelo, local ou marca...',
+                        'BUSCAR: FUEL, MODELO, MICRO-LOCAL...',
                     hintStyle:
-                        const TextStyle(color: Colors.white38, fontSize: 13),
+                        const TextStyle(color: Colors.white38, fontSize: 12, fontFamily: 'Courier', fontWeight: FontWeight.bold),
                     prefixIcon: const Icon(Icons.search_rounded,
-                        color: Color(0xFF0ea5e9), size: 20),
+                        color: Colors.white60, size: 20),
                     filled: true,
-                    fillColor: const Color(0xFF1e293b),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                            color: Color(0xFF0ea5e9), width: 1.2)),
+                    fillColor: const Color(0xFF13151E),
+                    border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.zero,
+                        borderSide: BorderSide(color: Colors.white24, width: 1)),
+                    enabledBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.zero,
+                        borderSide: BorderSide(color: Colors.white12, width: 1)),
+                    focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.zero,
+                        borderSide: BorderSide(color: Color(0xFF0055FF), width: 2)),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 12, horizontal: 16),
                   ),
@@ -368,9 +375,10 @@ class _MaquinaCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1e293b),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        color: const Color(0xFF13151E),
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+        boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(4, 4))],
       ),
       child: Column(
         children: [
@@ -383,8 +391,8 @@ class _MaquinaCard extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0ea5e9).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFF090A0F),
+                  border: Border.all(color: const Color(0xFF0055FF), width: 1),
                 ),
                 child: Center(
                   child: Text(
@@ -445,15 +453,16 @@ class _MaquinaCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _corCrit.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: _corCrit.withValues(alpha: 0.4)),
+                  color: const Color(0xFF090A0F),
+                  border: Border.all(color: _corCrit, width: 2),
                 ),
-                child: Text(maquina.criticidade,
+                child: Text(maquina.criticidade.toUpperCase(),
                     style: TextStyle(
                         color: _corCrit,
                         fontSize: 10,
-                        fontWeight: FontWeight.w700)),
+                        fontFamily: 'Courier',
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1)),
               ),
             ],
           ),
@@ -468,16 +477,13 @@ class _MaquinaCard extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onEditar,
                 icon: const Icon(Icons.edit_outlined, size: 15),
-                label: const Text('Editar',
-                    style: TextStyle(fontSize: 12,
-                        fontWeight: FontWeight.w600)),
+                label: const Text('EDITAR',
+                    style: TextStyle(fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.bold, letterSpacing: 1)),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF0ea5e9),
-                  side: BorderSide(
-                      color: const Color(0xFF0ea5e9).withValues(alpha: 0.4)),
+                  foregroundColor: Colors.white70,
+                  side: const BorderSide(color: Colors.white24, width: 1.5),
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                 ),
               ),
             ),
@@ -563,8 +569,8 @@ class _FormMaquinaState extends State<_FormMaquina> {
     return Container(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottom),
       decoration: const BoxDecoration(
-        color: Color(0xFF1e293b),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        color: Color(0xFF090A0F),
+        border: Border(top: BorderSide(color: Color(0xFFCCFF00), width: 2)),
       ),
       child: SingleChildScrollView(
         child: Form(
@@ -574,15 +580,8 @@ class _FormMaquinaState extends State<_FormMaquina> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Handle
-              Center(
-                child: Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(2)),
-                ),
-              ),
-              const SizedBox(height: 16),
+              const Text('SYS.FORM_UPDATE', style: TextStyle(color: Color(0xFFCCFF00), fontFamily: 'Courier', fontSize: 10, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
               Text(
                 _editando ? 'Editar Máquina' : 'Adicionar Máquina',
                 style: const TextStyle(
@@ -625,22 +624,23 @@ class _FormMaquinaState extends State<_FormMaquina> {
                 child: ElevatedButton(
                   onPressed: _salvando ? null : _salvar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0ea5e9),
-                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFCCFF00),
+                    foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                     elevation: 0,
                   ),
                   child: _salvando
                       ? const SizedBox(
                           width: 20, height: 20,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2))
-                      : Text(_editando ? 'SALVAR ALTERAÇÕES' : 'SALVAR',
+                              color: Colors.black, strokeWidth: 3))
+                      : Text(_editando ? 'SALVAR ALTERAÇÕES' : 'SALVAR NOVO',
                           style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8)),
+                              fontWeight: FontWeight.w900,
+                              fontFamily: 'Courier',
+                              fontSize: 16,
+                              letterSpacing: 2)),
                 ),
               ),
             ],
@@ -662,9 +662,9 @@ class _FormMaquinaState extends State<_FormMaquina> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
+          Text(label.toUpperCase(),
               style:
-                  const TextStyle(color: Colors.white60, fontSize: 12)),
+                  const TextStyle(color: Colors.white60, fontSize: 11, fontFamily: 'Courier', fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 4),
           TextFormField(
             controller: ctrl,
@@ -693,21 +693,24 @@ class _FormMaquinaState extends State<_FormMaquina> {
       hintText: hint,
       hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
       filled: true,
-      fillColor: const Color(0xFF0f172a),
-      border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none),
-      focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+      fillColor: const Color(0xFF13151E),
+      border: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: Colors.white24, width: 1)),
+      enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: Colors.white24, width: 1)),
+      focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
           borderSide:
-              const BorderSide(color: Color(0xFF0ea5e9), width: 1.2)),
-      errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 1)),
-      focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+              BorderSide(color: Color(0xFFCCFF00), width: 2)),
+      errorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: Colors.redAccent, width: 2)),
+      focusedErrorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
           borderSide:
-              const BorderSide(color: Colors.redAccent, width: 1.2)),
+              BorderSide(color: Colors.redAccent, width: 2)),
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
@@ -732,18 +735,17 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: cor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: cor.withValues(alpha: 0.25)),
+        color: const Color(0xFF090A0F),
+        border: Border.all(color: cor.withOpacity(0.5), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: cor, size: 13),
+          Icon(icon, color: cor, size: 12),
           const SizedBox(width: 6),
-          Text(label,
+          Text(label.toUpperCase(),
               style: TextStyle(
-                  color: cor, fontSize: 11, fontWeight: FontWeight.w600),
+                  color: cor, fontSize: 10, fontFamily: 'Courier', fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis),
         ],
       ),
