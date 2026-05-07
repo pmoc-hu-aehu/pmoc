@@ -112,34 +112,51 @@
     <div id="tela-dashboard" style="display: none;">
       <div class="sidebar">
         <div class="sidebar-header">
-          <h2 style="font-family: 'Barlow', sans-serif;">PMOC <span style="color: #ff5722;">SYS</span></h2>
-          <p>Gestão UEL</p>
+          <div class="sidebar-logo">P</div>
+          <div class="sidebar-brand">
+            <h2>PMOC<span style="color:var(--green-400);">SYS</span></h2>
+            <p>Gestão UEL · HU</p>
+          </div>
         </div>
-        
-        <div class="sidebar-menu">
-          <button class="menu-category active" onclick="toggleSubmenu(this, 'sub-principal')">Principal</button>
-          <div id="sub-principal" class="submenu-content show"> 
-            <button id="btn-home" onclick="abrirModulo('HOME')" class="menu-btn active">Dashboard</button>
-          </div>
-          
-          <button class="menu-category" onclick="toggleSubmenu(this, 'sub-cadastros')">Cadastros</button>
-          <div id="sub-cadastros" class="submenu-content">
-            <button id="btn-maquinas" onclick="abrirModulo('MAQUINAS')" class="menu-btn">Máquinas</button>
-            <button id="btn-engenheiros" onclick="abrirModulo('ENGENHEIROS')" class="menu-btn">Engenheiros</button>
-            <button id="btn-tecnicos" onclick="abrirModulo('TECNICOS')" class="menu-btn">Técnicos</button>
-            <button id="btn-empresas" onclick="abrirModulo('EMPRESAS')" class="menu-btn">Empresas</button>
-          </div>
 
-          <button class="menu-category" onclick="toggleSubmenu(this, 'sub-operacional')">Operacional</button>
-          <div id="sub-operacional" class="submenu-content">
-            <button id="btn-agendamento" onclick="abrirModulo('AGENDAMENTO')" class="menu-btn">Agendamento</button>
-            <button id="btn-relatorio" onclick="abrirModulo('RELATORIO')" class="menu-btn">Relatórios</button>
-            <button id="btn-pagamentos" onclick="abrirModulo('PAGAMENTOS')" class="menu-btn">Pagamentos</button>
-            <button id="btn-pmoc" onclick="abrirModulo('PMOC')" class="menu-btn">Doc. PMOC</button>
-          </div>
+        <div class="sidebar-menu">
+          <span class="menu-category">Principal</span>
+          <button id="btn-home" onclick="abrirModulo('HOME')" class="menu-btn active">
+            <span class="menu-icon">⊞</span>Dashboard
+          </button>
+
+          <span class="menu-category">Cadastros</span>
+          <button id="btn-maquinas" onclick="abrirModulo('MAQUINAS')" class="menu-btn">
+            <span class="menu-icon">⚙</span>Máquinas
+          </button>
+          <button id="btn-engenheiros" onclick="abrirModulo('ENGENHEIROS')" class="menu-btn">
+            <span class="menu-icon">◈</span>Engenheiros
+          </button>
+          <button id="btn-tecnicos" onclick="abrirModulo('TECNICOS')" class="menu-btn">
+            <span class="menu-icon">◉</span>Técnicos
+          </button>
+          <button id="btn-empresas" onclick="abrirModulo('EMPRESAS')" class="menu-btn">
+            <span class="menu-icon">◫</span>Empresas
+          </button>
+
+          <span class="menu-category">Operacional</span>
+          <button id="btn-agendamento" onclick="abrirModulo('AGENDAMENTO')" class="menu-btn">
+            <span class="menu-icon">◷</span>Agendamento
+          </button>
+          <button id="btn-relatorio" onclick="abrirModulo('RELATORIO')" class="menu-btn">
+            <span class="menu-icon">◱</span>Relatórios
+          </button>
+          <button id="btn-pagamentos" onclick="abrirModulo('PAGAMENTOS')" class="menu-btn">
+            <span class="menu-icon">◈</span>Pagamentos
+          </button>
+          <button id="btn-pmoc" onclick="abrirModulo('PMOC')" class="menu-btn">
+            <span class="menu-icon">◧</span>Doc. PMOC
+          </button>
         </div>
-        
-        <button onclick="sair()" class="btn-sair">Sair do Sistema</button>
+
+        <button onclick="sair()" class="btn-sair">
+          <span style="font-size:14px;">⏻</span> Sair do Sistema
+        </button>
       </div>
 
       <div class="main-content">
@@ -192,6 +209,22 @@
       })();
     </script>
 
+    <div id="toast-container"></div>
+
     <?!= include('JS'); ?>
+    <script>
+    function showToast(msg, type) {
+      var c = document.getElementById('toast-container');
+      var t = document.createElement('div');
+      t.className = 'toast toast-' + (type || 'success');
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(function() {
+        t.style.opacity = '0';
+        t.style.transition = 'opacity 0.3s';
+        setTimeout(function() { t.remove(); }, 300);
+      }, 3000);
+    }
+    </script>
   </body>
 </html>
