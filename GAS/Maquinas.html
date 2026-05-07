@@ -102,33 +102,33 @@
 </div>
 
 <!-- MODAL AUTORIZAR RELIMPEZA -->
-<div id="modal-autorizar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:28px;width:380px;max-width:95vw;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Autorizar Relimpeza</h3>
-      <button onclick="fecharModalAutorizar()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">✕</button>
+<div id="modal-autorizar" class="modal-overlay" style="display:none;">
+  <div class="modal-box" style="width:380px;">
+    <div class="modal-header">
+      <h3>Autorizar Relimpeza</h3>
+      <button onclick="fecharModalAutorizar()" class="modal-close">✕</button>
     </div>
-    <p style="margin:0;font-size:13px;color:#475569;">FUEL: <strong id="autorizar-fuel-label">—</strong></p>
+    <p style="margin:0;font-size:13px;color:var(--text-muted);">Equipamento FUEL: <strong id="autorizar-fuel-label" style="color:var(--text-main);">—</strong></p>
     <input type="hidden" id="autorizar-fuel-val">
-    <label style="font-size:12px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:1px;">Tipo de Relimpeza</label>
+    <label style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">Tipo de Relimpeza</label>
     <div style="display:flex;gap:10px;">
-      <button id="btn-tipo-filtro" onclick="selecionarTipoAutorizar('FILTRO')" style="flex:1;padding:12px;border:2px solid #d6d6d6;border-radius:8px;background:#fff;font-weight:800;font-size:13px;cursor:pointer;">FILTRO</button>
-      <button id="btn-tipo-duto"   onclick="selecionarTipoAutorizar('DUTO')"   style="flex:1;padding:12px;border:2px solid #d6d6d6;border-radius:8px;background:#fff;font-weight:800;font-size:13px;cursor:pointer;">DUTO</button>
+      <button id="btn-tipo-filtro" onclick="selecionarTipoAutorizar('FILTRO')" style="flex:1;padding:12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:#fff;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.15s;color:var(--text-main);">Filtro</button>
+      <button id="btn-tipo-duto"   onclick="selecionarTipoAutorizar('DUTO')"   style="flex:1;padding:12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:#fff;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.15s;color:var(--text-main);">Duto</button>
     </div>
-    <p id="msg-autorizar" style="margin:0;font-size:12px;font-weight:700;min-height:16px;text-align:center;"></p>
+    <p id="msg-autorizar" style="margin:0;font-size:12px;font-weight:600;min-height:16px;text-align:center;"></p>
     <div style="display:flex;gap:10px;margin-top:4px;">
-      <button onclick="fecharModalAutorizar()" style="flex:1;padding:12px;border:2px solid #d6d6d6;border-radius:8px;background:#fff;font-weight:700;font-size:13px;cursor:pointer;">Cancelar</button>
-      <button id="btn-confirmar-autorizar" onclick="confirmarAutorizar()" style="flex:1;padding:12px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-weight:800;font-size:13px;cursor:pointer;" disabled>Confirmar</button>
+      <button onclick="fecharModalAutorizar()" style="flex:1;padding:11px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:#fff;font-weight:600;font-size:13px;cursor:pointer;color:var(--text-muted);">Cancelar</button>
+      <button id="btn-confirmar-autorizar" onclick="confirmarAutorizar()" class="btn-primary" style="flex:1;" disabled>Confirmar</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL GERENCIAR SETORES -->
-<div id="modal-setores" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:28px;width:420px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Gerenciar Setores</h3>
-      <button onclick="fecharModalSetores()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">✕</button>
+<div id="modal-setores" class="modal-overlay" style="display:none;">
+  <div class="modal-box" style="width:420px;max-height:80vh;">
+    <div class="modal-header">
+      <h3>Gerenciar Setores</h3>
+      <button onclick="fecharModalSetores()" class="modal-close">✕</button>
     </div>
     <div style="display:flex;gap:8px;">
       <input type="text" id="setor-input" placeholder="Ex: HU/UTI 1  ou  HU/CC" class="input-form" style="flex:1;">

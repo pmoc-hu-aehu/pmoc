@@ -263,24 +263,23 @@ function renderizarTabelaMaquinas(lista) {
     return;
   }
   lista.forEach(function(m) {
-    var corCrit = m.criticidade === "Alta"  ? "var(--danger)" :
-                 (m.criticidade === "Média" ? "#f59e0b" : "#10b981");
+    var badgeCrit = m.criticidade === "Alta"  ? 'badge badge-danger'  :
+                  (m.criticidade === "Média" ? 'badge badge-warning' : 'badge badge-success');
     var empresaLabel = m.empresaCnpj
-      ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:10px;font-weight:700;">' + (empresasMap[m.empresaCnpj] || m.empresaCnpj) + '</span>'
-      : '<span style="font-size:10px;color:#94a3b8;">—</span>';
+      ? '<span class="badge badge-info">' + (empresasMap[m.empresaCnpj] || m.empresaCnpj) + '</span>'
+      : '<span style="color:var(--text-light);font-size:12px;">—</span>';
     var tr = document.createElement('tr');
-    tr.style.borderBottom = "1px solid #e2e8f0";
     tr.innerHTML =
-      '<td style="padding:10px 8px;font-weight:bold;color:var(--primary);font-size:13px;">' + m.fuel + '</td>' +
-      '<td style="padding:10px 8px;font-size:12px;"><strong>' + m.modelo + '</strong><br><small style="color:var(--text-muted);">' + m.marca + ' | ' + m.capacidade + '</small></td>' +
-      '<td style="padding:10px 8px;font-size:12px;">' + m.localizacao + '</td>' +
-      '<td style="padding:10px 8px;font-size:12px;">' + m.serie + '</td>' +
-      '<td style="padding:10px 8px;"><span style="background:' + corCrit + ';color:white;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:bold;">' + m.criticidade + '</span></td>' +
-      '<td style="padding:10px 8px;">' + empresaLabel + '</td>' +
-      '<td style="padding:10px 8px;text-align:center;min-width:90px;">' +
-        '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + encodeURIComponent(m.localizacao) + '\',\'' + m.modelo + '\',\'' + encodeURIComponent(m.marca) + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + encodeURIComponent(m.capacidade) + '\',\'' + (m.empresaCnpj||'') + '\',\'' + (m.ocupantesFixos||'') + '\',\'' + (m.ocupantesVariaveis||'') + '\',\'' + (m.areaM2||'') + '\')" style="background:#f59e0b;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">EDITAR</button>' +
-        '<button onclick="abrirAutorizarRelimpeza(\'' + m.fuel + '\')" style="background:#8b5cf6;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">AUTORIZAR</button>' +
-        '<button onclick="apagarMaquina(\'' + m.id + '\')" style="background:var(--danger);color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold;">X</button>' +
+      '<td style="font-weight:600;color:var(--primary);">' + m.fuel + '</td>' +
+      '<td><span style="font-weight:600;font-size:13px;">' + m.modelo + '</span><br><span style="color:var(--text-muted);font-size:11px;">' + (m.marca||'—') + (m.capacidade ? ' · ' + m.capacidade : '') + '</span></td>' +
+      '<td>' + (m.localizacao||'—') + '</td>' +
+      '<td style="color:var(--text-muted);">' + (m.serie||'—') + '</td>' +
+      '<td><span class="' + badgeCrit + '">' + m.criticidade + '</span></td>' +
+      '<td>' + empresaLabel + '</td>' +
+      '<td style="white-space:nowrap;">' +
+        '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + encodeURIComponent(m.localizacao) + '\',\'' + m.modelo + '\',\'' + encodeURIComponent(m.marca) + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + encodeURIComponent(m.capacidade) + '\',\'' + (m.empresaCnpj||'') + '\',\'' + (m.ocupantesFixos||'') + '\',\'' + (m.ocupantesVariaveis||'') + '\',\'' + (m.areaM2||'') + '\')" style="background:var(--warning-light);color:#b45309;border:1px solid #fcd34d;padding:5px 10px;border-radius:var(--radius-sm);cursor:pointer;margin-right:4px;font-size:11px;font-weight:600;">Editar</button>' +
+        '<button onclick="abrirAutorizarRelimpeza(\'' + m.fuel + '\')" style="background:var(--info-light);color:#1d4ed8;border:1px solid #bfdbfe;padding:5px 10px;border-radius:var(--radius-sm);cursor:pointer;margin-right:4px;font-size:11px;font-weight:600;">Autorizar</button>' +
+        '<button onclick="apagarMaquina(\'' + m.id + '\')" style="background:var(--danger-light);color:#b91c1c;border:1px solid #fecaca;padding:5px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:11px;font-weight:600;">Excluir</button>' +
       '</td>';
     tbody.appendChild(tr);
   });
