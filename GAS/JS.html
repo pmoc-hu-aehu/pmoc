@@ -1,6 +1,16 @@
 <script>
 
 // ==========================================
+// UTILITÁRIOS
+// ==========================================
+
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ==========================================
 // RELÓGIO
 // ==========================================
 
@@ -157,17 +167,44 @@ function carregarContadores() {
         var el = document.getElementById(id);
         if (el) el.innerText = val || 0;
       }
-      set('filtros-hoje',  d.filtros      ? d.filtros.hoje      : 0); set('filtros-mes',  d.filtros      ? d.filtros.mes      : 0); set('filtros-ano',  d.filtros      ? d.filtros.ano      : 0);
-      set('prev-hoje',     d.preventivas  ? d.preventivas.hoje  : 0); set('prev-mes',     d.preventivas  ? d.preventivas.mes  : 0); set('prev-ano',     d.preventivas  ? d.preventivas.ano  : 0);
-      set('corr-hoje',     d.corretivas   ? d.corretivas.hoje   : 0); set('corr-mes',     d.corretivas   ? d.corretivas.mes   : 0); set('corr-ano',     d.corretivas   ? d.corretivas.ano   : 0);
-      set('mov-hoje',      d.movimentacao ? d.movimentacao.hoje : 0); set('mov-mes',      d.movimentacao ? d.movimentacao.mes : 0); set('mov-ano',      d.movimentacao ? d.movimentacao.ano : 0);
-      set('pressao-hoje',  d.pressao      ? d.pressao.hoje      : 0); set('pressao-mes',  d.pressao      ? d.pressao.mes      : 0); set('pressao-ano',  d.pressao      ? d.pressao.ano      : 0);
-      set('qar-hoje',      d.qualidadeAr  ? d.qualidadeAr.hoje  : 0); set('qar-mes',      d.qualidadeAr  ? d.qualidadeAr.mes  : 0); set('qar-ano',      d.qualidadeAr  ? d.qualidadeAr.ano  : 0);
-      set('dutos-hoje',    d.dutos        ? d.dutos.hoje        : 0); set('dutos-mes',    d.dutos        ? d.dutos.mes        : 0); set('dutos-ano',    d.dutos        ? d.dutos.ano        : 0);
-      set('exaustao-hoje', d.exaustao     ? d.exaustao.hoje     : 0); set('exaustao-mes', d.exaustao     ? d.exaustao.mes     : 0); set('exaustao-ano', d.exaustao     ? d.exaustao.ano     : 0);
+      set('filtros-hoje',  d.filtros      ? d.filtros.hoje      : 0); set('filtros-mes',  d.filtros      ? d.filtros.mes      : 0);
+      set('prev-hoje',     d.preventivas  ? d.preventivas.hoje  : 0); set('prev-mes',     d.preventivas  ? d.preventivas.mes  : 0);
+      set('corr-hoje',     d.corretivas   ? d.corretivas.hoje   : 0); set('corr-mes',     d.corretivas   ? d.corretivas.mes   : 0);
+      set('mov-hoje',      d.movimentacao ? d.movimentacao.hoje : 0); set('mov-mes',      d.movimentacao ? d.movimentacao.mes : 0);
+      set('pressao-hoje',  d.pressao      ? d.pressao.hoje      : 0); set('pressao-mes',  d.pressao      ? d.pressao.mes      : 0);
+      set('qar-hoje',      d.qualidadeAr  ? d.qualidadeAr.hoje  : 0); set('qar-mes',      d.qualidadeAr  ? d.qualidadeAr.mes  : 0);
+      set('dutos-hoje',    d.dutos        ? d.dutos.hoje        : 0); set('dutos-mes',    d.dutos        ? d.dutos.mes        : 0);
+      set('exaustao-hoje', d.exaustao     ? d.exaustao.hoje     : 0); set('exaustao-mes', d.exaustao     ? d.exaustao.mes     : 0);
+      renderizarGrafico(d);
     })
     .withFailureHandler(function(err) { console.error("Erro dashboard:", err); })
     .obterContadoresDashboard();
+}
+
+function renderizarGrafico(d) {
+  var container = document.getElementById('chart-container');
+  if (!container) return;
+  var dados = [
+    { label: 'Filtros',         val: d.filtros      ? d.filtros.ano      : 0, cor: '#0d7d8a' },
+    { label: 'Preventivas',     val: d.preventivas  ? d.preventivas.ano  : 0, cor: '#16a34a' },
+    { label: 'Corretivas',      val: d.corretivas   ? d.corretivas.ano   : 0, cor: '#dc2626' },
+    { label: 'Movimentação',    val: d.movimentacao ? d.movimentacao.ano : 0, cor: '#7c3aed' },
+    { label: 'Pressão',         val: d.pressao      ? d.pressao.ano      : 0, cor: '#d97706' },
+    { label: 'Qualidade do Ar', val: d.qualidadeAr  ? d.qualidadeAr.ano  : 0, cor: '#0ea5e9' },
+    { label: 'Dutos',           val: d.dutos        ? d.dutos.ano        : 0, cor: '#db2777' },
+    { label: 'Exaustão',        val: d.exaustao     ? d.exaustao.ano     : 0, cor: '#64748b' }
+  ];
+  var max = Math.max.apply(null, dados.map(function(x) { return x.val; })) || 1;
+  container.innerHTML = dados.map(function(item) {
+    var pct = Math.max(Math.round((item.val / max) * 100), item.val > 0 ? 2 : 0);
+    return '<div style="display:flex;align-items:center;gap:12px;">' +
+      '<span style="width:128px;font-size:12px;font-weight:600;color:var(--text-2);text-align:right;flex-shrink:0;line-height:1.2;">' + item.label + '</span>' +
+      '<div style="flex:1;background:var(--border);border-radius:4px;height:26px;overflow:hidden;">' +
+        '<div style="width:' + pct + '%;height:100%;background:' + item.cor + ';border-radius:4px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);"></div>' +
+      '</div>' +
+      '<span style="width:42px;font-size:14px;font-family:\'IBM Plex Mono\',monospace;font-weight:600;color:var(--text);flex-shrink:0;text-align:right;">' + item.val + '</span>' +
+    '</div>';
+  }).join('');
 }
 
 // ==========================================
@@ -175,6 +212,7 @@ function carregarContadores() {
 // ==========================================
 
 var maquinasGlobais = [];
+var empresasMap = {};
 
 function limparFormMaquina() {
   document.getElementById('maq_id').value          = "";
@@ -262,24 +300,23 @@ function renderizarTabelaMaquinas(lista) {
     return;
   }
   lista.forEach(function(m) {
-    var corCrit = m.criticidade === "Alta"  ? "var(--danger)" :
-                 (m.criticidade === "Média" ? "#f59e0b" : "#10b981");
+    var badgeCrit = m.criticidade === "Alta"  ? 'badge badge-danger'  :
+                  (m.criticidade === "Média" ? 'badge badge-warning' : 'badge badge-success');
     var empresaLabel = m.empresaCnpj
-      ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:10px;font-weight:700;">' + m.empresaCnpj + '</span>'
-      : '<span style="font-size:10px;color:#94a3b8;">—</span>';
+      ? '<span class="badge badge-info">' + escHtml(empresasMap[m.empresaCnpj] || m.empresaCnpj) + '</span>'
+      : '<span style="color:var(--text-light);font-size:12px;">—</span>';
     var tr = document.createElement('tr');
-    tr.style.borderBottom = "1px solid #e2e8f0";
     tr.innerHTML =
-      '<td style="padding:10px 8px;font-weight:bold;color:var(--primary);font-size:13px;">' + m.fuel + '</td>' +
-      '<td style="padding:10px 8px;font-size:12px;"><strong>' + m.modelo + '</strong><br><small style="color:var(--text-muted);">' + m.marca + ' | ' + m.capacidade + '</small></td>' +
-      '<td style="padding:10px 8px;font-size:12px;">' + m.localizacao + '</td>' +
-      '<td style="padding:10px 8px;font-size:12px;">' + m.serie + '</td>' +
-      '<td style="padding:10px 8px;"><span style="background:' + corCrit + ';color:white;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:bold;">' + m.criticidade + '</span></td>' +
-      '<td style="padding:10px 8px;">' + empresaLabel + '</td>' +
-      '<td style="padding:10px 8px;text-align:center;min-width:90px;">' +
-        '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + encodeURIComponent(m.localizacao) + '\',\'' + m.modelo + '\',\'' + encodeURIComponent(m.marca) + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + encodeURIComponent(m.capacidade) + '\',\'' + (m.empresaCnpj||'') + '\',\'' + (m.ocupantesFixos||'') + '\',\'' + (m.ocupantesVariaveis||'') + '\',\'' + (m.areaM2||'') + '\')" style="background:#f59e0b;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">EDITAR</button>' +
-        '<button onclick="abrirAutorizarRelimpeza(\'' + m.fuel + '\')" style="background:#8b5cf6;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;margin-right:3px;font-size:10px;font-weight:bold;">AUTORIZAR</button>' +
-        '<button onclick="apagarMaquina(\'' + m.id + '\')" style="background:var(--danger);color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold;">X</button>' +
+      '<td style="font-weight:600;color:var(--primary);">' + escHtml(m.fuel) + '</td>' +
+      '<td><span style="font-weight:600;font-size:13px;">' + escHtml(m.modelo) + '</span><br><span style="color:var(--text-muted);font-size:11px;">' + escHtml(m.marca||'—') + (m.capacidade ? ' · ' + escHtml(m.capacidade) : '') + '</span></td>' +
+      '<td>' + escHtml(m.localizacao||'—') + '</td>' +
+      '<td style="color:var(--text-muted);">' + escHtml(m.serie||'—') + '</td>' +
+      '<td><span class="' + badgeCrit + '">' + escHtml(m.criticidade) + '</span></td>' +
+      '<td>' + empresaLabel + '</td>' +
+      '<td style="white-space:nowrap;">' +
+        '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + encodeURIComponent(m.localizacao) + '\',\'' + m.modelo + '\',\'' + encodeURIComponent(m.marca) + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + encodeURIComponent(m.capacidade) + '\',\'' + (m.empresaCnpj||'') + '\',\'' + (m.ocupantesFixos||'') + '\',\'' + (m.ocupantesVariaveis||'') + '\',\'' + (m.areaM2||'') + '\')" style="background:#FFF9EB;color:#92400E;border:1px solid #FCD34D;padding:5px 12px;border-radius:4px;cursor:pointer;margin-right:4px;font-size:11px;font-weight:700;font-family:\'Fira Sans\',sans-serif;">Editar</button>' +
+        '<button onclick="abrirAutorizarRelimpeza(\'' + m.fuel + '\')" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;padding:5px 12px;border-radius:4px;cursor:pointer;margin-right:4px;font-size:11px;font-weight:700;font-family:\'Fira Sans\',sans-serif;">Autorizar</button>' +
+        '<button onclick="apagarMaquina(\'' + m.id + '\')" style="background:#1A2332;color:#FFFFFF;border:1px solid #1A2332;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;font-family:\'Fira Sans\',sans-serif;">✕</button>' +
       '</td>';
     tbody.appendChild(tr);
   });
@@ -310,21 +347,62 @@ function filtrarMaquinas() {
   renderizarTabelaMaquinas(filtrados);
 }
 
-function abrirAutorizarRelimpeza(fuel) {
-  var tipo = prompt('Autorizar relimpeza para FUEL ' + fuel + '.\nDigite o tipo: FILTRO ou DUTO');
-  if (!tipo) return;
-  tipo = tipo.trim().toUpperCase();
-  if (tipo !== 'FILTRO' && tipo !== 'DUTO') {
-    alert('Tipo inválido. Use FILTRO ou DUTO.');
-    return;
-  }
-  if (!confirm('Autorizar relimpeza de ' + tipo + ' para FUEL ' + fuel + ' no mês atual?')) return;
+var _autorizarTipoSelecionado = '';
 
+function abrirAutorizarRelimpeza(fuel) {
+  _autorizarTipoSelecionado = '';
+  document.getElementById('autorizar-fuel-val').value   = fuel;
+  document.getElementById('autorizar-fuel-label').innerText = fuel;
+  document.getElementById('msg-autorizar').innerText    = '';
+  document.getElementById('btn-confirmar-autorizar').disabled = true;
+  ['btn-tipo-filtro','btn-tipo-duto'].forEach(function(id) {
+    document.getElementById(id).style.background    = '#fff';
+    document.getElementById(id).style.borderColor   = '#d6d6d6';
+    document.getElementById(id).style.color         = '#0f172a';
+  });
+  document.getElementById('modal-autorizar').style.display = 'flex';
+}
+
+function selecionarTipoAutorizar(tipo) {
+  _autorizarTipoSelecionado = tipo;
+  var ativo   = tipo === 'FILTRO' ? 'btn-tipo-filtro' : 'btn-tipo-duto';
+  var inativo = tipo === 'FILTRO' ? 'btn-tipo-duto'   : 'btn-tipo-filtro';
+  var el = document.getElementById(ativo);
+  el.style.background  = 'var(--primary)';
+  el.style.borderColor = 'var(--primary)';
+  el.style.color       = '#fff';
+  var el2 = document.getElementById(inativo);
+  el2.style.background  = '#fff';
+  el2.style.borderColor = '#d6d6d6';
+  el2.style.color       = '#0f172a';
+  document.getElementById('btn-confirmar-autorizar').disabled = false;
+  document.getElementById('msg-autorizar').innerText = '';
+}
+
+function fecharModalAutorizar() {
+  document.getElementById('modal-autorizar').style.display = 'none';
+}
+
+function confirmarAutorizar() {
+  var fuel = document.getElementById('autorizar-fuel-val').value;
+  var tipo = _autorizarTipoSelecionado;
+  var msg  = document.getElementById('msg-autorizar');
+  if (!tipo) return;
+  msg.innerText   = 'Autorizando...';
+  msg.style.color = 'var(--primary)';
+  document.getElementById('btn-confirmar-autorizar').disabled = true;
   google.script.run
     .withSuccessHandler(function(res) {
-      alert(res.sucesso ? '✓ ' + res.msg : '✗ ' + res.msg);
+      msg.innerText   = res.sucesso ? '✓ ' + res.msg : '✗ ' + res.msg;
+      msg.style.color = res.sucesso ? '#16a34a' : 'var(--danger)';
+      if (res.sucesso) setTimeout(fecharModalAutorizar, 1500);
+      else document.getElementById('btn-confirmar-autorizar').disabled = false;
     })
-    .withFailureHandler(function(err) { alert('Erro: ' + err.message); })
+    .withFailureHandler(function(err) {
+      msg.innerText   = 'Erro: ' + err.message;
+      msg.style.color = 'var(--danger)';
+      document.getElementById('btn-confirmar-autorizar').disabled = false;
+    })
     .autorizarRelimpeza(fuel, tipo);
 }
 
@@ -353,13 +431,16 @@ function carregarEmpresasNoSelect(idSelect) {
       var sel = document.getElementById(idSelect);
       if (!sel) return;
       var valorAtual = sel.value;
+      empresasMap = {};
       // Limpa opções antigas (mantém a primeira "Sem vínculo")
       while (sel.options.length > 1) sel.remove(1);
       (lista || []).forEach(function(emp) {
         if (!emp.cnpj) return;
+        var nome = emp.nomeFantasia || emp.razaoSocial || emp.cnpj;
+        empresasMap[emp.cnpj] = nome;
         var opt = document.createElement('option');
         opt.value = emp.cnpj;
-        opt.text  = (emp.nomeFantasia || emp.razaoSocial) + ' — ' + emp.cnpj;
+        opt.text  = nome + ' — ' + emp.cnpj;
         sel.appendChild(opt);
       });
       if (valorAtual) sel.value = valorAtual;
@@ -447,15 +528,19 @@ function listarTecnicos() {
       lista.forEach(function(t) {
         var tr = document.createElement('tr');
         tr.style.borderBottom = "1px solid #e2e8f0";
-        tr.innerHTML =
-          '<td style="padding:10px 5px;font-weight:bold;">'    + t.nome  + '</td>' +
-          '<td style="padding:10px 5px;">'                     + t.login + '</td>' +
-          '<td style="padding:10px 5px;">'                     + t.fone  + '</td>' +
-          '<td style="padding:10px 5px;font-weight:600;color:var(--primary);">' + t.perfil + '</td>' +
-          '<td style="padding:10px 5px;text-align:center;">' +
-            '<button onclick="editarTecnico(\'' + t.id + '\',\'' + t.nome + '\',\'' + t.login + '\',\'' + t.senha + '\',\'' + t.fone + '\',\'' + t.perfil + '\')" style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;">EDITAR</button>' +
-            '<button onclick="apagarTecnico(\'' + t.id + '\')" style="background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;">X</button>' +
-          '</td>';
+        function mkTd(val, css) { var c = document.createElement('td'); c.style.cssText = css || 'padding:10px 5px;'; c.textContent = val || ''; return c; }
+        tr.appendChild(mkTd(t.nome,   'padding:10px 5px;font-weight:bold;'));
+        tr.appendChild(mkTd(t.login));
+        tr.appendChild(mkTd(t.fone));
+        tr.appendChild(mkTd(t.perfil, 'padding:10px 5px;font-weight:600;color:var(--primary);'));
+        var tdAc = document.createElement('td'); tdAc.style.cssText = 'padding:10px 5px;text-align:center;';
+        var bE = document.createElement('button');
+        bE.textContent = 'EDITAR'; bE.style.cssText = 'background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;';
+        bE.onclick = (function(x){ return function(){ editarTecnico(x.id, x.nome, x.login, '', x.fone, x.perfil); }; })(t);
+        var bD = document.createElement('button');
+        bD.textContent = 'X'; bD.style.cssText = 'background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;';
+        bD.onclick = (function(id){ return function(){ apagarTecnico(id); }; })(t.id);
+        tdAc.appendChild(bE); tdAc.appendChild(bD); tr.appendChild(tdAc);
         tbody.appendChild(tr);
       });
     })
@@ -557,15 +642,19 @@ function listarEngenheiros() {
       lista.forEach(function(eng) {
         var tr = document.createElement('tr');
         tr.style.borderBottom = "1px solid #e2e8f0";
-        tr.innerHTML =
-          '<td style="padding:10px 5px;font-weight:bold;">' + eng.nome  + '</td>' +
-          '<td style="padding:10px 5px;">'                  + eng.crea  + '</td>' +
-          '<td style="padding:10px 5px;">'                  + eng.login + '</td>' +
-          '<td style="padding:10px 5px;">'                  + eng.fone  + '</td>' +
-          '<td style="padding:10px 5px;text-align:center;">' +
-            '<button onclick="editarEngenheiro(\'' + eng.id + '\',\'' + eng.nome + '\',\'' + eng.crea + '\',\'' + eng.login + '\',\'' + eng.senha + '\',\'' + eng.fone + '\',\'' + eng.email + '\')" style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;">EDITAR</button>' +
-            '<button onclick="apagarEngenheiro(\'' + eng.id + '\')" style="background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;">X</button>' +
-          '</td>';
+        function mkTd(val, css) { var c = document.createElement('td'); c.style.cssText = css || 'padding:10px 5px;'; c.textContent = val || ''; return c; }
+        tr.appendChild(mkTd(eng.nome,  'padding:10px 5px;font-weight:bold;'));
+        tr.appendChild(mkTd(eng.crea));
+        tr.appendChild(mkTd(eng.login));
+        tr.appendChild(mkTd(eng.fone));
+        var tdAc = document.createElement('td'); tdAc.style.cssText = 'padding:10px 5px;text-align:center;';
+        var bE = document.createElement('button');
+        bE.textContent = 'EDITAR'; bE.style.cssText = 'background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;';
+        bE.onclick = (function(x){ return function(){ editarEngenheiro(x.id, x.nome, x.crea, x.login, '', x.fone, x.email); }; })(eng);
+        var bD = document.createElement('button');
+        bD.textContent = 'X'; bD.style.cssText = 'background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;';
+        bD.onclick = (function(id){ return function(){ apagarEngenheiro(id); }; })(eng.id);
+        tdAc.appendChild(bE); tdAc.appendChild(bD); tr.appendChild(tdAc);
         tbody.appendChild(tr);
       });
     })

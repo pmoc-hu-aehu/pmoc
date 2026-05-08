@@ -1,99 +1,95 @@
-<div id="modulo-HOME" class="modulo-oculto" style="display: flex; flex-direction: column; height: 100%; justify-content: space-evenly;">
+<div id="modulo-HOME" class="modulo-oculto" style="display:flex; flex-direction:column; height:calc(100vh - 100px); overflow:hidden;">
 
-  <div>
-    <h3 class="section-title">Resumo Geral</h3>
-    <div class="grid-cards">
-      <div class="card-stat">
-        <h4>Total de Máquinas</h4>
-        <p class="main-number" id="count-maquinas">0</p>
-      </div>
-      <div class="card-stat">
-        <h4>Engenheiros Ativos</h4>
-        <p class="main-number" id="count-engenheiros">0</p>
-      </div>
-      <div class="card-stat">
-        <h4>Técnicos Ativos</h4>
-        <p class="main-number" id="count-tecnicos">0</p>
-      </div>
+  <!-- STRIP TOPO: 3 números -->
+  <div style="display:flex; gap:0; margin-bottom:14px; background:var(--surface); border-radius:var(--r-lg); border:1px solid var(--border); overflow:hidden; flex-shrink:0;">
+    <div style="flex:1; padding:13px 24px; border-right:1px solid var(--border); text-align:center;">
+      <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:3px;">Total de Máquinas</div>
+      <div id="count-maquinas" style="font-size:38px; font-family:'Cuprum',sans-serif; font-weight:700; color:var(--accent); line-height:1.05;">0</div>
+    </div>
+    <div style="flex:1; padding:13px 24px; border-right:1px solid var(--border); text-align:center;">
+      <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:3px;">Engenheiros Ativos</div>
+      <div id="count-engenheiros" style="font-size:38px; font-family:'Cuprum',sans-serif; font-weight:700; color:var(--accent); line-height:1.05;">0</div>
+    </div>
+    <div style="flex:1; padding:13px 24px; text-align:center;">
+      <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:3px;">Técnicos Ativos</div>
+      <div id="count-tecnicos" style="font-size:38px; font-family:'Cuprum',sans-serif; font-weight:700; color:var(--accent); line-height:1.05;">0</div>
     </div>
   </div>
 
-  <div>
-    <h3 class="section-title">Produtividade de Manutenção</h3>
-    <div class="grid-cards" style="grid-template-columns: repeat(4, 1fr);">
+  <!-- CONTEÚDO PRINCIPAL: tabela + gráfico -->
+  <div style="display:flex; gap:14px; flex:1; min-height:0; overflow:hidden;">
 
-      <div class="card-stat">
-        <h4>Filtros</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="filtros-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="filtros-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="filtros-ano">0</span><span class="stat-label">Ano</span></div>
-        </div>
+    <!-- ESQUERDA: tabela HOJE / MÊS -->
+    <div style="width:268px; flex-shrink:0; background:var(--surface); border-radius:var(--r-lg); border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column;">
+
+      <!-- cabeçalho tabela -->
+      <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:10px 18px; background:var(--accent); color:#fff; flex-shrink:0;">
+        <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Tipo</span>
+        <span style="font-size:10px; font-weight:700; text-align:center; text-transform:uppercase;">Hoje</span>
+        <span style="font-size:10px; font-weight:700; text-align:center; text-transform:uppercase;">Mês</span>
       </div>
 
-      <div class="card-stat">
-        <h4>Preventivas</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="prev-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="prev-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="prev-ano">0</span><span class="stat-label">Ano</span></div>
-        </div>
-      </div>
+      <!-- linhas: crescem para preencher o espaço -->
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:space-evenly; padding:4px 0;">
 
-      <div class="card-stat">
-        <h4>Corretivas</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="corr-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="corr-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="corr-ano">0</span><span class="stat-label">Ano</span></div>
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center; border-bottom:1px solid var(--border);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Filtros</span>
+          <span id="filtros-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="filtros-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Movimentação</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="mov-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="mov-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="mov-ano">0</span><span class="stat-label">Ano</span></div>
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center; border-bottom:1px solid var(--border);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Preventivas</span>
+          <span id="prev-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="prev-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Pressão</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="pressao-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="pressao-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="pressao-ano">0</span><span class="stat-label">Ano</span></div>
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center; border-bottom:1px solid var(--border);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Corretivas</span>
+          <span id="corr-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="corr-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Qualidade do Ar</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="qar-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="qar-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="qar-ano">0</span><span class="stat-label">Ano</span></div>
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center; border-bottom:1px solid var(--border);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Movimentação</span>
+          <span id="mov-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="mov-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Dutos</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="dutos-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="dutos-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="dutos-ano">0</span><span class="stat-label">Ano</span></div>
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center; border-bottom:1px solid var(--border);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Pressão</span>
+          <span id="pressao-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="pressao-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Exaustão</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="exaustao-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="exaustao-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="exaustao-ano">0</span><span class="stat-label">Ano</span></div>
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center; border-bottom:1px solid var(--border);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Qualidade do Ar</span>
+          <span id="qar-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="qar-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
         </div>
-      </div>
 
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center; border-bottom:1px solid var(--border);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Dutos</span>
+          <span id="dutos-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="dutos-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 54px 54px; padding:0 18px; align-items:center;">
+          <span style="font-size:13px; font-weight:600; color:var(--text-2);">Exaustão</span>
+          <span id="exaustao-hoje" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+          <span id="exaustao-mes"  style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500; color:var(--text); text-align:center;">0</span>
+        </div>
+
+      </div>
     </div>
+
+    <!-- DIREITA: gráfico de barras anual -->
+    <div style="flex:1; min-width:0; background:var(--surface); border-radius:var(--r-lg); border:1px solid var(--border); display:flex; flex-direction:column; padding:20px 28px; overflow:hidden;">
+      <h3 class="section-title" style="flex-shrink:0;">Manutenções no Ano</h3>
+      <div id="chart-container" style="flex:1; display:flex; flex-direction:column; justify-content:space-evenly; min-height:0;">
+        <p style="color:var(--muted); font-size:12px; text-align:center;">Carregando...</p>
+      </div>
+    </div>
+
   </div>
 </div>

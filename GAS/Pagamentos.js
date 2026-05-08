@@ -78,12 +78,14 @@ function salvarPreco(dados) {
 
 function excluirPreco(row) {
   try {
+    row = parseInt(row);
     var sheet = getPlanilha().getSheetByName("TABELA_PRECOS");
     if (!sheet) return { sucesso: false, msg: "Aba não encontrada." };
-    sheet.deleteRow(parseInt(row));
+    if (isNaN(row) || row < 2 || row > sheet.getLastRow()) return { sucesso: false, msg: "Linha inválida." };
+    sheet.deleteRow(row);
     return { sucesso: true };
   } catch(e) {
-    return { sucesso: false, msg: e.message };
+    return { sucesso: false, msg: "Erro ao excluir." };
   }
 }
 
