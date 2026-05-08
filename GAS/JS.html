@@ -1,6 +1,16 @@
 <script>
 
 // ==========================================
+// UTILITÁRIOS
+// ==========================================
+
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ==========================================
 // RELÓGIO
 // ==========================================
 
@@ -293,15 +303,15 @@ function renderizarTabelaMaquinas(lista) {
     var badgeCrit = m.criticidade === "Alta"  ? 'badge badge-danger'  :
                   (m.criticidade === "Média" ? 'badge badge-warning' : 'badge badge-success');
     var empresaLabel = m.empresaCnpj
-      ? '<span class="badge badge-info">' + (empresasMap[m.empresaCnpj] || m.empresaCnpj) + '</span>'
+      ? '<span class="badge badge-info">' + escHtml(empresasMap[m.empresaCnpj] || m.empresaCnpj) + '</span>'
       : '<span style="color:var(--text-light);font-size:12px;">—</span>';
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td style="font-weight:600;color:var(--primary);">' + m.fuel + '</td>' +
-      '<td><span style="font-weight:600;font-size:13px;">' + m.modelo + '</span><br><span style="color:var(--text-muted);font-size:11px;">' + (m.marca||'—') + (m.capacidade ? ' · ' + m.capacidade : '') + '</span></td>' +
-      '<td>' + (m.localizacao||'—') + '</td>' +
-      '<td style="color:var(--text-muted);">' + (m.serie||'—') + '</td>' +
-      '<td><span class="' + badgeCrit + '">' + m.criticidade + '</span></td>' +
+      '<td style="font-weight:600;color:var(--primary);">' + escHtml(m.fuel) + '</td>' +
+      '<td><span style="font-weight:600;font-size:13px;">' + escHtml(m.modelo) + '</span><br><span style="color:var(--text-muted);font-size:11px;">' + escHtml(m.marca||'—') + (m.capacidade ? ' · ' + escHtml(m.capacidade) : '') + '</span></td>' +
+      '<td>' + escHtml(m.localizacao||'—') + '</td>' +
+      '<td style="color:var(--text-muted);">' + escHtml(m.serie||'—') + '</td>' +
+      '<td><span class="' + badgeCrit + '">' + escHtml(m.criticidade) + '</span></td>' +
       '<td>' + empresaLabel + '</td>' +
       '<td style="white-space:nowrap;">' +
         '<button onclick="editarMaquina(\'' + m.id + '\',\'' + m.fuel + '\',\'' + encodeURIComponent(m.localizacao) + '\',\'' + m.modelo + '\',\'' + encodeURIComponent(m.marca) + '\',\'' + m.serie + '\',\'' + m.criticidade + '\',\'' + encodeURIComponent(m.capacidade) + '\',\'' + (m.empresaCnpj||'') + '\',\'' + (m.ocupantesFixos||'') + '\',\'' + (m.ocupantesVariaveis||'') + '\',\'' + (m.areaM2||'') + '\')" style="background:#FFF9EB;color:#92400E;border:1px solid #FCD34D;padding:5px 12px;border-radius:4px;cursor:pointer;margin-right:4px;font-size:11px;font-weight:700;font-family:\'Fira Sans\',sans-serif;">Editar</button>' +
@@ -518,15 +528,19 @@ function listarTecnicos() {
       lista.forEach(function(t) {
         var tr = document.createElement('tr');
         tr.style.borderBottom = "1px solid #e2e8f0";
-        tr.innerHTML =
-          '<td style="padding:10px 5px;font-weight:bold;">'    + t.nome  + '</td>' +
-          '<td style="padding:10px 5px;">'                     + t.login + '</td>' +
-          '<td style="padding:10px 5px;">'                     + t.fone  + '</td>' +
-          '<td style="padding:10px 5px;font-weight:600;color:var(--primary);">' + t.perfil + '</td>' +
-          '<td style="padding:10px 5px;text-align:center;">' +
-            '<button onclick="editarTecnico(\'' + t.id + '\',\'' + t.nome + '\',\'' + t.login + '\',\'' + t.senha + '\',\'' + t.fone + '\',\'' + t.perfil + '\')" style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;">EDITAR</button>' +
-            '<button onclick="apagarTecnico(\'' + t.id + '\')" style="background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;">X</button>' +
-          '</td>';
+        function mkTd(val, css) { var c = document.createElement('td'); c.style.cssText = css || 'padding:10px 5px;'; c.textContent = val || ''; return c; }
+        tr.appendChild(mkTd(t.nome,   'padding:10px 5px;font-weight:bold;'));
+        tr.appendChild(mkTd(t.login));
+        tr.appendChild(mkTd(t.fone));
+        tr.appendChild(mkTd(t.perfil, 'padding:10px 5px;font-weight:600;color:var(--primary);'));
+        var tdAc = document.createElement('td'); tdAc.style.cssText = 'padding:10px 5px;text-align:center;';
+        var bE = document.createElement('button');
+        bE.textContent = 'EDITAR'; bE.style.cssText = 'background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;';
+        bE.onclick = (function(x){ return function(){ editarTecnico(x.id, x.nome, x.login, '', x.fone, x.perfil); }; })(t);
+        var bD = document.createElement('button');
+        bD.textContent = 'X'; bD.style.cssText = 'background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;';
+        bD.onclick = (function(id){ return function(){ apagarTecnico(id); }; })(t.id);
+        tdAc.appendChild(bE); tdAc.appendChild(bD); tr.appendChild(tdAc);
         tbody.appendChild(tr);
       });
     })
@@ -628,15 +642,19 @@ function listarEngenheiros() {
       lista.forEach(function(eng) {
         var tr = document.createElement('tr');
         tr.style.borderBottom = "1px solid #e2e8f0";
-        tr.innerHTML =
-          '<td style="padding:10px 5px;font-weight:bold;">' + eng.nome  + '</td>' +
-          '<td style="padding:10px 5px;">'                  + eng.crea  + '</td>' +
-          '<td style="padding:10px 5px;">'                  + eng.login + '</td>' +
-          '<td style="padding:10px 5px;">'                  + eng.fone  + '</td>' +
-          '<td style="padding:10px 5px;text-align:center;">' +
-            '<button onclick="editarEngenheiro(\'' + eng.id + '\',\'' + eng.nome + '\',\'' + eng.crea + '\',\'' + eng.login + '\',\'' + eng.senha + '\',\'' + eng.fone + '\',\'' + eng.email + '\')" style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;">EDITAR</button>' +
-            '<button onclick="apagarEngenheiro(\'' + eng.id + '\')" style="background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;">X</button>' +
-          '</td>';
+        function mkTd(val, css) { var c = document.createElement('td'); c.style.cssText = css || 'padding:10px 5px;'; c.textContent = val || ''; return c; }
+        tr.appendChild(mkTd(eng.nome,  'padding:10px 5px;font-weight:bold;'));
+        tr.appendChild(mkTd(eng.crea));
+        tr.appendChild(mkTd(eng.login));
+        tr.appendChild(mkTd(eng.fone));
+        var tdAc = document.createElement('td'); tdAc.style.cssText = 'padding:10px 5px;text-align:center;';
+        var bE = document.createElement('button');
+        bE.textContent = 'EDITAR'; bE.style.cssText = 'background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-right:5px;font-size:11px;font-weight:bold;';
+        bE.onclick = (function(x){ return function(){ editarEngenheiro(x.id, x.nome, x.crea, x.login, '', x.fone, x.email); }; })(eng);
+        var bD = document.createElement('button');
+        bD.textContent = 'X'; bD.style.cssText = 'background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;';
+        bD.onclick = (function(id){ return function(){ apagarEngenheiro(id); }; })(eng.id);
+        tdAc.appendChild(bE); tdAc.appendChild(bD); tr.appendChild(tdAc);
         tbody.appendChild(tr);
       });
     })

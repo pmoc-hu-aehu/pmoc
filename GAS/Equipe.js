@@ -7,10 +7,14 @@
 
 function salvarTecnicoBD(dados) {
   var sheet = getPlanilha().getSheetByName("TECNICO");
+  var senha = dados.senha;
   if (dados.id) {
-    sheet.getRange(parseInt(dados.id), 1, 1, 5).setValues([[dados.nome, dados.login, dados.senha, dados.fone, dados.perfil]]);
+    if (!senha) {
+      senha = sheet.getRange(parseInt(dados.id), 3, 1, 1).getValue();
+    }
+    sheet.getRange(parseInt(dados.id), 1, 1, 5).setValues([[dados.nome, dados.login, senha, dados.fone, dados.perfil]]);
   } else {
-    sheet.appendRow([dados.nome, dados.login, dados.senha, dados.fone, dados.perfil]);
+    sheet.appendRow([dados.nome, dados.login, senha, dados.fone, dados.perfil]);
   }
   return { sucesso: true, msg: "Técnico salvo!" };
 }
@@ -18,12 +22,15 @@ function salvarTecnicoBD(dados) {
 function getListaTecnicos() {
   var data = getPlanilha().getSheetByName("TECNICO").getDataRange().getValues();
   return data.slice(1).map(function(r, i) {
-    return { id: i + 2, nome: r[0], login: r[1], senha: r[2], fone: r[3], perfil: r[4] };
+    return { id: i + 2, nome: r[0], login: r[1], fone: r[3], perfil: r[4] };
   });
 }
 
 function excluirTecnicoBD(row) {
-  getPlanilha().getSheetByName("TECNICO").deleteRow(parseInt(row));
+  row = parseInt(row);
+  var sheet = getPlanilha().getSheetByName("TECNICO");
+  if (isNaN(row) || row < 2 || row > sheet.getLastRow()) return { sucesso: false };
+  sheet.deleteRow(row);
   return { sucesso: true };
 }
 
@@ -31,10 +38,14 @@ function excluirTecnicoBD(row) {
 
 function salvarEngenheiroBD(dados) {
   var sheet = getPlanilha().getSheetByName("ENGENHEIRO");
+  var senha = dados.senha;
   if (dados.id) {
-    sheet.getRange(parseInt(dados.id), 1, 1, 6).setValues([[dados.nome, dados.crea, dados.login, dados.senha, dados.fone, dados.email]]);
+    if (!senha) {
+      senha = sheet.getRange(parseInt(dados.id), 4, 1, 1).getValue();
+    }
+    sheet.getRange(parseInt(dados.id), 1, 1, 6).setValues([[dados.nome, dados.crea, dados.login, senha, dados.fone, dados.email]]);
   } else {
-    sheet.appendRow([dados.nome, dados.crea, dados.login, dados.senha, dados.fone, dados.email]);
+    sheet.appendRow([dados.nome, dados.crea, dados.login, senha, dados.fone, dados.email]);
   }
   return { sucesso: true, msg: "Engenheiro salvo!" };
 }
@@ -42,11 +53,14 @@ function salvarEngenheiroBD(dados) {
 function getListaEngenheiros() {
   var data = getPlanilha().getSheetByName("ENGENHEIRO").getDataRange().getValues();
   return data.slice(1).map(function(r, i) {
-    return { id: i + 2, nome: r[0], crea: r[1], login: r[2], senha: r[3], fone: r[4], email: r[5] };
+    return { id: i + 2, nome: r[0], crea: r[1], login: r[2], fone: r[4], email: r[5] };
   });
 }
 
 function excluirEngenheiroBD(row) {
-  getPlanilha().getSheetByName("ENGENHEIRO").deleteRow(parseInt(row));
+  row = parseInt(row);
+  var sheet = getPlanilha().getSheetByName("ENGENHEIRO");
+  if (isNaN(row) || row < 2 || row > sheet.getLastRow()) return { sucesso: false };
+  sheet.deleteRow(row);
   return { sucesso: true };
 }

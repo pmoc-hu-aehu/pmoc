@@ -81,11 +81,14 @@ function listarMaquinasApp() {
 
 function excluirMaquinaBD(row) {
   try {
-    getPlanilha().getSheetByName("MAQUINAS").deleteRow(parseInt(row));
+    row = parseInt(row);
+    var sheet = getPlanilha().getSheetByName("MAQUINAS");
+    if (isNaN(row) || row < 2 || row > sheet.getLastRow()) return { sucesso: false, msg: "Linha inválida." };
+    sheet.deleteRow(row);
     atualizarAgendamentoGlobal();
     return { sucesso: true, msg: "Máquina excluída!" };
   } catch(e) {
-    return { sucesso: false, msg: e.message };
+    return { sucesso: false, msg: "Erro ao excluir." };
   }
 }
 

@@ -145,11 +145,13 @@ function salvarEmpresa(dados) {
 
 function excluirEmpresa(row) {
   try {
+    row = parseInt(row);
     var sheet = getPlanilha().getSheetByName("EMPRESAS");
     if (!sheet) return { sucesso: false, msg: "Aba EMPRESAS não encontrada." };
-    sheet.deleteRow(parseInt(row));
+    if (isNaN(row) || row < 2 || row > sheet.getLastRow()) return { sucesso: false, msg: "Linha inválida." };
+    sheet.deleteRow(row);
     return { sucesso: true, msg: "Empresa removida." };
   } catch(e) {
-    return { sucesso: false, msg: e.message };
+    return { sucesso: false, msg: "Erro ao excluir." };
   }
 }
