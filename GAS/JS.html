@@ -157,17 +157,44 @@ function carregarContadores() {
         var el = document.getElementById(id);
         if (el) el.innerText = val || 0;
       }
-      set('filtros-hoje',  d.filtros      ? d.filtros.hoje      : 0); set('filtros-mes',  d.filtros      ? d.filtros.mes      : 0); set('filtros-ano',  d.filtros      ? d.filtros.ano      : 0);
-      set('prev-hoje',     d.preventivas  ? d.preventivas.hoje  : 0); set('prev-mes',     d.preventivas  ? d.preventivas.mes  : 0); set('prev-ano',     d.preventivas  ? d.preventivas.ano  : 0);
-      set('corr-hoje',     d.corretivas   ? d.corretivas.hoje   : 0); set('corr-mes',     d.corretivas   ? d.corretivas.mes   : 0); set('corr-ano',     d.corretivas   ? d.corretivas.ano   : 0);
-      set('mov-hoje',      d.movimentacao ? d.movimentacao.hoje : 0); set('mov-mes',      d.movimentacao ? d.movimentacao.mes : 0); set('mov-ano',      d.movimentacao ? d.movimentacao.ano : 0);
-      set('pressao-hoje',  d.pressao      ? d.pressao.hoje      : 0); set('pressao-mes',  d.pressao      ? d.pressao.mes      : 0); set('pressao-ano',  d.pressao      ? d.pressao.ano      : 0);
-      set('qar-hoje',      d.qualidadeAr  ? d.qualidadeAr.hoje  : 0); set('qar-mes',      d.qualidadeAr  ? d.qualidadeAr.mes  : 0); set('qar-ano',      d.qualidadeAr  ? d.qualidadeAr.ano  : 0);
-      set('dutos-hoje',    d.dutos        ? d.dutos.hoje        : 0); set('dutos-mes',    d.dutos        ? d.dutos.mes        : 0); set('dutos-ano',    d.dutos        ? d.dutos.ano        : 0);
-      set('exaustao-hoje', d.exaustao     ? d.exaustao.hoje     : 0); set('exaustao-mes', d.exaustao     ? d.exaustao.mes     : 0); set('exaustao-ano', d.exaustao     ? d.exaustao.ano     : 0);
+      set('filtros-hoje',  d.filtros      ? d.filtros.hoje      : 0); set('filtros-mes',  d.filtros      ? d.filtros.mes      : 0);
+      set('prev-hoje',     d.preventivas  ? d.preventivas.hoje  : 0); set('prev-mes',     d.preventivas  ? d.preventivas.mes  : 0);
+      set('corr-hoje',     d.corretivas   ? d.corretivas.hoje   : 0); set('corr-mes',     d.corretivas   ? d.corretivas.mes   : 0);
+      set('mov-hoje',      d.movimentacao ? d.movimentacao.hoje : 0); set('mov-mes',      d.movimentacao ? d.movimentacao.mes : 0);
+      set('pressao-hoje',  d.pressao      ? d.pressao.hoje      : 0); set('pressao-mes',  d.pressao      ? d.pressao.mes      : 0);
+      set('qar-hoje',      d.qualidadeAr  ? d.qualidadeAr.hoje  : 0); set('qar-mes',      d.qualidadeAr  ? d.qualidadeAr.mes  : 0);
+      set('dutos-hoje',    d.dutos        ? d.dutos.hoje        : 0); set('dutos-mes',    d.dutos        ? d.dutos.mes        : 0);
+      set('exaustao-hoje', d.exaustao     ? d.exaustao.hoje     : 0); set('exaustao-mes', d.exaustao     ? d.exaustao.mes     : 0);
+      renderizarGrafico(d);
     })
     .withFailureHandler(function(err) { console.error("Erro dashboard:", err); })
     .obterContadoresDashboard();
+}
+
+function renderizarGrafico(d) {
+  var container = document.getElementById('chart-container');
+  if (!container) return;
+  var dados = [
+    { label: 'Filtros',         val: d.filtros      ? d.filtros.ano      : 0, cor: '#0d7d8a' },
+    { label: 'Preventivas',     val: d.preventivas  ? d.preventivas.ano  : 0, cor: '#16a34a' },
+    { label: 'Corretivas',      val: d.corretivas   ? d.corretivas.ano   : 0, cor: '#dc2626' },
+    { label: 'Movimentação',    val: d.movimentacao ? d.movimentacao.ano : 0, cor: '#7c3aed' },
+    { label: 'Pressão',         val: d.pressao      ? d.pressao.ano      : 0, cor: '#d97706' },
+    { label: 'Qualidade do Ar', val: d.qualidadeAr  ? d.qualidadeAr.ano  : 0, cor: '#0ea5e9' },
+    { label: 'Dutos',           val: d.dutos        ? d.dutos.ano        : 0, cor: '#db2777' },
+    { label: 'Exaustão',        val: d.exaustao     ? d.exaustao.ano     : 0, cor: '#64748b' }
+  ];
+  var max = Math.max.apply(null, dados.map(function(x) { return x.val; })) || 1;
+  container.innerHTML = dados.map(function(item) {
+    var pct = Math.max(Math.round((item.val / max) * 100), item.val > 0 ? 2 : 0);
+    return '<div style="display:flex;align-items:center;gap:10px;">' +
+      '<span style="width:116px;font-size:11px;font-weight:600;color:var(--text-2);text-align:right;flex-shrink:0;line-height:1.2;">' + item.label + '</span>' +
+      '<div style="flex:1;background:var(--border);border-radius:3px;height:20px;overflow:hidden;">' +
+        '<div style="width:' + pct + '%;height:100%;background:' + item.cor + ';border-radius:3px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1);"></div>' +
+      '</div>' +
+      '<span style="width:34px;font-size:12px;font-family:\'IBM Plex Mono\',monospace;font-weight:500;color:var(--text);flex-shrink:0;text-align:right;">' + item.val + '</span>' +
+    '</div>';
+  }).join('');
 }
 
 // ==========================================

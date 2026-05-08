@@ -1,99 +1,104 @@
-<div id="modulo-HOME" class="modulo-oculto" style="display: flex; flex-direction: column; height: 100%; justify-content: space-evenly;">
+<div id="modulo-HOME" class="modulo-oculto">
 
-  <div>
-    <h3 class="section-title">Resumo Geral</h3>
-    <div class="grid-cards">
-      <div class="card-stat">
-        <h4>Total de Máquinas</h4>
-        <p class="main-number" id="count-maquinas">0</p>
-      </div>
-      <div class="card-stat">
-        <h4>Engenheiros Ativos</h4>
-        <p class="main-number" id="count-engenheiros">0</p>
-      </div>
-      <div class="card-stat">
-        <h4>Técnicos Ativos</h4>
-        <p class="main-number" id="count-tecnicos">0</p>
-      </div>
+  <h3 class="section-title">Resumo Geral</h3>
+  <div class="grid-cards">
+    <div class="card-stat">
+      <h4>Total de Máquinas</h4>
+      <p class="main-number" id="count-maquinas">0</p>
+    </div>
+    <div class="card-stat">
+      <h4>Engenheiros Ativos</h4>
+      <p class="main-number" id="count-engenheiros">0</p>
+    </div>
+    <div class="card-stat">
+      <h4>Técnicos Ativos</h4>
+      <p class="main-number" id="count-tecnicos">0</p>
     </div>
   </div>
 
-  <div>
-    <h3 class="section-title">Produtividade de Manutenção</h3>
-    <div class="grid-cards" style="grid-template-columns: repeat(4, 1fr);">
+  <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
 
-      <div class="card-stat">
-        <h4>Filtros</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="filtros-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="filtros-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="filtros-ano">0</span><span class="stat-label">Ano</span></div>
+    <!-- ESQUERDA: cards Hoje + Mês -->
+    <div style="flex:1.3; min-width:280px;">
+      <h3 class="section-title">Produtividade de Manutenção</h3>
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px;">
+
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Filtros</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="filtros-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="filtros-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Preventivas</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="prev-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="prev-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="prev-ano">0</span><span class="stat-label">Ano</span></div>
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Preventivas</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="prev-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="prev-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Corretivas</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="corr-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="corr-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="corr-ano">0</span><span class="stat-label">Ano</span></div>
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Corretivas</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="corr-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="corr-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Movimentação</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="mov-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="mov-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="mov-ano">0</span><span class="stat-label">Ano</span></div>
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Movimentação</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="mov-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="mov-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Pressão</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="pressao-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="pressao-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="pressao-ano">0</span><span class="stat-label">Ano</span></div>
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Pressão</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="pressao-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="pressao-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Qualidade do Ar</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="qar-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="qar-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="qar-ano">0</span><span class="stat-label">Ano</span></div>
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Qualidade do Ar</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="qar-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="qar-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Dutos</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="dutos-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="dutos-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="dutos-ano">0</span><span class="stat-label">Ano</span></div>
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Dutos</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="dutos-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="dutos-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card-stat">
-        <h4>Exaustão</h4>
-        <div class="stat-group">
-          <div class="stat-item"><span class="stat-num" id="exaustao-hoje">0</span><span class="stat-label">Hoje</span></div>
-          <div class="stat-item"><span class="stat-num" id="exaustao-mes">0</span><span class="stat-label">Mês</span></div>
-          <div class="stat-item"><span class="stat-num" id="exaustao-ano">0</span><span class="stat-label">Ano</span></div>
+        <div class="card-stat" style="padding:16px 18px;">
+          <h4>Exaustão</h4>
+          <div class="stat-group">
+            <div class="stat-item"><span class="stat-num" id="exaustao-hoje">0</span><span class="stat-label">Hoje</span></div>
+            <div class="stat-item"><span class="stat-num" id="exaustao-mes">0</span><span class="stat-label">Mês</span></div>
+          </div>
         </div>
-      </div>
 
+      </div>
     </div>
+
+    <!-- DIREITA: gráfico de barras anual -->
+    <div style="flex:1; min-width:260px;">
+      <h3 class="section-title">Manutenções no Ano</h3>
+      <div class="card-stat" style="padding:22px 24px; cursor:default;">
+        <div id="chart-container" style="display:flex; flex-direction:column; gap:13px;">
+          <p style="color:var(--muted);font-size:12px;text-align:center;">Carregando...</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
