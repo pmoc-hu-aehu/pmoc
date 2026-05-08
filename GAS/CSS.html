@@ -362,7 +362,7 @@ html, body {
   width: 100%;
   min-height: 40px;
   padding: 9px 10px;
-  background: none;
+  background: transparent;
   border: none;
   border-radius: var(--r-sm);
   font-family: 'Fira Sans', sans-serif;
@@ -370,8 +370,12 @@ html, body {
   font-weight: 500;
   color: var(--text-2);
   cursor: pointer;
-  transition: background var(--t-fast), color var(--t-fast);
+  transition: background var(--t-fast), color var(--t-fast), border-left var(--t-fast);
   text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none;
+  outline: none;
 }
 
 .menu-btn .menu-icon {
