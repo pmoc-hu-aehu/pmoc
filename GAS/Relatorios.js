@@ -6,6 +6,27 @@
 function getRelatorio(filtros) {
   var ss = getPlanilha();
 
+  function formatarHoraCelula(valor) {
+    if (!valor) return "";
+
+    // Se a célula vier como Date, mantém só a hora.
+    if (valor instanceof Date && !isNaN(valor.getTime())) {
+      try {
+        var hora = Utilities.formatDate(valor, "GMT-3", "HH:mm");
+        return hora === "00:00" ? "" : hora;
+      } catch (e) {
+        return "";
+      }
+    }
+
+    // Se vier como texto, preserva formatos do tipo HH:mm ou HH:mm:ss.
+    var texto = String(valor).trim();
+    if (!texto) return "";
+    var match = texto.match(/^(\d{1,2}:\d{2})(?::\d{2})?$/);
+    if (match) return match[1];
+    return texto;
+  }
+
   var abas = [
     { nome: "FILTROS",      tipo: "Filtro",       colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 16, colStatus: 22 },
     { nome: "PREVENTIVAS",  tipo: "Preventiva",   colFuel: 5, colTec: 4, colDataIni: 0, colDataFim: 2, colLocal: 6, colFoto: 24, colStatus: 29 },
@@ -44,6 +65,8 @@ function getRelatorio(filtros) {
       var foto       = String(row[aba.colFoto]  || "").trim();
       var dataIniRow = row[aba.colDataIni] ? new Date(row[aba.colDataIni]) : null;
       var dataFimRow = row[aba.colDataFim] ? new Date(row[aba.colDataFim]) : null;
+      var horaIniRow = row[1];
+      var horaFimRow = row[3];
 
       if (!fuel || !dataIniRow || isNaN(dataIniRow.getTime())) continue;
       if (dataIni && dataIniRow < dataIni) continue;
@@ -55,8 +78,14 @@ function getRelatorio(filtros) {
       var horaIni = "";
       var horaFim = "";
       var dataFmt = "";
-      try { horaIni = Utilities.formatDate(dataIniRow, "GMT-3", "HH:mm"); if (horaIni === "00:00") horaIni = ""; } catch(e) {}
-      try { if (dataFimRow && !isNaN(dataFimRow.getTime())) { horaFim = Utilities.formatDate(dataFimRow, "GMT-3", "HH:mm"); if (horaFim === "00:00") horaFim = ""; } } catch(e) {}
+      horaIni = formatarHoraCelula(horaIniRow);
+      horaFim = formatarHoraCelula(horaFimRow);
+      if (!horaIni) {
+        try { horaIni = Utilities.formatDate(dataIniRow, "GMT-3", "HH:mm"); if (horaIni === "00:00") horaIni = ""; } catch(e) {}
+      }
+      if (!horaFim) {
+        try { if (dataFimRow && !isNaN(dataFimRow.getTime())) { horaFim = Utilities.formatDate(dataFimRow, "GMT-3", "HH:mm"); if (horaFim === "00:00") horaFim = ""; } } catch(e) {}
+      }
       try { dataFmt = Utilities.formatDate(dataIniRow, "GMT-3", "dd/MM/yyyy"); } catch(e) {}
 
       resultado.push({
